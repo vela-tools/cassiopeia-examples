@@ -442,7 +442,7 @@ Normalized validation can catch metadata that a simplified check cannot see. Cha
 }
 ```
 
-Rerun `cassiopeia map --manifest manifest.json5`. Products still emit `sugars` with `unitCode: "GRM"`, so validation fails. With `mode: "fail"`, the run stops before writing output. With `warn`, it completes and counts the mismatches. The [validation guide](../../validation.md#validation-modes) describes the available outcomes.
+Rerun `cassiopeia map --manifest manifest.json5`. Products still emit `sugars` with `unitCode: "GRM"`, so validation fails. With `mode: "fail"`, the run stops before writing output. With `warn`, it completes and counts the mismatches. The [validation guide](https://vela-tools.github.io/cassiopeia/docs/guides/validation#validation-modes) describes the available outcomes.
 
 ## Related pages
 
@@ -451,4 +451,4 @@ Rerun `cassiopeia map --manifest manifest.json5`. Products still emit `sugars` w
 - [A controlled-vocabulary term as an IRI](../26-csv-vocab-property/example.md), the VocabProperty in depth.
 - [An ordered list of values](../24-json-list-property/example.md), the ListProperty in depth.
 - [A variable object kept whole](../25-geojson-json-property/example.md), another custom model built around one attribute kind.
-- [Validation](../../validation.md), the modes, the representation, and the custom-schema entry points in reference form.
+- [Validation](https://vela-tools.github.io/cassiopeia/docs/guides/validation), the modes, the representation, and the custom-schema entry points in reference form.

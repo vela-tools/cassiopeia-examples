@@ -391,4 +391,4 @@ The broker returns the temporal representation: each attribute is an array of ti
 docker compose down -v
 ```
 
-[Output](../../output.md#send-to-a-context-broker) documents broker destinations, operations, atomic delivery, context delivery, authentication, and the temporal representation used here.
+[Output](https://vela-tools.github.io/cassiopeia/docs/guides/output#send-to-a-context-broker) documents broker destinations, operations, atomic delivery, context delivery, authentication, and the temporal representation used here.

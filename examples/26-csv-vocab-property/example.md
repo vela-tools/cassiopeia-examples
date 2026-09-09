@@ -2,7 +2,7 @@
 
 A category from a shared vocabulary is more precise than free-form text. A `VocabProperty` stores the term's IRI in `vocab`, so different systems can use the same identifier. This example maps OpenStreetMap amenities in Slovenia to a custom `UrbanMobilityPoint` model and builds the IRI from each `amenity` value.
 
-This is the third custom-model example. The [data-model guide](../../data-models.md) explains why a controlled vocabulary can belong in a custom model.
+This is the third custom-model example. The [data-model guide](https://vela-tools.github.io/cassiopeia/docs/guides/data-models) explains why a controlled vocabulary can belong in a custom model.
 
 ## What it teaches
 
@@ -153,4 +153,4 @@ A Ljubljana charging station with its category carried as an IRI:
 
 ## When a VocabProperty, and when not
 
-Use a `VocabProperty` when a value is a controlled-vocabulary term that should be identified by IRI. Use a plain `Property` for an opaque code with no shared vocabulary, and a `Relationship` when the value points to a first-class entity rather than a vocabulary term. The [attribute-type reference](../../ngsi-ld/attribute-types.md#vocabproperty) compares the three.
+Use a `VocabProperty` when a value is a controlled-vocabulary term that should be identified by IRI. Use a plain `Property` for an opaque code with no shared vocabulary, and a `Relationship` when the value points to a first-class entity rather than a vocabulary term. The [attribute-type reference](https://vela-tools.github.io/cassiopeia/docs/reference/ngsi-ld/attribute-types#vocabproperty) compares the three.

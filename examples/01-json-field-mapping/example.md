@@ -130,7 +130,7 @@ cargo run -- run 01 --runtime docker
 
 ### What the run writes
 
-The command uses `--context none` so the example does not need a JSON-LD context or a Smart Data Models catalog. [Output](https://vela-tools.github.io/cassiopeia/guides/output) explains how to attach a real context later.
+The command uses `--context none` so the example does not need a JSON-LD context or a Smart Data Models catalog. [Output](https://vela-tools.github.io/cassiopeia/docs/guides/output) explains how to attach a real context later.
 
 Cassiopeia writes one file per entity type. This run therefore creates `out/ChemicalElement.json`, a single JSON array of 118 `ChemicalElement` entities.
 

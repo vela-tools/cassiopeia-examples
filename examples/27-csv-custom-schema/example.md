@@ -297,7 +297,7 @@ cassiopeia map \
     --validation-schema exoplanet.schema.json
 ```
 
-With the column gone, Cassiopeia never produces `discoveryMethod`, so the `required` check in `exoplanet.schema.json` fails. `--validation-mode fail` aborts without writing output. With `warn`, the run completes, writes every entity, and reports each violation as a warning. The [validation guide](../../validation.md#validation-modes) describes the available outcomes.
+With the column gone, Cassiopeia never produces `discoveryMethod`, so the `required` check in `exoplanet.schema.json` fails. `--validation-mode fail` aborts without writing output. With `warn`, the run completes, writes every entity, and reports each violation as a warning. The [validation guide](https://vela-tools.github.io/cassiopeia/docs/guides/validation#validation-modes) describes the available outcomes.
 
 ## Naming the schema: precedence
 
@@ -314,11 +314,11 @@ output: {
 }
 ```
 
-The per-input `schema` takes precedence for its own type, and the global source supplies the rest. This allows one model to use a hand-authored schema while other types use the catalog convention or a shared fallback. `--validation-schema` is the single-input form of the same setting. A remote HTTPS schema is downloaded once at the start; a failed fetch or missing schema aborts the run. Schemas belong to the run, never to a mapping document. The [validation guide](../../validation.md#custom-schemas) covers precedence and local-versus-URL rules.
+The per-input `schema` takes precedence for its own type, and the global source supplies the rest. This allows one model to use a hand-authored schema while other types use the catalog convention or a shared fallback. `--validation-schema` is the single-input form of the same setting. A remote HTTPS schema is downloaded once at the start; a failed fetch or missing schema aborts the run. Schemas belong to the run, never to a mapping document. The [validation guide](https://vela-tools.github.io/cassiopeia/docs/guides/validation#custom-schemas) covers precedence and local-versus-URL rules.
 
 ## Related pages
 
-- [Validation](../../validation.md), the modes, the representation, and the custom-schema entry points in reference form.
+- [Validation](https://vela-tools.github.io/cassiopeia/docs/guides/validation), the modes, the representation, and the custom-schema entry points in reference form.
 - [Advanced JSON schema validation for normalized output](../28-json-advanced-schema/example.md), a custom schema that constrains the full normalized wrapper, with `unitCode`, `observedAt`, `datasetId`, and the LanguageProperty, VocabProperty, and ListProperty kinds.
 - [A custom model with its own `@context`](../20-csv-at-context/example.md), the same planet model, with a synthetic host star and a local `@context` rather than a schema.
-- [Data models](../../data-models.md), targeting a Smart Data Model versus an invented one, and what each gives up.
+- [Data models](https://vela-tools.github.io/cassiopeia/docs/guides/data-models), targeting a Smart Data Model versus an invented one, and what each gives up.

@@ -148,7 +148,7 @@ A block names exactly one of `file`, `broker-entities`, and `broker-temporal`.
 
 ## The page
 
-`example.md` is the example. Write it for someone who has read [Concepts](https://vela-tools.github.io/cassiopeia/guides/concepts) and nothing else. It syncs to the documentation site unchanged and has to stand on its own there, and it is the only route open to a reader without the runner. That is why its commands are checked and not trusted.
+`example.md` is the example. Write it for someone who has read [Concepts](https://vela-tools.github.io/cassiopeia/docs/guides/concepts) and nothing else. It syncs to the documentation site unchanged and has to stand on its own there, and it is the only route open to a reader without the runner. That is why its commands are checked and not trusted.
 
 The page follows the same order every time.
 
@@ -161,7 +161,7 @@ The page follows the same order every time.
 
 Cite the spec by clause when the output shape follows from it, for instance "ETSI GS CIM 009 v1.9.1, clause 4.5.5". Explain why an attribute has the shape it does, not only what it looks like.
 
-Links to the guides are absolute, to `https://vela-tools.github.io/cassiopeia/`, since the guides live in another repository. Links to sibling examples are relative, `../07-csv-observed-at/example.md`, and resolve both on GitHub and on the site. Links to files in the same example directory are bare filenames.
+Links to the guides are absolute, to `https://vela-tools.github.io/cassiopeia/docs/`, since the guides live in another repository. The `/docs/` segment is part of every guide and reference URL; only the site's landing page sits above it. Links to sibling examples are relative, `../07-csv-observed-at/example.md`, and resolve both on GitHub and on the site. Links to files in the same example directory are bare filenames.
 
 The prose rules from the rest of the project apply: no emojis, one paragraph is one line with no hard breaks inside it, and no line references the migration, the repository split, or anything else a reader outside the project cannot see.
 

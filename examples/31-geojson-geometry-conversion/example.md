@@ -4,7 +4,7 @@ Real geospatial sources rarely use the geometry type a data model asks for. An a
 
 This example maps Eurostat's NUTS level 1 regions to a custom `Region` model. It declares two GeoProperties from the same source geometry: a `location` demoted to a `Polygon`, and a separate `centroid` derived as a map-pin `Point`.
 
-It uses a **custom** data model. See the [data-model guide](../../data-models.md) for background.
+It uses a **custom** data model. See the [data-model guide](https://vela-tools.github.io/cassiopeia/docs/guides/data-models) for background.
 
 ## What it teaches
 
@@ -306,4 +306,4 @@ Gozo is gone, which is what `largest` was asked to do. The ring's positions are 
 
 ## When to convert, and when to change the model
 
-Every conversion but the three automatic ones loses something, and a conversion in the mapping is a decision that consumers cannot see. Prefer a model that admits the source's own geometry type when you can: `transformation: "multipolygon"` here would keep every island of every region and need no `geometry` block. Convert when a published model fixes the type, when a consumer cannot handle multi-geometries, or when a derived geometry answers a question the original cannot, as the centroid does here. The [mapping guide](../../mapping.md#convert-between-geometry-types) lists every conversion, and the [`geo_convert` template function](../../templates.md#geometry-functions) reaches the same lattice for a geometry built inside a structure.
+Every conversion but the three automatic ones loses something, and a conversion in the mapping is a decision that consumers cannot see. Prefer a model that admits the source's own geometry type when you can: `transformation: "multipolygon"` here would keep every island of every region and need no `geometry` block. Convert when a published model fixes the type, when a consumer cannot handle multi-geometries, or when a derived geometry answers a question the original cannot, as the centroid does here. The [mapping guide](https://vela-tools.github.io/cassiopeia/docs/guides/mapping#convert-between-geometry-types) lists every conversion, and the [`geo_convert` template function](https://vela-tools.github.io/cassiopeia/docs/guides/templates#geometry-functions) reaches the same lattice for a geometry built inside a structure.

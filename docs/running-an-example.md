@@ -68,7 +68,7 @@ In container mode the runner builds the command shown above, with your real uid 
 
 Examples that need the Smart Data Models catalog mount it from `${XDG_CACHE_HOME:-$HOME/.cache}/cassiopeia-examples/schemas`, so one example's download is still there for the next. Without that mount, `--rm` would take the catalog away with the container.
 
-[Running with Docker](https://vela-tools.github.io/cassiopeia/reference/docker) covers the image, its paths, and its environment variables in full.
+[Running with Docker](https://vela-tools.github.io/cassiopeia/docs/reference/docker) covers the image, its paths, and its environment variables in full.
 
 ## The datasets
 

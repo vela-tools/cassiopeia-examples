@@ -2,7 +2,7 @@
 
 Some lists are meaningful only when their order is preserved. In a day of hourly bicycle counts, each position represents one hour. NGSI-LD's `ListProperty` stores that sequence in `valueList`. This example maps a public bicycle counter to a custom `BicycleCounter` model and builds one ordered list per day.
 
-It uses a **custom** data model because no published Smart Data Model represents an hourly counter in this shape. The [data-model guide](../../data-models.md) explains when a custom model is appropriate.
+It uses a **custom** data model because no published Smart Data Model represents an hourly counter in this shape. The [data-model guide](https://vela-tools.github.io/cassiopeia/docs/guides/data-models) explains when a custom model is appropriate.
 
 ## What it teaches
 
@@ -234,4 +234,4 @@ The list is positional: `valueList[7]` is 312 at 07:00, `valueList[8]` is 456 at
 
 ## When a ListProperty, and when not
 
-Use a `ListProperty` when values form an ordered sequence read by position. Use a plain `Property` with an array when order has no meaning, and a [`ListRelationship`](../12-csv-list-relationship/example.md) when the elements link to other entities. The [attribute-type reference](../../ngsi-ld/attribute-types.md#listproperty) compares the three.
+Use a `ListProperty` when values form an ordered sequence read by position. Use a plain `Property` with an array when order has no meaning, and a [`ListRelationship`](../12-csv-list-relationship/example.md) when the elements link to other entities. The [attribute-type reference](https://vela-tools.github.io/cassiopeia/docs/reference/ngsi-ld/attribute-types#listproperty) compares the three.

@@ -2,7 +2,7 @@
 
 Many source fields have a stable shape and can be mapped field by field. A weather alert's `parameters` object is different: its keys depend on the event type. `JsonProperty` keeps that object as JSON in `json` instead of turning each changing key into an attribute. This example maps the US National Weather Service alerts feed to a custom `WeatherAlert` model.
 
-Like examples 24 and 26, this example uses a **custom** data model. See the [data-model guide](../../data-models.md) for background.
+Like examples 24 and 26, this example uses a **custom** data model. See the [data-model guide](https://vela-tools.github.io/cassiopeia/docs/guides/data-models) for background.
 
 ## What it teaches
 
@@ -329,8 +329,8 @@ A thunderstorm-driven Special Weather Statement with its `parameters` intact und
 
 `rawParameters` carries every key in the source alert, including `maxWindGust`, `maxHailSize`, and the storm-motion vector. None needs its own mapping. A flood alert from the same run could contain completely different keys without requiring a mapping change. The timestamps were parsed to UTC and the polygon passed through as the location.
 
-The polygon's positions are the source's, in reverse order. The alert feed winds its exterior ring clockwise; RFC 7946 clause 3.1.6 states the opposite as a producer requirement, so Cassiopeia rewinds every exterior ring it emits counterclockwise. See the [mapping guide](../../mapping.md#geoproperty) for the geometry normalisation rules.
+The polygon's positions are the source's, in reverse order. The alert feed winds its exterior ring clockwise; RFC 7946 clause 3.1.6 states the opposite as a producer requirement, so Cassiopeia rewinds every exterior ring it emits counterclockwise. See the [mapping guide](https://vela-tools.github.io/cassiopeia/docs/guides/mapping#geoproperty) for the geometry normalisation rules.
 
 ## When a JsonProperty, and when not
 
-Use a `JsonProperty` when a value varies between records or is an opaque document that the consumer will parse. Prefer real attributes, a nested `Property` with [`mappings`](../03-geojson-smart-data-model/example.md), or top-level attributes when the structure is stable and should be queryable or validated. The inner keys of a `JsonProperty` are invisible to NGSI-LD queries and schemas. The [attribute-type reference](../../ngsi-ld/attribute-types.md#jsonproperty) explains the distinction.
+Use a `JsonProperty` when a value varies between records or is an opaque document that the consumer will parse. Prefer real attributes, a nested `Property` with [`mappings`](../03-geojson-smart-data-model/example.md), or top-level attributes when the structure is stable and should be queryable or validated. The inner keys of a `JsonProperty` are invisible to NGSI-LD queries and schemas. The [attribute-type reference](https://vela-tools.github.io/cassiopeia/docs/reference/ngsi-ld/attribute-types#jsonproperty) explains the distinction.

@@ -142,7 +142,7 @@ The `schedule` block controls the repeated runs:
 - `jitter` adds a random delay of up to the specified duration before each run. That prevents many deployments polling the same feed from hitting it at exactly the same moment.
 - `retry` repeats one failed run up to `maxAttempts` times, waiting `backoff` between attempts. It can ride out a dropped connection or a broker restart.
 
-The top-level **`onFailure`** field, outside `schedule`, controls what happens after retries are exhausted. The default `abort` would stop a long-lived poller after the first failed request, so this manifest uses `onFailure: "ignore"`: the failure is logged, polling continues, and the command exits zero. `continue` also keeps polling but exits non-zero when a bounded schedule ends. See [Handle failures](../../running.md#handle-failures) for the full policy.
+The top-level **`onFailure`** field, outside `schedule`, controls what happens after retries are exhausted. The default `abort` would stop a long-lived poller after the first failed request, so this manifest uses `onFailure: "ignore"`: the failure is logged, polling continues, and the command exits zero. `continue` also keeps polling but exits non-zero when a bounded schedule ends. See [Handle failures](https://vela-tools.github.io/cassiopeia/docs/guides/running#handle-failures) for the full policy.
 
 The first run starts immediately; later runs wait for the schedule trigger. Add `repeat` to limit the number of runs or `duration` to limit its lifetime. With neither, the process runs until interrupted.
 
@@ -248,4 +248,4 @@ The DHT22 entity at the same location carries the climate readings and omits PM1
 }
 ```
 
-Five minutes later, the schedule fetches the next window and upserts fresh readings onto the same sensor entities. Each update has a new `dateObserved` and `observedAt`. The broker keeps the latest value for each sensor, while the timestamps let its temporal history grow one poll at a time. [Output](../../output.md) covers broker delivery options, and [temporal observations](../07-csv-observed-at/example.md) explains the timestamping.
+Five minutes later, the schedule fetches the next window and upserts fresh readings onto the same sensor entities. Each update has a new `dateObserved` and `observedAt`. The broker keeps the latest value for each sensor, while the timestamps let its temporal history grow one poll at a time. [Output](https://vela-tools.github.io/cassiopeia/docs/guides/output) covers broker delivery options, and [temporal observations](../07-csv-observed-at/example.md) explains the timestamping.
