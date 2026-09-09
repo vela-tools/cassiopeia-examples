@@ -105,7 +105,7 @@ jobs:
       issues: write
     steps:
       - name: Collect what every example reported
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: drift-*
           path: drift
