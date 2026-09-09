@@ -1,0 +1,36 @@
+[example]
+title = "Mapping CSV files with messy headers"
+label = "Messy CSV headers"
+summary = "Address unusual Latin-1 CSV headers and parse comma decimals."
+formats = ["csv"]
+models = ["MonthlyPrecipitationObserved"]
+
+[requirements]
+smart-data-models = false
+
+[run]
+args = [
+    "map",
+    "--input",
+    "data/precipitation.csv",
+    "--mapping",
+    "precipitation.json5",
+    "--type",
+    "csv",
+    "--output",
+    "out",
+    "--context",
+    "none",
+]
+
+[[datasets]]
+file = "data/precipitation.csv"
+url = "https://dati.comune.milano.it/dataset/b1bf9652-fe21-48c3-b0aa-9f75adc0016f/resource/9d953b9c-331e-484e-aaa2-fa70f207937d/download/ds306_ambientemeteo_precipitazioni-mese_2008-2014.csv"
+source = "Comune di Milano"
+license = "CC-BY-4.0"
+volatility = "frozen"
+
+[[outputs]]
+file = "out/MonthlyPrecipitationObserved.json"
+entities = 84
+contains = ["urn:ngsi-ld:MonthlyPrecipitationObserved:2014-1"]

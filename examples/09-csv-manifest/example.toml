@@ -1,0 +1,40 @@
+[example]
+title = "Combining CSV sources with a manifest"
+label = "Manifests"
+summary = "Use a manifest to map two headerless CSV files in one run."
+formats = ["csv"]
+models = ["Airport", "Airline"]
+
+[requirements]
+smart-data-models = true
+
+[run]
+args = [
+    "map",
+    "--manifest",
+    "manifest.json5",
+]
+
+[[datasets]]
+file = "data/airports.dat"
+url = "https://raw.githubusercontent.com/jpatokal/openflights/master/data/airports.dat"
+source = "OpenFlights"
+license = "ODbL-1.0"
+volatility = "live"
+
+[[datasets]]
+file = "data/airlines.dat"
+url = "https://raw.githubusercontent.com/jpatokal/openflights/master/data/airlines.dat"
+source = "OpenFlights"
+license = "ODbL-1.0"
+volatility = "live"
+
+[[outputs]]
+file = "out/Airline.json"
+entities = 6162
+contains = ["urn:ngsi-ld:Airline:24"]
+
+[[outputs]]
+file = "out/Airport.json"
+entities = 7698
+contains = ["urn:ngsi-ld:Airport:1"]

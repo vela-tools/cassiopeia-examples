@@ -1,0 +1,39 @@
+[example]
+title = "Guarding GeoJSON attributes before validation"
+label = "Attribute guards"
+summary = "Combine conditional values with constants and omit invalid source values."
+formats = ["geojson"]
+models = ["OffStreetParking"]
+
+[requirements]
+smart-data-models = true
+
+[run]
+args = [
+    "map",
+    "--input",
+    "data/parking.json",
+    "--mapping",
+    "parking.json5",
+    "--type",
+    "geojson",
+    "--output",
+    "out",
+    "--context",
+    "none",
+    "--validation-mode",
+    "fail",
+    "--validation-representation",
+    "simplified",
+]
+
+[[datasets]]
+file = "data/parking.json"
+url = "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&typeName=ogdwien:BEHINDERTENPARKPLATZOGD&srsName=EPSG:4326&outputFormat=json"
+source = "City of Vienna"
+license = "CC-BY-4.0"
+volatility = "live"
+
+[[outputs]]
+file = "out/OffStreetParking.json"
+at-least = 1932

@@ -1,0 +1,55 @@
+[example]
+title = "Mapping JSON arrays with a ListProperty"
+label = "ListProperty"
+summary = "Store hourly counts in an ordered ListProperty."
+formats = ["json"]
+models = ["BicycleCounter"]
+
+[requirements]
+smart-data-models = false
+
+[run]
+args = [
+    "map",
+    "--input",
+    "data/counts.json",
+    "--mapping",
+    "counter.json5",
+    "--type",
+    "json",
+    "--output",
+    "out",
+    "--context",
+    "none",
+]
+
+[[datasets]]
+file = "data/counts.json"
+url = "https://data.seattle.gov/resource/65db-xm6k.json"
+source = "City of Seattle open data"
+# The Socrata dataset metadata records licenseId PUBLIC_DOMAIN, attributed to the City of Seattle.
+# https://data.seattle.gov/api/views/65db-xm6k.json
+license = "Public domain"
+volatility = "live"
+command = '''
+curl -sS --fail --retry 3 --retry-delay 5 --retry-all-errors -G "https://data.seattle.gov/resource/65db-xm6k.json" \
+    --data-urlencode "\$where=date between '2026-07-01T00:00:00' and '2026-07-07T23:59:59'" \
+    --data-urlencode "\$order=date" \
+    --data-urlencode "\$limit=200" \
+    | jq '
+      map({day: (.date[0:10]), hour: (.date[11:13] | tonumber), count: (.fremont_bridge | tonumber)})
+      | group_by(.day)
+      | map({
+          counter: "Fremont Bridge",
+          date: .[0].day,
+          latitude: 47.647417,
+          longitude: -122.349722,
+          hourlyCounts: (reduce .[] as $r ([range(24) | 0]; .[$r.hour] = $r.count))
+        })' \
+    > data/counts.json
+'''
+
+[[outputs]]
+file = "out/BicycleCounter.json"
+entities = 7
+contains = ["urn:ngsi-ld:BicycleCounter:FremontBridge-2026-07-01"]

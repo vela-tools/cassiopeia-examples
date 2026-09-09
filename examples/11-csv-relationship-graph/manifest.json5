@@ -1,0 +1,40 @@
+{
+    version: "v1",
+    inputs: [
+        {
+            source: "data/countries.dat",
+            mapping: "country.json5",
+            format: "csv",
+        },
+        {
+            source: "data/planes.dat",
+            mapping: "plane.json5",
+            format: "csv",
+        },
+        {
+            source: "data/airports.dat",
+            mapping: "airport.json5",
+            format: "csv",
+        },
+        {
+            source: "data/airlines.dat",
+            mapping: "airline.json5",
+            format: "csv",
+        },
+        {
+            source: "data/routes.dat",
+            mapping: "route.json5",
+            format: "csv",
+        },
+    ],
+    output: {
+        target: "file",
+        directory: "out",
+        context: "none",
+        // Validate each entity against its model's schema where one exists, and let the schemaless
+        // country pass. The four Aeronautics types are checked; Country is not.
+        validation: {
+            mode: "fail-when-schema",
+        },
+    },
+}

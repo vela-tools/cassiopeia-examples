@@ -1,1 +1,10 @@
 .DS_Store
+
+# Datasets are downloaded by the runner, never committed.
+data/
+
+# Entities produced by a run.
+out/
+
+# Runner build artifacts.
+/target

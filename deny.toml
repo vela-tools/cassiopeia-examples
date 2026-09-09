@@ -1,0 +1,52 @@
+# Licence policy gate for the runner. The allow list is permissive only: the intersection of
+# licences that are both EUPL-redistributable and safe to relicense into proprietary work. Strong
+# copyleft (GPL, AGPL, SSPL) and weak or file-level copyleft (MPL-2.0, LGPL) are both left off on
+# purpose, so a dependency carrying one fails the build and gets a legal review instead of shipping
+# unnoticed. No copyleft dependency is in the tree today.
+#
+# A crate whose licence is not on the allow list but is still permissive gets an explicit
+# [[licenses.exceptions]] entry below, with the reason stated, so the exception stays scoped to that
+# one crate instead of widening the allow list.
+#
+# Only the runner is gated here. The datasets an example downloads are not dependencies and are not
+# in this repository: their terms are recorded per example in `example.toml` and in NOTICE.md.
+
+[graph]
+all-features = true
+
+[licenses]
+confidence-threshold = 0.93
+allow = [
+    # General permissive licences
+    "MIT",
+    "Apache-2.0",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Zlib",
+    "Unicode-3.0",
+    # The runner's own licence
+    "EUPL-1.2",
+]
+
+# CDLA-Permissive-2.0 covers data, not code - this crate is the Mozilla root certificate bundle that
+# ureq's TLS stack trusts. Permissive, no copyleft, no obligation on the runner's own source.
+[[licenses.exceptions]]
+name = "webpki-roots"
+allow = ["CDLA-Permissive-2.0"]
+
+[advisories]
+db-urls = ["https://github.com/rustsec/advisory-db"]
+yanked = "deny"
+
+[bans]
+# Duplicate versions are hygiene, not a licensing or security concern, and they appear and disappear
+# with upstream releases. Warn so they stay visible without turning an upstream bump into a red
+# build.
+multiple-versions = "warn"
+wildcards = "deny"
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]

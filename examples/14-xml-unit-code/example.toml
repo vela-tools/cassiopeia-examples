@@ -1,0 +1,31 @@
+[example]
+title = "Mapping XML unit codes and observed timestamps"
+label = "XML unit codes"
+summary = "Map XML measurements with unitCode and observedAt."
+formats = ["xml"]
+models = ["WeatherObserved"]
+
+[requirements]
+smart-data-models = true
+
+[run]
+args = [
+    "map",
+    "--manifest",
+    "manifest.json5",
+]
+
+[[datasets]]
+file = "data/observation.xml"
+url = "https://meteo.arso.gov.si/uploads/probase/www/observ/surface/text/sl/observation_LJUBL-ANA_BEZIGRAD_latest.xml"
+source = "Slovenian Environment Agency (ARSO)"
+# Public information: reuse is free, and the source must be named ("Source: ARSO"), under
+# Article 14 of the National Meteorology, Hydrology, Oceanography and Seismic Service Act.
+# https://meteo.arso.gov.si/uploads/meteo/help/en/copyright.html
+license = "Free reuse with attribution to ARSO"
+volatility = "live"
+
+[[outputs]]
+file = "out/WeatherObserved.json"
+entities = 1
+contains = ["urn:ngsi-ld:WeatherObserved:65142878"]

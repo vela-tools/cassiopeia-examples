@@ -1,0 +1,56 @@
+[example]
+title = "Validating two CSV custom models, each with its own schema"
+label = "Custom schemas"
+summary = "Validate two invented models against two local JSON Schemas in one run."
+formats = ["csv"]
+models = ["ExoPlanet", "Star"]
+
+[requirements]
+smart-data-models = false
+
+[run]
+args = [
+    "map",
+    "--manifest",
+    "manifest.json5",
+]
+
+[[datasets]]
+file = "data/planets.csv"
+url = "https://exoplanetarchive.ipac.caltech.edu/TAP/sync"
+source = "NASA Exoplanet Archive"
+# A publicly funded NASA service with open access and no stated licence; published work is
+# asked to carry the archive's acknowledgement text.
+# https://exoplanetarchive.ipac.caltech.edu/docs/acknowledge.html
+license = "Free reuse with acknowledgement (NASA Exoplanet Archive)"
+volatility = "live"
+command = '''
+curl -sS --fail --retry 3 --retry-delay 5 --retry-all-errors -G "https://exoplanetarchive.ipac.caltech.edu/TAP/sync" \
+    --data-urlencode "query=select pl_name,hostname,discoverymethod,disc_year,pl_orbper,pl_rade,pl_bmasse,pl_eqt,pl_orbeccen from ps where default_flag=1" \
+    --data-urlencode "format=csv" \
+    -o data/planets.csv
+'''
+
+[[datasets]]
+file = "data/stars.csv"
+url = "https://exoplanetarchive.ipac.caltech.edu/TAP/sync"
+source = "NASA Exoplanet Archive"
+# A publicly funded NASA service with open access and no stated licence; published work is
+# asked to carry the archive's acknowledgement text.
+# https://exoplanetarchive.ipac.caltech.edu/docs/acknowledge.html
+license = "Free reuse with acknowledgement (NASA Exoplanet Archive)"
+volatility = "live"
+command = '''
+curl -sS --fail --retry 3 --retry-delay 5 --retry-all-errors -G "https://exoplanetarchive.ipac.caltech.edu/TAP/sync" \
+    --data-urlencode "query=select hostname,max(sy_pnum) sy_pnum,max(st_teff) st_teff,max(st_rad) st_rad,max(st_mass) st_mass,max(st_spectype) st_spectype,max(sy_dist) sy_dist,max(ra) ra,max(dec) dec from ps where default_flag=1 group by hostname" \
+    --data-urlencode "format=csv" \
+    -o data/stars.csv
+'''
+
+[[outputs]]
+file = "out/ExoPlanet.json"
+at-least = 3180
+
+[[outputs]]
+file = "out/Star.json"
+at-least = 2384

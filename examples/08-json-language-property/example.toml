@@ -1,0 +1,36 @@
+[example]
+title = "Mapping multilingual JSON with a LanguageProperty"
+label = "LanguageProperty"
+summary = "Build a LanguageProperty and read a hyphenated source key."
+formats = ["json"]
+models = ["Region"]
+
+[requirements]
+smart-data-models = false
+
+[run]
+args = [
+    "map",
+    "--input",
+    "data/regions.json",
+    "--mapping",
+    "region.json5",
+    "--type",
+    "json",
+    "--output",
+    "out",
+    "--context",
+    "none",
+]
+
+[[datasets]]
+file = "data/regions.json"
+url = "https://raw.githubusercontent.com/dr5hn/countries-states-cities-database/master/json/regions.json"
+source = "dr5hn/countries-states-cities-database"
+license = "ODbL-1.0"
+volatility = "live"
+
+[[outputs]]
+file = "out/Region.json"
+entities = 6
+contains = ["urn:ngsi-ld:Region:1"]

@@ -1,0 +1,40 @@
+[example]
+title = "Mapping CSV vocabulary terms with a VocabProperty"
+label = "VocabProperty"
+summary = "Turn an OpenStreetMap tag into a VocabProperty IRI."
+formats = ["csv"]
+models = ["UrbanMobilityPoint"]
+
+[requirements]
+smart-data-models = false
+
+[run]
+args = [
+    "map",
+    "--input",
+    "data/amenities.csv",
+    "--mapping",
+    "amenity.json5",
+    "--type",
+    "csv",
+    "--output",
+    "out",
+    "--context",
+    "none",
+]
+
+[[datasets]]
+file = "data/amenities.csv"
+url = "https://overpass-api.de/api/interpreter"
+source = "OpenStreetMap via Overpass"
+license = "ODbL-1.0"
+volatility = "live"
+command = '''
+curl -sS --fail --retry 3 --retry-delay 5 --retry-all-errors "https://overpass-api.de/api/interpreter" \
+    --data-urlencode 'data=[out:csv(::type,::id,::lat,::lon,amenity,name)][timeout:180];area["ISO3166-1"="SI"][admin_level=2]->.si;nwr[amenity~"^(charging_station|bicycle_rental|bicycle_parking|car_sharing|fuel|taxi)$"](area.si);out center;' \
+    -o data/amenities.csv
+'''
+
+[[outputs]]
+file = "out/UrbanMobilityPoint.json"
+at-least = 1499

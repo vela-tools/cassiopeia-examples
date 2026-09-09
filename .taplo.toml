@@ -1,0 +1,15 @@
+[formatting]
+inline_table_expand = false
+array_auto_collapse = true
+column_width = 200
+# Four spaces, so a TOML array reads the same as the Rust and JSON5 beside it.
+indent_string = "    "
+
+# An example descriptor writes its Cassiopeia invocation one argument per line, which is the shape
+# the page's code blocks are derived from and the shape an author reads when editing a run.
+# Collapsing those arrays onto a single line would hide it.
+[[rule]]
+include = ["examples/*/example.toml"]
+
+[rule.formatting]
+array_auto_collapse = false

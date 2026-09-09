@@ -1,0 +1,33 @@
+name: test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "tools/runner/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - ".github/workflows/test.yaml"
+  pull_request:
+    paths:
+      - "tools/runner/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - ".github/workflows/test.yaml"
+
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: cargo test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test --workspace --all-features --locked

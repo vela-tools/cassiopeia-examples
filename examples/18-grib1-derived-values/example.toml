@@ -1,0 +1,52 @@
+[example]
+title = "Deriving weather values from a GRIB1 grid"
+label = "GRIB1 derived values"
+summary = "Derive weather values from GRIB1 components."
+formats = ["grib1"]
+models = ["WeatherObserved"]
+
+[requirements]
+smart-data-models = true
+
+[run]
+args = [
+    "map",
+    "--input",
+    "data/nowcast.grb",
+    "--mapping",
+    "weather.json5",
+    "--type",
+    "grib",
+    "--output",
+    "out",
+    "--context",
+    "none",
+    "--validation-mode",
+    "fail-when-schema",
+]
+
+[[preparation]]
+description = "unpacking the archive and keeping the analysis step"
+command = "cd data && unzip -p nowcast.zip > nowcast_full.grb && rm nowcast.zip && grib_copy -w stepRange=0 nowcast_full.grb nowcast.grb && rm nowcast_full.grb"
+
+[[datasets]]
+file = "data/nowcast.zip"
+url = "https://meteo.arso.gov.si/uploads/probase/www/nowcast/data"
+source = "Slovenian Environment Agency (ARSO)"
+# Public information: reuse is free, and the source must be named ("Source: ARSO"), under
+# Article 14 of the National Meteorology, Hydrology, Oceanography and Seismic Service Act.
+# https://meteo.arso.gov.si/uploads/meteo/help/en/copyright.html
+license = "Free reuse with attribution to ARSO"
+volatility = "live"
+command = '''
+BASE="https://meteo.arso.gov.si/uploads/probase/www/nowcast/data"
+LATEST=$(curl -sS --fail --retry 3 --retry-delay 5 --retry-all-errors "$BASE/" | grep -oE 'nowcast_[0-9]{8}-[0-9]{4}\.zip' | head -1)
+curl -sS --fail --retry 3 --retry-delay 5 --retry-all-errors "$BASE/$LATEST" -o data/nowcast.zip
+'''
+
+# The nowcast grid is fixed, but the file is republished every few minutes, so the count is a floor
+# rather than an exact figure. The identifier is the geohash of a grid point the page quotes.
+[[outputs]]
+file = "out/WeatherObserved.json"
+at-least = 120701
+contains = ["urn:ngsi-ld:WeatherObserved:u24q465zw"]

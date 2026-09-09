@@ -1,0 +1,43 @@
+[example]
+title = "Scheduling repeated JSON feed mappings"
+label = "Scheduling"
+summary = "Poll a sensor feed and upsert entities on a schedule."
+formats = ["json"]
+models = ["AirQualityObserved"]
+
+[requirements]
+smart-data-models = true
+
+# The same stack the tropical-cyclone example starts, which is what this example's page tells a
+# reader to use rather than running a second broker beside it.
+[context-broker]
+compose = "../22-csv-broker-temporal/docker-compose.yml"
+url = "http://localhost:9090/"
+# The manifest writes with context "default", which the catalog resolves to the model's own
+# repository context. A broker expands the type in a query against whichever context the query
+# carries, so asking for a bare "AirQualityObserved" without this would expand it against the core
+# context and match none of the entities the run just wrote.
+context = "https://raw.githubusercontent.com/smart-data-models/dataModel.Environment/master/context.jsonld"
+
+# The mapping polls until it is interrupted, so the descriptor says how many polls are worth
+# watching. Two polls are what it takes to show a schedule scheduling: the first fires immediately
+# and the second waits out the interval. One interval plus the grace is a window of seven minutes,
+# and the grace covers the manifest's 20 seconds of jitter before each poll and the fetch, mapping,
+# and upsert of the last one.
+[schedule]
+cycles = 2
+interval = "5m"
+grace = "2m"
+
+[run]
+args = [
+    "map",
+    "--manifest",
+    "manifest.json5",
+]
+
+# The feed returned 31 readings from 14 sensors when this was written, and a quiet five-minute window
+# returns far fewer, so the floor is set low enough to survive one.
+[[outputs]]
+broker-entities = "AirQualityObserved"
+at-least = 5

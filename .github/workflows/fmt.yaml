@@ -1,0 +1,37 @@
+name: fmt
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "tools/runner/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "rustfmt.toml"
+      - ".github/workflows/fmt.yaml"
+  pull_request:
+    paths:
+      - "tools/runner/**"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "rustfmt.toml"
+      - ".github/workflows/fmt.yaml"
+
+concurrency:
+  group: fmt-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  fmt:
+    name: cargo +nightly fmt --check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      # The formatting rules the repository uses are nightly rustfmt options.
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: rustfmt
+      - run: cargo +nightly fmt --all --check

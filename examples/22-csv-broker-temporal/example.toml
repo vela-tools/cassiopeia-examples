@@ -1,0 +1,40 @@
+[example]
+title = "Sending CSV temporal output to a broker"
+label = "Temporal to broker"
+summary = "Fold a track and deliver it to Scorpio."
+formats = ["csv"]
+models = ["TropicalCyclone"]
+
+[requirements]
+smart-data-models = false
+
+# The broker the manifest delivers to. The runner brings this stack up, waits for the broker to
+# answer, and takes it down again once the run is over.
+[context-broker]
+compose = "docker-compose.yml"
+url = "http://localhost:9090/"
+
+[run]
+args = [
+    "map",
+    "--manifest",
+    "manifest.json5",
+]
+
+[[preparation]]
+description = "flattening the storm headers onto their track rows"
+command = "awk -f flatten.awk data/hurdat2-atlantic.txt > data/cyclones.csv"
+
+[[datasets]]
+file = "data/hurdat2-atlantic.txt"
+url = "https://www.nhc.noaa.gov/data/hurdat/hurdat2-1851-2025-02272026.txt"
+source = "NOAA HURDAT2"
+license = "Public domain"
+volatility = "frozen"
+
+# The run delivers to the broker rather than to a file, so the assertion is the query the page makes
+# by hand: the temporal endpoint holds KATRINA's folded track (ETSI GS CIM 009 v1.9.1, clause 5.2.20).
+[[outputs]]
+broker-temporal = "urn:ngsi-ld:TropicalCyclone:AL122005"
+entities = 1
+contains = ["urn:ngsi-ld:TropicalCyclone:AL122005"]

@@ -1,0 +1,39 @@
+[example]
+title = "Mapping JSON fields into entities"
+label = "JSON field mapping"
+summary = "Map a JSON array to ChemicalElement entities and type one copied field as a number."
+formats = ["json"]
+models = ["ChemicalElement"]
+
+[requirements]
+smart-data-models = false
+
+# The command the page documents. The runner executes these arguments, and derives the native and
+# container forms of the page's code blocks from them, so the two cannot drift apart.
+[run]
+args = [
+    "map",
+    "--input",
+    "data/element.json",
+    "--mapping",
+    "element.json5",
+    "--type",
+    "json",
+    "--output",
+    "out",
+    "--context",
+    "none",
+]
+
+[[datasets]]
+file = "data/element.json"
+url = "https://raw.githubusercontent.com/andrejewski/periodic-table/master/data.json"
+source = "andrejewski/periodic-table"
+license = "ISC"
+volatility = "frozen"
+records = 118
+
+[[outputs]]
+file = "out/ChemicalElement.json"
+entities = 118
+contains = ["urn:ngsi-ld:ChemicalElement:H", "urn:ngsi-ld:ChemicalElement:He"]

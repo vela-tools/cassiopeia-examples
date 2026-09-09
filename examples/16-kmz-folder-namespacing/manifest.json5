@@ -1,0 +1,22 @@
+{
+    version: "v1",
+    inputs: [
+        // A KMZ is a zip whose only real payload is a KML; the ingestor unzips it and reads the KML inside,
+        // so the format is "kmz" and the source is the archive itself.
+        {
+            source: "data/yosemite-poi.kmz",
+            mapping: "park-point-of-interest.json5",
+            format: "kmz",
+        },
+    ],
+    output: {
+        target: "file",
+        directory: "out",
+        context: "none",
+        // ParkPointOfInterest is a model this example invents, so there is no schema to check it against
+        // and fail-when-schema writes it unvalidated.
+        validation: {
+            mode: "fail-when-schema",
+        },
+    },
+}

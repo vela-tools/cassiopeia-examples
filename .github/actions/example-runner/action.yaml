@@ -1,0 +1,14 @@
+name: Example runner
+description: Places the prebuilt example runner in the working directory, ready to invoke.
+
+runs:
+  using: composite
+  steps:
+    - name: Download the runner
+      uses: actions/download-artifact@v4
+      with:
+        name: runner
+    # An artifact carries the file, not its mode, so the binary arrives without its executable bit.
+    - name: Make the runner executable
+      shell: bash
+      run: chmod +x ./cassiopeia-example-runner

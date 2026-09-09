@@ -1,0 +1,76 @@
+[example]
+title = "Mapping CSV multi-attribute relationships across airport roles"
+label = "Multi-attribute relationships"
+summary = "Give a Flight one servesAirport name for its departure and arrival airports, distinguished by datasetId."
+formats = ["csv"]
+models = ["Flight", "Airport", "Airline", "AircraftModel", "Country"]
+
+[requirements]
+smart-data-models = true
+
+[run]
+args = [
+    "map",
+    "--manifest",
+    "manifest.json5",
+]
+
+[[datasets]]
+file = "data/countries.dat"
+url = "https://raw.githubusercontent.com/jpatokal/openflights/master/data/countries.dat"
+source = "OpenFlights"
+license = "ODbL-1.0"
+volatility = "live"
+
+[[datasets]]
+file = "data/planes.dat"
+url = "https://raw.githubusercontent.com/jpatokal/openflights/master/data/planes.dat"
+source = "OpenFlights"
+license = "ODbL-1.0"
+volatility = "live"
+
+[[datasets]]
+file = "data/airports.dat"
+url = "https://raw.githubusercontent.com/jpatokal/openflights/master/data/airports.dat"
+source = "OpenFlights"
+license = "ODbL-1.0"
+volatility = "live"
+
+[[datasets]]
+file = "data/airlines.dat"
+url = "https://raw.githubusercontent.com/jpatokal/openflights/master/data/airlines.dat"
+source = "OpenFlights"
+license = "ODbL-1.0"
+volatility = "live"
+
+[[datasets]]
+file = "data/routes.dat"
+url = "https://raw.githubusercontent.com/jpatokal/openflights/master/data/routes.dat"
+source = "OpenFlights"
+license = "ODbL-1.0"
+volatility = "live"
+
+[[outputs]]
+file = "out/AircraftModel.json"
+entities = 232
+contains = ["urn:ngsi-ld:AircraftModel:321"]
+
+[[outputs]]
+file = "out/Airline.json"
+entities = 6162
+contains = ["urn:ngsi-ld:Airline:3320"]
+
+[[outputs]]
+file = "out/Airport.json"
+entities = 7698
+contains = ["urn:ngsi-ld:Airport:340", "urn:ngsi-ld:Airport:535"]
+
+[[outputs]]
+file = "out/Country.json"
+entities = 259
+contains = ["urn:ngsi-ld:Country:Japan"]
+
+[[outputs]]
+file = "out/Flight.json"
+entities = 67663
+contains = ["urn:ngsi-ld:Flight:LH-EDI-FRA"]

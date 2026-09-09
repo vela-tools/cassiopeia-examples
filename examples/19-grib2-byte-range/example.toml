@@ -1,0 +1,55 @@
+[example]
+title = "Reading GRIB2 fields by byte range"
+label = "GRIB2 byte ranges"
+summary = "Fetch selected GRIB2 fields by byte range."
+formats = ["grib2"]
+models = ["WeatherObserved"]
+
+[requirements]
+smart-data-models = true
+
+[run]
+args = [
+    "map",
+    "--input",
+    "data/weather.grib2",
+    "--mapping",
+    "weather.json5",
+    "--type",
+    "grib",
+    "--output",
+    "out",
+    "--context",
+    "none",
+    "--validation-mode",
+    "fail-when-schema",
+]
+
+[[datasets]]
+file = "data/weather.grib2"
+url = "https://noaa-gfs-bdp-pds.s3.amazonaws.com/"
+source = "NOAA GFS on AWS Open Data"
+license = "Public domain"
+volatility = "frozen"
+command = '''
+BASE="https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.20260823/00/atmos"
+FILE="gfs.t00z.pgrb2.1p00.f000"
+curl -sS --fail --retry 3 --retry-delay 5 --retry-all-errors "$BASE/$FILE.idx" -o data/gfs.idx
+: > data/weather.grib2
+awk -F: '
+  {off[NR]=$2}
+  ($4=="PRMSL" && $5=="mean sea level") ||
+  ($4=="VIS"   && $5=="surface") ||
+  ($4=="GUST"  && $5=="surface") ||
+  ($5=="2 m above ground"  && ($4=="TMP"||$4=="DPT"||$4=="RH")) ||
+  ($5=="10 m above ground" && ($4=="UGRD"||$4=="VGRD")) {keep[NR]=1}
+  END{for(n=1;n<=NR;n++) if(keep[n]) print off[n]"-"(off[n+1]?off[n+1]-1:"")}' data/gfs.idx |
+while read range; do curl -sS --fail --retry 3 --retry-delay 5 --retry-all-errors -r "$range" "$BASE/$FILE" >> data/weather.grib2; done
+'''
+
+# One entity per cell of the one-degree global grid, which is a property of the grid rather than of
+# the forecast run, so it holds for every dated prefix in the archive.
+[[outputs]]
+file = "out/WeatherObserved.json"
+entities = 64800
+contains = ["urn:ngsi-ld:WeatherObserved:u21vww43r"]

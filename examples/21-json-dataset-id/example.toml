@@ -1,0 +1,34 @@
+[example]
+title = "Mapping JSON `datasetId` instances"
+label = "JSON datasetId"
+summary = "Keep forecasts from several models under one attribute."
+formats = ["json"]
+models = ["WeatherForecast"]
+
+[requirements]
+smart-data-models = false
+
+[run]
+args = [
+    "map",
+    "--manifest",
+    "manifest.json5",
+]
+
+[[datasets]]
+file = "data/forecast.json"
+url = "https://api.open-meteo.com/v1/forecast"
+source = "Open-Meteo"
+# Open-Meteo serves API data under CC-BY 4.0.
+# https://open-meteo.com/en/terms
+license = "CC-BY-4.0"
+volatility = "live"
+command = '''
+curl -sS --fail --retry 3 --retry-delay 5 --retry-all-errors "https://api.open-meteo.com/v1/forecast?latitude=46.05&longitude=14.51&daily=temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant,shortwave_radiation_sum,relative_humidity_2m_mean,pressure_msl_mean,cloud_cover_mean&models=ecmwf_ifs025,gfs_global,icon_eu&forecast_days=10&timezone=UTC" \
+    | jq '.latitude as $lat | .longitude as $lon | [.daily as $d | range(0; ($d.time | length)) as $i | ($d | to_entries | map({(.key): .value[$i]}) | add) + {place: "Ljubljana", latitude: $lat, longitude: $lon}]' \
+    > data/forecast.json
+'''
+
+[[outputs]]
+file = "out/WeatherForecast.json"
+entities = 10

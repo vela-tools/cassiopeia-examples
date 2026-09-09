@@ -1,0 +1,36 @@
+[example]
+title = "Mapping KMZ folder namespacing into entities"
+label = "KMZ namespacing"
+summary = "Package a KML as a KMZ, namespace its records by folder, and pass placemark geometry through."
+formats = ["kmz"]
+models = ["ParkPointOfInterest"]
+
+[requirements]
+smart-data-models = false
+
+[run]
+args = [
+    "map",
+    "--manifest",
+    "manifest.json5",
+]
+
+[[preparation]]
+description = "packaging the KML as a KMZ archive"
+command = "cd data && rm -f yosemite-poi.kmz && zip -q yosemite-poi.kmz yosemite-poi.kml"
+
+[[datasets]]
+file = "data/yosemite-poi.kml"
+url = "https://opendata.arcgis.com/datasets/nps::yosemite-national-park-points-of-interest-open-data.kml"
+source = "US National Park Service, Yosemite National Park"
+# A work of the US federal government, and every record carries DATAACCESS "Unrestricted". The item's
+# licence text is a liability disclaimer, not a restriction on reuse.
+# https://hub.arcgis.com/datasets/nps::yosemite-national-park-points-of-interest-open-data
+license = "Public domain (US Government)"
+volatility = "live"
+records = 553
+
+[[outputs]]
+file = "out/ParkPointOfInterest.json"
+# The park service maintains the layer, so the count drifts as points are added or retired.
+at-least = 500

@@ -1,0 +1,37 @@
+[example]
+title = "Keeping JSON entities with colliding IDs apart"
+label = "ID collisions"
+summary = "See how a weak city ID merges records, then add a geohash from the coordinates."
+formats = ["json"]
+models = ["City"]
+
+[requirements]
+smart-data-models = false
+
+[run]
+args = [
+    "map",
+    "--input",
+    "data/city.json",
+    "--mapping",
+    "city.json5",
+    "--type",
+    "json",
+    "--output",
+    "out",
+    "--context",
+    "none",
+]
+
+[[datasets]]
+file = "data/city.json"
+url = "https://raw.githubusercontent.com/joelacus/world-cities/main/world_cities_15000.json"
+source = "joelacus/world-cities"
+license = "CC-BY-4.0"
+volatility = "live"
+records = 34135
+
+[[outputs]]
+file = "out/City.json"
+entities = 34135
+contains = ["urn:ngsi-ld:City:AD-lesEscaldes-sp91ffjnu", "urn:ngsi-ld:City:DE-Hamburg-u1x0eksew"]

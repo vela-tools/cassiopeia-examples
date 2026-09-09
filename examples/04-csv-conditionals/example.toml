@@ -1,0 +1,40 @@
+[example]
+title = "Using CSV conditionals for nested attributes"
+label = "CSV conditionals"
+summary = "Read a semicolon-delimited CSV, translate codes, and build an address object."
+formats = ["csv"]
+models = ["BikeHireDockingStation"]
+
+[requirements]
+smart-data-models = true
+
+[run]
+args = [
+    "map",
+    "--input",
+    "data/bikemi_stazioni.csv",
+    "--mapping",
+    "station.json5",
+    "--type",
+    "csv",
+    "--output",
+    "out",
+    "--context",
+    "none",
+    "--validation-mode",
+    "fail",
+    "--validation-representation",
+    "simplified",
+]
+
+[[datasets]]
+file = "data/bikemi_stazioni.csv"
+url = "https://dati.comune.milano.it/dataset/cc065002-cd21-4dcb-b84f-bba2fd9e0c86/resource/4c31029c-22c9-49f7-b145-91374feac41c/download/bikemi_stazioni.csv"
+source = "Comune di Milano"
+license = "CC-BY-4.0"
+volatility = "live"
+
+[[outputs]]
+file = "out/BikeHireDockingStation.json"
+entities = 325
+contains = ["urn:ngsi-ld:BikeHireDockingStation:38"]

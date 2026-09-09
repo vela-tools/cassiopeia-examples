@@ -1,0 +1,32 @@
+name: pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "examples/**"
+      - "tools/runner/**"
+      - ".github/workflows/pages.yaml"
+  pull_request:
+    paths:
+      - "examples/**"
+      - "tools/runner/**"
+      - ".github/workflows/pages.yaml"
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  pages:
+    name: cargo run -- check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Check that every page documents the run it declares
+        run: cargo run --quiet -- check

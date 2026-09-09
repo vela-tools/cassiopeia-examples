@@ -1,0 +1,30 @@
+[example]
+title = "Decoding shapefile enums into entity attributes"
+label = "Shapefile enums"
+summary = "Read a zipped shapefile and decode its coded columns."
+formats = ["shapefile"]
+models = ["Port"]
+
+[requirements]
+smart-data-models = false
+
+[run]
+args = [
+    "map",
+    "--manifest",
+    "manifest.json5",
+]
+
+[[datasets]]
+file = "data/world_port_index.zip"
+url = "https://data.humdata.org/dataset/3f976f27-2566-4ea7-b29e-7fc6ebc90aab/resource/060abaf3-8c9f-4df4-b7e3-5335a15c6247/download/world_port_index.zip"
+source = "World Port Index (NGA Pub 150), redistributed by HDX"
+# HDX records the dataset as "Public Domain / No restrictions (CC0)".
+# https://data.humdata.org/dataset/world-port-index
+license = "CC0-1.0"
+volatility = "frozen"
+
+[[outputs]]
+file = "out/Port.json"
+entities = 3669
+contains = ["urn:ngsi-ld:Port:61090"]

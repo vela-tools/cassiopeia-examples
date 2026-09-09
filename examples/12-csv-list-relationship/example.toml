@@ -1,0 +1,76 @@
+[example]
+title = "Mapping CSV lists with a ListRelationship"
+label = "ListRelationship"
+summary = "Use a ListRelationship when one route has several aircraft models."
+formats = ["csv"]
+models = ["Flight", "Airport", "Airline", "AircraftModel", "Country"]
+
+[requirements]
+smart-data-models = true
+
+[run]
+args = [
+    "map",
+    "--manifest",
+    "manifest.json5",
+]
+
+[[datasets]]
+file = "data/countries.dat"
+url = "https://raw.githubusercontent.com/jpatokal/openflights/master/data/countries.dat"
+source = "OpenFlights"
+license = "ODbL-1.0"
+volatility = "live"
+
+[[datasets]]
+file = "data/planes.dat"
+url = "https://raw.githubusercontent.com/jpatokal/openflights/master/data/planes.dat"
+source = "OpenFlights"
+license = "ODbL-1.0"
+volatility = "live"
+
+[[datasets]]
+file = "data/airports.dat"
+url = "https://raw.githubusercontent.com/jpatokal/openflights/master/data/airports.dat"
+source = "OpenFlights"
+license = "ODbL-1.0"
+volatility = "live"
+
+[[datasets]]
+file = "data/airlines.dat"
+url = "https://raw.githubusercontent.com/jpatokal/openflights/master/data/airlines.dat"
+source = "OpenFlights"
+license = "ODbL-1.0"
+volatility = "live"
+
+[[datasets]]
+file = "data/routes.dat"
+url = "https://raw.githubusercontent.com/jpatokal/openflights/master/data/routes.dat"
+source = "OpenFlights"
+license = "ODbL-1.0"
+volatility = "live"
+
+[[outputs]]
+file = "out/AircraftModel.json"
+entities = 232
+contains = ["urn:ngsi-ld:AircraftModel:773", "urn:ngsi-ld:AircraftModel:330"]
+
+[[outputs]]
+file = "out/Airline.json"
+entities = 6162
+contains = ["urn:ngsi-ld:Airline:4867"]
+
+[[outputs]]
+file = "out/Airport.json"
+entities = 7698
+contains = ["urn:ngsi-ld:Airport:2650", "urn:ngsi-ld:Airport:2564"]
+
+[[outputs]]
+file = "out/Country.json"
+entities = 259
+contains = ["urn:ngsi-ld:Country:Somalia"]
+
+[[outputs]]
+file = "out/Flight.json"
+entities = 67663
+contains = ["urn:ngsi-ld:Flight:JJ-GRU-SCL"]

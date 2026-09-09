@@ -1,0 +1,64 @@
+[example]
+title = "Building JSON relationships across a hierarchy"
+label = "JSON relationships"
+summary = "Connect region, subregion, country, and state entities."
+formats = ["json"]
+models = ["Region", "Subregion", "Country", "State"]
+
+[requirements]
+smart-data-models = false
+
+[run]
+args = [
+    "map",
+    "--manifest",
+    "manifest.json5",
+]
+
+[[datasets]]
+file = "data/regions.json"
+url = "https://raw.githubusercontent.com/dr5hn/countries-states-cities-database/master/json/regions.json"
+source = "dr5hn/countries-states-cities-database"
+license = "ODbL-1.0"
+volatility = "live"
+
+[[datasets]]
+file = "data/subregions.json"
+url = "https://raw.githubusercontent.com/dr5hn/countries-states-cities-database/master/json/subregions.json"
+source = "dr5hn/countries-states-cities-database"
+license = "ODbL-1.0"
+volatility = "live"
+
+[[datasets]]
+file = "data/countries.json"
+url = "https://raw.githubusercontent.com/dr5hn/countries-states-cities-database/master/json/countries.json"
+source = "dr5hn/countries-states-cities-database"
+license = "ODbL-1.0"
+volatility = "live"
+
+[[datasets]]
+file = "data/states.json"
+url = "https://raw.githubusercontent.com/dr5hn/countries-states-cities-database/master/json/states.json"
+source = "dr5hn/countries-states-cities-database"
+license = "ODbL-1.0"
+volatility = "live"
+
+[[outputs]]
+file = "out/Country.json"
+entities = 250
+contains = ["urn:ngsi-ld:Country:201", "urn:ngsi-ld:Country:233"]
+
+[[outputs]]
+file = "out/Region.json"
+entities = 6
+contains = ["urn:ngsi-ld:Region:4"]
+
+[[outputs]]
+file = "out/State.json"
+entities = 5308
+contains = ["urn:ngsi-ld:State:1416"]
+
+[[outputs]]
+file = "out/Subregion.json"
+entities = 22
+contains = ["urn:ngsi-ld:Subregion:16"]

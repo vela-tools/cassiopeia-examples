@@ -1,0 +1,43 @@
+name: Broken example
+description: An example no longer runs, or no longer produces what its page says it does.
+labels: ["examples"]
+body:
+  - type: input
+    id: example
+    attributes:
+      label: Example
+      description: The directory, for instance 01-json-field-mapping.
+      placeholder: 01-json-field-mapping
+    validations:
+      required: true
+  - type: dropdown
+    id: runtime
+    attributes:
+      label: How did you run it
+      options:
+        - Native binary
+        - Docker
+        - Podman
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Cassiopeia version
+      description: The output of cassiopeia --version.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What the page says should happen
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened instead
+      description: Paste the command you ran and the output it produced. Terminal output is formatted automatically.
+      render: text
+    validations:
+      required: true

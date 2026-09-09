@@ -1,0 +1,13 @@
+name: Native dependencies
+description: Installs the host tools an example's preparation step or dataset command runs before Cassiopeia reads the data.
+
+runs:
+  using: composite
+  steps:
+    # jq and zip happen to be on the runner image already. They are named here anyway, so that what
+    # the examples depend on is declared rather than inherited from whatever the image ships.
+    - name: Install native dependencies
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends jq libeccodes-tools zip

@@ -1,0 +1,5 @@
+# The runner's tests build descriptors and entries from literals that are known-good at the point
+# they are written, so the panicking assertions the production paths deny are allowed there.
+allow-expect-in-tests = true
+allow-panic-in-tests = true
+allow-unwrap-in-tests = true

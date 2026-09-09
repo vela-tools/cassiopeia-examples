@@ -1,0 +1,31 @@
+[example]
+title = "Mapping CSV nested relationships in movie credits"
+label = "Nested relationships"
+summary = "Give a Movie's hasLeadActor relationship a nested playsCharacter relationship and a billingOrder property."
+formats = ["csv"]
+models = ["Movie"]
+
+[requirements]
+smart-data-models = false
+
+[run]
+args = [
+    "map",
+    "--manifest",
+    "manifest.json5",
+]
+
+[[datasets]]
+file = "data/tmdb_5000_credits.csv"
+url = "https://raw.githubusercontent.com/andandandand/CSV-datasets/master/tmdb_5000_credits.csv"
+source = "andandandand/CSV-datasets"
+# The credits come from TMDB, whose terms make attribution a condition of use; the CSV is
+# redistributed on GitHub without a licence of its own.
+# https://www.themoviedb.org/api-terms-of-use
+license = "TMDB API Terms of Use (attribution required)"
+volatility = "frozen"
+
+[[outputs]]
+file = "out/Movie.json"
+entities = 4803
+contains = ["urn:ngsi-ld:Movie:19995"]

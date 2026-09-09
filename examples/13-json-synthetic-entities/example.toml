@@ -1,0 +1,36 @@
+[example]
+title = "Creating synthetic JSON entities from a field"
+label = "Synthetic entities"
+summary = "Create country entities from a mountain's country field."
+formats = ["json"]
+models = ["Mountain", "Country"]
+
+[requirements]
+smart-data-models = false
+
+[run]
+args = [
+    "map",
+    "--manifest",
+    "manifest.json5",
+]
+
+[[datasets]]
+file = "data/mountains.json"
+url = "https://raw.githubusercontent.com/sharmadhiraj/free-json-datasets/master/docs/geography-environment/list_of_highest_mountains_on_earth.json"
+source = "sharmadhiraj/free-json-datasets"
+# The repository publishes no licence, and states the data is scraped from public sources.
+# https://github.com/sharmadhiraj/free-json-datasets
+license = "Unspecified"
+volatility = "frozen"
+records = 120
+
+[[outputs]]
+file = "out/Country.json"
+entities = 8
+contains = ["urn:ngsi-ld:Country:China", "urn:ngsi-ld:Country:Nepal"]
+
+[[outputs]]
+file = "out/Mountain.json"
+entities = 120
+contains = ["urn:ngsi-ld:Mountain:MountEverest", "urn:ngsi-ld:Mountain:Lhotse"]

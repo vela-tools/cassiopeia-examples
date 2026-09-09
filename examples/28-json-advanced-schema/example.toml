@@ -1,0 +1,44 @@
+[example]
+title = "Advanced JSON schema validation for normalized output"
+label = "Advanced schema validation"
+summary = "Validate wrappers and metadata in normalized output."
+formats = ["json"]
+models = ["FoodProduct"]
+
+[requirements]
+smart-data-models = false
+
+[run]
+args = [
+    "map",
+    "--manifest",
+    "manifest.json5",
+]
+
+[[datasets]]
+file = "data/products.json"
+url = "https://world.openfoodfacts.org/api/v2/search"
+source = "Open Food Facts"
+license = "ODbL-1.0"
+volatility = "live"
+# Open Food Facts answers a request that does not name its client with an HTML holding page under
+# HTTP 503, so the User-Agent is part of the request rather than decoration, and --fail stops the
+# download there instead of handing the HTML to jq. The response is written to a file rather
+# than piped, because a shell pipeline reports jq's status and would hide a failed download.
+# The search endpoint is rate limited to ten requests a minute, so a throttled answer is retried
+# rather than treated as the dataset having moved.
+command = '''
+curl -sS --fail --retry 5 --retry-delay 10 --retry-all-errors \
+    -A "cassiopeia-examples/1.0 (+https://github.com/vela-tools/cassiopeia-examples)" \
+    -G "https://world.openfoodfacts.org/api/v2/search" \
+    --data-urlencode "categories_tags_en=chocolates" \
+    --data-urlencode "fields=code,product_name,product_name_en,product_name_fr,product_name_de,product_name_es,product_name_it,brands,nutriments,nutrient_levels,nutriscore_grade,nova_group,labels_tags,last_modified_t" \
+    --data-urlencode "page_size=100" \
+    -o data/search.json \
+    && jq '.products' data/search.json > data/products.json \
+    && rm data/search.json
+'''
+
+[[outputs]]
+file = "out/FoodProduct.jsonld"
+at-least = 50

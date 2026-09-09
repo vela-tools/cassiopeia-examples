@@ -1,0 +1,45 @@
+[example]
+title = "Mapping KML folder collections in one run"
+label = "KML collections"
+summary = "Route four KML folders to four mappings."
+formats = ["kml"]
+models = ["CitiBikeStation", "BikeRentalShop", "Sightseeing", "PublicRestroom"]
+
+[requirements]
+smart-data-models = false
+
+[run]
+args = [
+    "map",
+    "--manifest",
+    "manifest.json5",
+]
+
+[[datasets]]
+file = "data/nyc-cycling.kml"
+url = "https://www.google.com/maps/d/kml?mid=1ouRmFjRHxcdgoI4HSXml8UBqaWkh1k8i&forcekml=1"
+source = "A public Google My Maps map"
+# A public map made by a Google My Maps user, published with no licence of its own.
+# Any public map works here: replace the mid with your own.
+license = "Unspecified"
+volatility = "live"
+
+[[outputs]]
+file = "out/BikeRentalShop.json"
+entities = 5
+contains = ["urn:ngsi-ld:BikeRentalShop:BikeRentNYC"]
+
+[[outputs]]
+file = "out/CitiBikeStation.json"
+entities = 14
+contains = ["urn:ngsi-ld:CitiBikeStation:W120StClaremontAve"]
+
+[[outputs]]
+file = "out/PublicRestroom.json"
+entities = 7
+contains = ["urn:ngsi-ld:PublicRestroom:Pier40"]
+
+[[outputs]]
+file = "out/Sightseeing.json"
+entities = 7
+contains = ["urn:ngsi-ld:Sightseeing:911Memorial"]

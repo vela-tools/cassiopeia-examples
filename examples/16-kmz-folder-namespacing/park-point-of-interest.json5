@@ -1,0 +1,42 @@
+{
+    version: "v4",
+    dataModel: "ParkPointOfInterest",
+    // Every placemark sits in one <Folder> named after the published layer, so the ingestor nests each
+    // record under that folder's snake_cased key. A placemark's fields are reached through it.
+    identity: {
+        entityName: "{{ yosemite_national_park___points_of_interest___open_data.properties.OBJECTID }}",
+    },
+    attributes: {
+        name: {
+            source: "{{ yosemite_national_park___points_of_interest___open_data.properties.POINAME }}",
+            type: "Property",
+            transformation: "string",
+        },
+        // The placemark already carries a WGS84 <Point>, so the geometry passes straight through as the
+        // GeoProperty instead of being rebuilt from the LAT_DD_W84 and LON_DD_W84 columns beside it.
+        location: {
+            source: "{{ yosemite_national_park___points_of_interest___open_data.geometry }}",
+            type: "GeoProperty",
+            transformation: "geometry",
+        },
+        // The park service's own vocabulary for what a point is: Waterfall, Trailhead, Campground, and
+        // two dozen more. It is carried across unchanged rather than folded into fewer tokens.
+        category: {
+            source: "{{ yosemite_national_park___points_of_interest___open_data.properties.POITYPE }}",
+            type: "Property",
+            transformation: "string",
+        },
+        park: {
+            source: "{{ yosemite_national_park___points_of_interest___open_data.properties.UNITCODE }}",
+            type: "Property",
+            transformation: "string",
+        },
+        // Two thirds of the points leave the closure field empty, and a few say "Unknown". Only "Yes"
+        // and "No" carry meaning, so anything else matches no branch and the attribute is left off.
+        seasonallyClosed: {
+            source: "{% if yosemite_national_park___points_of_interest___open_data.properties.ISSEASONALLYCLOSED == 'Yes' %}true{% elif yosemite_national_park___points_of_interest___open_data.properties.ISSEASONALLYCLOSED == 'No' %}false{% endif %}",
+            type: "Property",
+            transformation: "boolean",
+        },
+    },
+}

@@ -1,0 +1,42 @@
+name: taplo
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "**/*.toml"
+      - ".taplo.toml"
+      - ".github/workflows/taplo.yaml"
+  pull_request:
+    paths:
+      - "**/*.toml"
+      - ".taplo.toml"
+      - ".github/workflows/taplo.yaml"
+
+concurrency:
+  group: taplo-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  taplo:
+    name: taplo fmt --check
+    runs-on: ubuntu-latest
+    env:
+      # Pinned rather than tracking the latest release, so a formatter change lands in a commit here
+      # instead of turning an unrelated pull request red.
+      TAPLO_VERSION: "0.10.0"
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install taplo
+        run: |
+          curl --fail --location --silent --show-error \
+            "https://github.com/tamasfe/taplo/releases/download/${TAPLO_VERSION}/taplo-linux-x86_64.gz" \
+            | gunzip > "${RUNNER_TEMP}/taplo"
+          chmod +x "${RUNNER_TEMP}/taplo"
+      # A block scalar, because a value that opens with a quote is a quoted scalar and the rest of
+      # the line is then a YAML syntax error rather than part of the command.
+      - run: |
+          "${RUNNER_TEMP}/taplo" fmt --check --diff

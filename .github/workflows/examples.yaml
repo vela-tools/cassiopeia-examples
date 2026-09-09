@@ -1,0 +1,178 @@
+name: examples
+
+on:
+  push:
+    branches: [main]
+    # Prose is checked against the descriptors by the pages workflow, so an edit to a page alone
+    # does not need the datasets downloaded and the runs repeated.
+    paths:
+      - "examples/**"
+      - "!examples/**/*.md"
+      - "tools/runner/**"
+      - ".github/workflows/examples.yaml"
+  pull_request:
+    paths:
+      - "examples/**"
+      - "!examples/**/*.md"
+      - "tools/runner/**"
+      - ".github/workflows/examples.yaml"
+  schedule:
+    # The datasets are fetched from their publishers, so an example can break without a commit here.
+    # A weekly run catches a moved file or a changed column.
+    - cron: "0 5 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: examples-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # The runner is the same binary for every example, so it is compiled once here rather than in each
+  # of the thirty-one legs below. A leg then needs no Rust toolchain and no build at all.
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Build the runner
+        run: cargo build --release --locked
+      - name: Keep the binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: runner
+          path: target/release/cassiopeia-example-runner
+          retention-days: 1
+
+  list:
+    name: list
+    needs: build
+    runs-on: ubuntu-latest
+    outputs:
+      examples: ${{ steps.list.outputs.examples }}
+    steps:
+      # The runner finds the examples by walking up from the working directory, so the tree is still
+      # what it reads; only the compiler is gone.
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/example-runner
+      - id: list
+        name: Collect the examples
+        run: echo "examples=$(./cassiopeia-example-runner list --matrix)" >> "$GITHUB_OUTPUT"
+
+  run:
+    name: ${{ matrix.example }}
+    needs: [build, list]
+    if: needs.list.outputs.examples != '[]'
+    runs-on: ubuntu-latest
+    # The scheduling example polls for seven minutes before it is interrupted, and the broker
+    # examples start a compose stack first, so the leg needs more room than a mapping alone.
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        example: ${{ fromJSON(needs.list.outputs.examples) }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/example-runner
+      # The container image carries the ecCodes library, so mapping GRIB needs nothing here. The
+      # GRIB1 example's preparation step runs on the host, and it trims the file with grib_copy.
+      - uses: ./.github/actions/native-dependencies
+      - name: Pull the Cassiopeia image
+        run: docker pull ghcr.io/vela-tools/cassiopeia:latest
+      - name: Run the example
+        run: ./cassiopeia-example-runner run "${{ matrix.example }}" --runtime docker --drift-report drift.json
+      # A leg that failed for another reason still learned whatever it got as far as checking, and
+      # the drift job would otherwise see nothing from it at all.
+      - name: Keep what drifted
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: drift-${{ matrix.example }}
+          path: drift.json
+          if-no-files-found: ignore
+
+  drift:
+    name: drift
+    needs: run
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Collect what every example reported
+        uses: actions/download-artifact@v4
+        with:
+          pattern: drift-*
+          path: drift
+          merge-multiple: false
+      - name: Merge the reports
+        id: merge
+        run: |
+          # A run whose legs all failed before they verified anything leaves nothing to download,
+          # which is an empty report rather than an error.
+          shopt -s nullglob
+          reports=(drift/*/drift.json)
+          if [ ${#reports[@]} -eq 0 ]; then
+            echo '[]' > merged.json
+          else
+            jq -s 'add // []' "${reports[@]}" > merged.json
+          fi
+          echo "count=$(jq 'length' merged.json)" >> "$GITHUB_OUTPUT"
+      - name: Write the run summary
+        run: |
+          {
+            echo "## Dataset drift"
+            echo
+            if [ "$(jq 'length' merged.json)" -eq 0 ]; then
+              echo "Every example matched what its descriptor declares."
+            else
+              echo "| Example | Checked | What moved |"
+              echo "| --- | --- | --- |"
+              jq -r '.[] | "| \(.example) | \(.target | to_entries[0].value) | \(if .kind.kind == "entity-count" then "\(.kind.found) entities, the descriptor declares \(.kind.declared)" else "no longer holds \(.kind.declared)" end) |"' merged.json
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+      # One issue, found by its label rather than by anything carried between runs, so a re-run that
+      # finds nothing closes what the run before it opened.
+      - name: Reconcile the tracking issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          # The job never checks the repository out, so gh is told which one it is working on.
+          GH_REPO: ${{ github.repository }}
+          COUNT: ${{ steps.merge.outputs.count }}
+        run: |
+          gh label create dataset-drift \
+            --description "A live dataset has moved under a working example" \
+            --color FBCA04 \
+            --force
+          open=$(gh issue list --label dataset-drift --state open --json number --jq '.[0].number // empty')
+
+          if [ "$COUNT" -eq 0 ]; then
+            if [ -n "$open" ]; then
+              gh issue close "$open" --comment "Every example now matches what its descriptor declares."
+            fi
+            exit 0
+          fi
+
+          {
+            echo "The examples below still pass. Their sources have moved, and the descriptors say something the runs no longer find."
+            echo
+            echo "| Example | Checked | What moved |"
+            echo "| --- | --- | --- |"
+            jq -r '.[] | "| \(.example) | \(.target | to_entries[0].value) | \(if .kind.kind == "entity-count" then "\(.kind.found) entities, the descriptor declares \(.kind.declared)" else "no longer holds \(.kind.declared)" end) |"' merged.json
+            echo
+            echo "Maintained by the [examples workflow](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}); it closes this issue once nothing drifts."
+          } > body.md
+
+          if [ -n "$open" ]; then
+            gh issue edit "$open" --body-file body.md
+          else
+            gh issue create \
+              --title "Dataset drift" \
+              --label dataset-drift \
+              --body-file body.md
+          fi

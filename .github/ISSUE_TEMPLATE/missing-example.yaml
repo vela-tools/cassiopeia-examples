@@ -1,0 +1,25 @@
+name: Missing example
+description: A source format or mapping technique that no example covers.
+labels: ["examples"]
+body:
+  - type: textarea
+    id: data
+    attributes:
+      label: The data you are mapping
+      description: The source format and the shape of one record. A public dataset that shows the problem is worth more than a description of it.
+    validations:
+      required: true
+  - type: textarea
+    id: obstacle
+    attributes:
+      label: What you could not work out from the existing examples
+      description: Name the examples and guides you read, and where they stopped being enough.
+    validations:
+      required: true
+  - type: textarea
+    id: entities
+    attributes:
+      label: The entities you need
+      description: The NGSI-LD model, and any attribute whose shape is the difficult part.
+    validations:
+      required: false

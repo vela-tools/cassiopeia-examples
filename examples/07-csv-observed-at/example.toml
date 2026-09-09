@@ -1,0 +1,36 @@
+[example]
+title = "Marking CSV rows as observations with observedAt"
+label = "observedAt observations"
+summary = "Keep monthly measurements under one entity ID with observedAt."
+formats = ["csv"]
+models = ["GoldPriceObserved"]
+
+[requirements]
+smart-data-models = false
+
+[run]
+args = [
+    "map",
+    "--input",
+    "data/gold.csv",
+    "--mapping",
+    "gold.json5",
+    "--type",
+    "csv",
+    "--output",
+    "out",
+    "--context",
+    "none",
+]
+
+[[datasets]]
+file = "data/gold.csv"
+url = "https://raw.githubusercontent.com/datasets/gold-prices/main/data/monthly-processed.csv"
+source = "datasets/gold-prices"
+license = "ODC-PDDL-1.0"
+volatility = "live"
+
+[[outputs]]
+file = "out/GoldPriceObserved.json"
+entities = 1
+contains = ["urn:ngsi-ld:GoldPriceObserved:gold"]
