@@ -42,7 +42,7 @@ jobs:
       - name: Build the runner
         run: cargo build --release --locked
       - name: Keep the binary
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: runner
           path: target/release/cassiopeia-example-runner
@@ -89,7 +89,7 @@ jobs:
       # the drift job would otherwise see nothing from it at all.
       - name: Keep what drifted
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: drift-${{ matrix.example }}
           path: drift.json
