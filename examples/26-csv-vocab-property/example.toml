@@ -25,12 +25,12 @@ args = [
 
 [[datasets]]
 file = "data/amenities.csv"
-url = "https://overpass-api.de/api/interpreter"
+url = "https://overpass.kumi.systems/api/interpreter"
 source = "OpenStreetMap via Overpass"
 license = "ODbL-1.0"
 volatility = "live"
 command = '''
-curl -sS --fail --retry 3 --retry-delay 5 --retry-all-errors "https://overpass-api.de/api/interpreter" \
+curl -sS --fail --retry 3 --retry-delay 5 --retry-all-errors "https://overpass.kumi.systems/api/interpreter" \
     --data-urlencode 'data=[out:csv(::type,::id,::lat,::lon,amenity,name)][timeout:180];area["ISO3166-1"="SI"][admin_level=2]->.si;nwr[amenity~"^(charging_station|bicycle_rental|bicycle_parking|car_sharing|fuel|taxi)$"](area.si);out center;' \
     -o data/amenities.csv
 '''
