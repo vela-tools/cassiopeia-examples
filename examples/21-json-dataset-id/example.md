@@ -90,7 +90,7 @@ docker run --rm \
     --user "$(id -u):$(id -g)" \
     --volume "$PWD:/data" \
     --workdir /data \
-    ghcr.io/vela-tools/cassiopeia:v1.0.3 \
+    ghcr.io/vela-tools/cassiopeia:v1.1.0 \
     map \
     --manifest manifest.json5
 ```
