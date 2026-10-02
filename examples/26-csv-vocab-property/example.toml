@@ -25,12 +25,15 @@ args = [
 
 [[datasets]]
 file = "data/amenities.csv"
-url = "https://overpass.kumi.systems/api/interpreter"
+url = "https://overpass-api.de/api/interpreter"
 source = "OpenStreetMap via Overpass"
 license = "ODbL-1.0"
 volatility = "live"
+# The main Overpass instance answers 406 Not Acceptable to curl's default User-Agent, so the request
+# names the project it comes from.
 command = '''
-curl -sS --fail --retry 3 --retry-delay 5 --retry-all-errors "https://overpass.kumi.systems/api/interpreter" \
+curl -sS --fail --retry 3 --retry-delay 5 --retry-all-errors "https://overpass-api.de/api/interpreter" \
+    --user-agent "cassiopeia-examples (+https://github.com/vela-tools/cassiopeia-examples)" \
     --data-urlencode 'data=[out:csv(::type,::id,::lat,::lon,amenity,name)][timeout:180];area["ISO3166-1"="SI"][admin_level=2]->.si;nwr[amenity~"^(charging_station|bicycle_rental|bicycle_parking|car_sharing|fuel|taxi)$"](area.si);out center;' \
     -o data/amenities.csv
 '''
