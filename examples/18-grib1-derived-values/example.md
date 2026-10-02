@@ -17,7 +17,7 @@ The nowcast files roll over hourly. The commands fetch the newest archive, unpac
 BASE="https://meteo.arso.gov.si/uploads/probase/www/nowcast/data"
 LATEST=$(curl -sS --fail --retry 3 --retry-delay 5 --retry-all-errors "$BASE/" | grep -oE 'nowcast_[0-9]{8}-[0-9]{4}\.zip' | head -1)
 curl -sS --fail --retry 3 --retry-delay 5 --retry-all-errors "$BASE/$LATEST" -o data/nowcast.zip
-unzip -p data/nowcast.zip > data/nowcast_full.grb && rm data/nowcast.zip
+unzip -p data/nowcast.zip > data/nowcast_full.grb
 grib_copy -w stepRange=0 data/nowcast_full.grb data/nowcast.grb && rm data/nowcast_full.grb
 ```
 

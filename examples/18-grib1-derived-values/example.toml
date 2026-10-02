@@ -25,9 +25,11 @@ args = [
     "fail-when-schema",
 ]
 
+# The archive is the declared dataset, so it stays: a run that reuses the download with
+# --skip-fetch prepares from it again.
 [[preparation]]
 description = "unpacking the archive and keeping the analysis step"
-command = "cd data && unzip -p nowcast.zip > nowcast_full.grb && rm nowcast.zip && grib_copy -w stepRange=0 nowcast_full.grb nowcast.grb && rm nowcast_full.grb"
+command = "cd data && unzip -p nowcast.zip > nowcast_full.grb && grib_copy -w stepRange=0 nowcast_full.grb nowcast.grb && rm nowcast_full.grb"
 
 [[datasets]]
 file = "data/nowcast.zip"
