@@ -134,7 +134,7 @@ The manifest supplies the remote source, broker destination, and schedule:
 }
 ```
 
-The `source` is an `https` URL, so Cassiopeia fetches it on every run. The output upserts to the broker at `localhost:9090`, using Scorpio as in the [tropical-cyclone example](../22-csv-broker-temporal/example.md). Because `AirQualityObserved` is published, `context: "default"` resolves its `@context` from the downloaded catalog.
+The `source` is an `https` URL, so Cassiopeia fetches it on every run. The output upserts to the broker at `localhost:9090`, the same Scorpio setup as in the [tropical-cyclone example](../22-csv-broker-temporal/example.md). Because `AirQualityObserved` is published, `context: "default"` resolves its `@context` from the downloaded catalog.
 
 The `schedule` block controls the repeated runs:
 
@@ -145,6 +145,14 @@ The `schedule` block controls the repeated runs:
 The top-level **`onFailure`** field, outside `schedule`, controls what happens after retries are exhausted. The default `abort` would stop a long-lived poller after the first failed request, so this manifest uses `onFailure: "ignore"`: the failure is logged, polling continues, and the command exits zero. `continue` also keeps polling but exits non-zero when a bounded schedule ends. See [Handle failures](https://vela-tools.github.io/cassiopeia/docs/guides/running#handle-failures) for the full policy.
 
 The first run starts immediately; later runs wait for the schedule trigger. Add `repeat` to limit the number of runs or `duration` to limit its lifetime. With neither, the process runs until interrupted.
+
+## Start the broker
+
+The [docker-compose.yml](docker-compose.yml) starts [Scorpio](https://github.com/ScorpioBroker/ScorpioBroker), an open-source NGSI-LD broker backed by PostGIS. It serves the API on port 9090, the address the manifest sends to. Start it and wait for it to become healthy:
+
+```bash
+docker compose up -d
+```
 
 ## Run it
 
@@ -175,6 +183,12 @@ cargo run -- run 23 --runtime docker
 ```
 
 The first poll fetches, maps, validates, and upserts immediately. The command then stays alive and logs each later poll. Stop it with Ctrl-C. To test the schedule without a broker, use `target: "file"` and a `directory`; each run will replace the output with the latest snapshot.
+
+When you are done, stop the broker and discard its data:
+
+```bash
+docker compose down -v
+```
 
 ## What you get
 

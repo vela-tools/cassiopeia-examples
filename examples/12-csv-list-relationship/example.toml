@@ -17,11 +17,11 @@ args = [
 
 [[preparation]]
 description = "collapsing the country list to one row per country"
-command = "awk -f ../11-csv-relationship-graph/openflights-csv.awk -f ../11-csv-relationship-graph/collapse-countries.awk data/countries.dat > data/countries.csv"
+command = "awk -f openflights-csv.awk -f collapse-countries.awk data/countries.dat > data/countries.csv"
 
 [[preparation]]
 description = "collapsing the aircraft list to one row per IATA code"
-command = "awk -f ../11-csv-relationship-graph/openflights-csv.awk -f ../11-csv-relationship-graph/collapse-planes.awk data/planes.dat > data/aircraft-models.csv"
+command = "awk -f openflights-csv.awk -f collapse-planes.awk data/planes.dat > data/aircraft-models.csv"
 
 [[datasets]]
 file = "data/countries.dat"

@@ -10,8 +10,8 @@ use url::Url;
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "kebab-case", deny_unknown_fields)]
 pub struct ContextBroker {
-    /// The compose file that starts the broker, relative to the example directory. Examples that
-    /// need the same broker point at one stack rather than each shipping a copy of it.
+    /// The compose file that starts the broker, relative to the example directory. Each example
+    /// ships its own copy, so the example stays self-contained.
     pub compose: PathBuf,
 
     /// Where the broker answers, matching the URL the example's manifest delivers to.
@@ -45,16 +45,6 @@ mod tests {
         assert_eq!(
             declared.map(|declared| (declared.compose, declared.url.to_string())),
             Some((PathBuf::from("docker-compose.yml"), "http://localhost:9090/".to_owned()))
-        );
-    }
-
-    #[test]
-    fn a_stack_shared_with_another_example_is_named_by_a_relative_path() {
-        let declared = broker("compose = \"../22-csv-broker-temporal/docker-compose.yml\"\nurl = \"http://localhost:9090/\"\n");
-
-        assert_eq!(
-            declared.map(|declared| declared.compose),
-            Some(PathBuf::from("../22-csv-broker-temporal/docker-compose.yml"))
         );
     }
 

@@ -28,6 +28,8 @@ examples/24-json-list-property/
 
 Everything else is generated. `data/` holds the downloaded dataset and `out/` holds the entities; git ignores both. Never commit either, and never commit a dataset in any other form. Filenames are kebab-case.
 
+An example is self-contained: every file its run, its preparation steps, and its page's commands use lives in its own directory. A reader who copies that one directory has everything needed to follow the page. When two examples need the same mapping, script, or compose file, each keeps its own copy. That duplication is deliberate, and the copies change together. Links from the page to sibling examples are fine, since they point the reader to more context rather than to a file the run needs.
+
 An example directory holds no run script: the command lives in the descriptor, and the runner executes it. A filter is a different thing. Where a download has to be reshaped before Cassiopeia can read it, a `[[preparation]]` block names the command that does the reshaping, and a filter too long for one line goes beside the mapping in a file of its own, as `flatten.awk` does in example 22.
 
 ## example.toml
@@ -108,9 +110,9 @@ An example that delivers to a context broker declares where the broker is and ho
 
 ```toml
 [context-broker]
-# The compose file, relative to the example directory. Examples that need the same broker point at
-# one stack rather than each shipping a copy of it.
-compose = "../22-csv-broker-temporal/docker-compose.yml"
+# The compose file, relative to the example directory. Each example ships its own copy, even when
+# another example starts the same stack.
+compose = "docker-compose.yml"
 # Where the broker answers, matching the URL the manifest delivers to.
 url = "http://localhost:9090/"
 # The `@context` the run's entities were written under. Only an example that asserts on a whole

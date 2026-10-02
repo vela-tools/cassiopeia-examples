@@ -8,10 +8,10 @@ models = ["AirQualityObserved"]
 [requirements]
 smart-data-models = true
 
-# The same stack the tropical-cyclone example starts, which is what this example's page tells a
-# reader to use rather than running a second broker beside it.
+# The page tells a reader to start this directory's own stack, the same Scorpio setup the
+# tropical-cyclone example uses, so the example runs without any other example beside it.
 [context-broker]
-compose = "../22-csv-broker-temporal/docker-compose.yml"
+compose = "docker-compose.yml"
 url = "http://localhost:9090/"
 # The manifest writes with context "default", which the catalog resolves to the model's own
 # repository context. A broker expands the type in a query against whichever context the query
