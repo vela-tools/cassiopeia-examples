@@ -14,7 +14,7 @@ curl --fail --location --output data/nyc-cycling.kml "https://www.google.com/map
 
 Replace the `mid` with your own public map's ID and the rest of the example works the same way.
 
-That map belongs to somebody else, and this example leans on more of it than most examples lean on their source: the manifest binds four folder names exactly as the owner wrote them, and the counts below include an accident of the data, the eight placemarks in `Where to Get Bikes` that collapse to five entities because three shops are pinned twice under the same name. Nothing here can stop the owner renaming a layer or adding a stop. If the counts stop matching, that is the map having changed rather than the mapping, and the answer is to point `mid` at another public map.
+That map belongs to somebody else, and this example leans on more of it than most examples lean on their source: the manifest binds four folder names exactly as the owner wrote them, and the counts below are the placemarks each layer held when this page was written. Nothing here can stop the owner renaming a layer or adding a stop. If the counts stop matching, that is the map having changed rather than the mapping, and the answer is to point `mid` at another public map.
 
 ## The record shape
 
@@ -23,7 +23,7 @@ The file holds five folders. Four contain point placemarks that this example map
 | Folder | What it holds | Mapped to |
 | --- | --- | --- |
 | `Citi Bike Stations` | 14 docking stations | `CitiBikeStation` |
-| `Where to Get Bikes` | 8 placemarks for 5 rental shops | `BikeRentalShop` |
+| `Where to Get Bikes` | 8 rental-shop branches | `BikeRentalShop` |
 | `Places to Stop` | sights along the way | `Sightseeing` |
 | `Restrooms` | public restrooms | `PublicRestroom` |
 | `Directions from the route` | a route line | _(unmapped)_ |
@@ -84,7 +84,16 @@ attributes: {
 },
 ```
 
-The rental and sight mappings read name and location directly. One rental shop appears twice under the same name, so using the name as its identity merges the two placemarks into one entity.
+The sight mapping reads name and location directly. The rental mapping cannot key on the name alone: the owner pinned three shops at two branches each under the same name, and a name-only identity would merge each pair into one entity at one of its two locations. It appends the geohash of the placemark's point instead, the same suffix that [keeping same-named entities apart](../02-json-id-collision/example.md) uses for cities:
+
+```json5
+// rental.json5, "Bike Rent NYC" at two branches becomes two entities
+identity: {
+    entityName: "{{ where_to_get_bikes.properties.name | trim | clean }}-{{ geohash(lat=where_to_get_bikes.geometry.coordinates[1], lon=where_to_get_bikes.geometry.coordinates[0]) }}",
+},
+```
+
+A placemark's point has the GeoJSON shape, longitude first, so `coordinates[1]` is the latitude and `coordinates[0]` the longitude.
 
 ## Run it
 
@@ -116,7 +125,7 @@ The run writes four files, one per bound folder:
 
 ```text
 CitiBikeStation.json   14 entities
-BikeRentalShop.json     5 entities
+BikeRentalShop.json     8 entities
 Sightseeing.json        7 entities
 PublicRestroom.json     7 entities
 ```
@@ -146,7 +155,7 @@ Here is one entity from each mapped folder, all produced from the same file:
 }
 
 {
-    "id": "urn:ngsi-ld:BikeRentalShop:BikeRentNYC",
+    "id": "urn:ngsi-ld:BikeRentalShop:BikeRentNYC-dr5regq39",
     "type": "BikeRentalShop",
     "name": {
         "type": "Property",

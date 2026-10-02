@@ -1,10 +1,11 @@
 {
     version: "v4",
     dataModel: "BikeRentalShop",
-    // The "Where to Get Bikes" folder becomes the `where_to_get_bikes` namespace. Two placemarks share
-    // a shop name, so keying the entity on the name merges them into one rental shop.
+    // The "Where to Get Bikes" folder becomes the `where_to_get_bikes` namespace. Several shops are
+    // pinned at more than one branch under the same name, so the name alone would merge the branches
+    // into one entity; the geohash of each placemark's point keeps every branch apart.
     identity: {
-        entityName: "{{ where_to_get_bikes.properties.name | trim | clean }}",
+        entityName: "{{ where_to_get_bikes.properties.name | trim | clean }}-{{ geohash(lat=where_to_get_bikes.geometry.coordinates[1], lon=where_to_get_bikes.geometry.coordinates[0]) }}",
     },
     attributes: {
         name: {

@@ -26,8 +26,8 @@ volatility = "live"
 
 [[outputs]]
 file = "out/BikeRentalShop.json"
-entities = 5
-contains = ["urn:ngsi-ld:BikeRentalShop:BikeRentNYC"]
+entities = 8
+contains = ["urn:ngsi-ld:BikeRentalShop:BikeRentNYC-dr5regq39"]
 
 [[outputs]]
 file = "out/CitiBikeStation.json"
