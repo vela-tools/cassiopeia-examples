@@ -59,6 +59,20 @@ A GRIB file stores one field per parameter. Cassiopeia groups fields with the sa
 
 Templates read the keys directly, for example `{{ dewpoint }}`, without `this[...]`. Temperature, wind, and pressure are measured at different levels, so they arrive as separate records and a shared identity merges them into one entity, as in the [GRIB1 example](../18-grib1-derived-values/example.md#merging-two-levels-into-one-observation). The `{% if ... is defined %}` guard on each attribute ensures that a record contributes only fields it contains.
 
+## One entity per grid cell
+
+The identity has to be the same for every record of a cell and different for every cell. On a regular grid, the cell's own coordinates already are that key, so the mapping uses them, rounded to whole degrees:
+
+```json5
+identity: {
+    entityName: "{{ latitude | round | int }}_{{ longitude | round | int }}",
+},
+```
+
+The rounding is needed because a coordinate arrives as `46.0` and an identifier does not keep the dot, so `46.0` would become `460`. `round | int` writes `46`, so the cell over Slovenia quoted below is `urn:ngsi-ld:WeatherObserved:46_14`. Whole degrees are exact here because the grid is one degree; a finer grid would need the fraction kept in the key.
+
+The grid runs from latitude 90 down to -90, so both poles are rows of their own. Keying on the coordinates keeps them apart, which a geohash, the location key of the [earlier examples](../02-json-id-collision/example.md), does not: it gives latitude 90 the same code as latitude -90.
+
 ## Deriving wind from components
 
 The model stores wind as eastward (`u`) and northward (`v`) components. `wind_speed` calculates the magnitude, and `wind_direction` calculates the meteorological bearing, the direction the wind blows _from_:
@@ -149,7 +163,7 @@ cargo run -- run 19
 cargo run -- run 19 --runtime docker
 ```
 
-This writes `out/WeatherObserved.json`, 64,800 `WeatherObserved` entities, one per cell of the one-degree global grid, each carrying all eight derived quantities.
+This writes `out/WeatherObserved.json`, 65,160 `WeatherObserved` entities, one per cell of the one-degree global grid (360 longitudes by 181 latitudes, both poles included), each carrying all eight derived quantities.
 
 ## Read the result
 
@@ -157,7 +171,7 @@ One cell, over Slovenia:
 
 ```json
 {
-    "id": "urn:ngsi-ld:WeatherObserved:u21vww43r",
+    "id": "urn:ngsi-ld:WeatherObserved:46_14",
     "type": "WeatherObserved",
     "location": {
         "type": "GeoProperty",

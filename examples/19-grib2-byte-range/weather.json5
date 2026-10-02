@@ -1,8 +1,13 @@
 {
     version: "v4",
     dataModel: "dataModel.Weather/WeatherObserved",
+    // A regular grid already has a key for each cell: its own coordinates. Every record of one cell
+    // shares them, so the levels merge into one entity. They are rounded to whole degrees because a
+    // coordinate arrives as 46.0 and the dot is not kept in an identifier, which would turn 46.0 into
+    // 460. A geohash would not do here: it gives latitude 90 the same code as latitude -90, and this
+    // grid holds both poles.
     identity: {
-        entityName: "{{ geohash(lat=latitude, lon=longitude) }}",
+        entityName: "{{ latitude | round | int }}_{{ longitude | round | int }}",
     },
     attributes: {
         location: {

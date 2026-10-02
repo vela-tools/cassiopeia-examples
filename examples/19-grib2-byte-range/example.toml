@@ -51,5 +51,10 @@ while read range; do curl -sS --fail --retry 3 --retry-delay 5 --retry-all-error
 # the forecast run, so it holds for every dated prefix in the archive.
 [[outputs]]
 file = "out/WeatherObserved.json"
-entities = 64800
-contains = ["urn:ngsi-ld:WeatherObserved:u21vww43r"]
+entities = 65160
+# The cell the page quotes, and both poles, which a shared key would merge into one entity.
+contains = [
+    "urn:ngsi-ld:WeatherObserved:46_14",
+    "urn:ngsi-ld:WeatherObserved:90_0",
+    "urn:ngsi-ld:WeatherObserved:-90_0",
+]
