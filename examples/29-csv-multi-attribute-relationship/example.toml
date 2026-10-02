@@ -15,6 +15,14 @@ args = [
     "manifest.json5",
 ]
 
+[[preparation]]
+description = "collapsing the country list to one row per country"
+command = "awk -f ../11-csv-relationship-graph/openflights-csv.awk -f ../11-csv-relationship-graph/collapse-countries.awk data/countries.dat > data/countries.csv"
+
+[[preparation]]
+description = "collapsing the aircraft list to one row per IATA code"
+command = "awk -f ../11-csv-relationship-graph/openflights-csv.awk -f ../11-csv-relationship-graph/collapse-planes.awk data/planes.dat > data/aircraft-models.csv"
+
 [[datasets]]
 file = "data/countries.dat"
 url = "https://raw.githubusercontent.com/jpatokal/openflights/master/data/countries.dat"

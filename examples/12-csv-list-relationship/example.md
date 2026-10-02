@@ -16,6 +16,13 @@ curl --fail --location --output data/routes.dat https://raw.githubusercontent.co
 cassiopeia sdm download
 ```
 
+The country and aircraft lists repeat some entities. Collapse them to one row per entity with example 11's scripts; its [one row per entity](../11-csv-relationship-graph/example.md#one-row-per-entity) section explains why:
+
+```bash
+awk -f ../11-csv-relationship-graph/openflights-csv.awk -f ../11-csv-relationship-graph/collapse-countries.awk data/countries.dat > data/countries.csv
+awk -f ../11-csv-relationship-graph/openflights-csv.awk -f ../11-csv-relationship-graph/collapse-planes.awk data/planes.dat > data/aircraft-models.csv
+```
+
 ## What changes
 
 Only the route mapping's aircraft attribute changes. The country, aircraft-model, airport, and airline mappings, along with the other three route relationships, are unchanged.

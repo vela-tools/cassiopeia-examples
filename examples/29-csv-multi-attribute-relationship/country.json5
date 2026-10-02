@@ -5,7 +5,8 @@
     dataModel: "Country",
     identity: {
         // The country name is the identity. An airport or airline that uses the same name therefore
-        // resolves to the same URN.
+        // resolves to the same URN. Rows that share a name were merged by collapse-countries.awk, so
+        // each row has its own id.
         entityName: "{{ this[0] }}",
     },
     attributes: {
@@ -19,10 +20,13 @@
             type: "Property",
             transformation: "string",
         },
+        // The merged row holds every DAFIF code of the country, separated by spaces. Split them into
+        // a list, which keeps one shape whether a country has one code or several. A country with no
+        // code has no dafifCode.
         dafifCode: {
-            source: "{% if this[2] %}{{ this[2] }}{% endif %}",
+            source: "{% if this[2] %}{{ this[2] | split(pat=' ') }}{% endif %}",
             type: "Property",
-            transformation: "string",
+            transformation: "array",
         },
     },
 }

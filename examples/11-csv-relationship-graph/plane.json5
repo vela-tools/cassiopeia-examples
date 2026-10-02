@@ -3,7 +3,9 @@
     dataModel: "dataModel.Aeronautics/AircraftModel",
     identity: {
         // The IATA code identifies the model, and is what a route's equipment list references. A few
-        // models carry no IATA code, so the ICAO code is the fallback identity for those.
+        // models carry no IATA code, so the ICAO code is the fallback identity for those. The source
+        // lists several models under some IATA codes; collapse-planes.awk has already merged those
+        // into one row per code, so every row here mints a distinct id.
         entityName: "{% if this[1] %}{{ this[1] }}{% else %}{{ this[2] }}{% endif %}",
     },
     attributes: {
@@ -19,7 +21,8 @@
             type: "Property",
             transformation: "string",
         },
-        // The ICAO code is only kept when it fits the model's pattern; several entries do not.
+        // The ICAO code is only kept when it fits the model's pattern; several entries do not, and a
+        // merged row whose models disagree on their ICAO code carries none.
         codeICAO: {
             source: "{% if this[2] is string and this[2] is matching(pat='^[A-Z][A-Z0-9]{3}$') %}{{ this[2] }}{% endif %}",
             type: "Property",

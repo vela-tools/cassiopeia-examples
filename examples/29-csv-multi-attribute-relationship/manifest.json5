@@ -1,13 +1,15 @@
 {
     version: "v1",
     inputs: [
+        // The country and aircraft lists are read in their collapsed form, one row per entity id,
+        // which the preparation step writes beside the downloads.
         {
-            source: "data/countries.dat",
+            source: "data/countries.csv",
             mapping: "country.json5",
             format: "csv",
         },
         {
-            source: "data/planes.dat",
+            source: "data/aircraft-models.csv",
             mapping: "plane.json5",
             format: "csv",
         },

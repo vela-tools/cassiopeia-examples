@@ -1,6 +1,6 @@
 # Building a CSV relationship graph across five sources
 
-The [airport and airline example](../09-csv-manifest/example.md) becomes a connected graph here. Five OpenFlights files provide countries, aircraft models, airports, airlines, and routes. Routes point to an airline, two airports, and an aircraft model; airports and airlines point to countries. Four types use published Smart Data Models, while `Country` is a custom relationship target. One manifest builds the graph.
+The [airport and airline example](../09-csv-manifest/example.md) becomes a connected graph here. Five OpenFlights files provide countries, aircraft models, airports, airlines, and routes. Routes point to an airline, two airports, and an aircraft model; airports and airlines point to countries. Four types use published Smart Data Models, while `Country` is a custom relationship target. Two of the lists repeat some entities, so a short awk step collapses them to one row per entity first. One manifest then builds the graph.
 
 ## Get the data
 
@@ -21,6 +21,43 @@ Four of the models are published Smart Data Models. Download the catalog once:
 ```bash
 cassiopeia sdm download
 ```
+
+## One row per entity
+
+Two of the files list some entities more than once. Routes name their aircraft by IATA code, so the aircraft mapping keys each `AircraftModel` on that code, but one IATA code can cover several rows of `planes.dat`: `CN1` stands for four Cessna types, and `E7W` for both wing variants of the Embraer 175. Airports name their country as text, so the country mapping keys each `Country` on its name, but `countries.dat` has one row per DAFIF code rather than per country: Palestine appears once as `GZ` and once as `WE`.
+
+Rows that resolve to the same ID merge into one entity, as the [ID collision example](../02-json-id-collision/example.md) shows. Where their values disagree, only one row's values survive: the `E7W` entity would describe either the long-wing or the short-wing model, and Palestine would keep one DAFIF code and lose the other.
+
+Two small awk scripts therefore collapse both lists to one row per entity ID before mapping. They share a CSV reader, [openflights-csv.awk](openflights-csv.awk):
+
+```bash
+awk -f openflights-csv.awk -f collapse-countries.awk data/countries.dat > data/countries.csv
+awk -f openflights-csv.awk -f collapse-planes.awk data/planes.dat > data/aircraft-models.csv
+```
+
+[collapse-planes.awk](collapse-planes.awk) merges the rows that share an IATA code, and passes a row without one through unchanged. The merged name lists every model the code covers, separated by semicolons because the names themselves already use slashes. The script keeps the ICAO code only when the merged rows agree on one. `E75L` and `E75S` cannot both be the ICAO code of `E7W`, so these two rows:
+
+```text
+"Embraer 175 (long wing)","E7W","E75L"
+"Embraer 175 (short wing)","E7W","E75S"
+```
+
+become one row with no ICAO code:
+
+```text
+"Embraer 175 (long wing); Embraer 175 (short wing)","E7W",\N
+```
+
+[collapse-countries.awk](collapse-countries.awk) merges the rows that share a name and puts all of their DAFIF codes in one column, separated by spaces:
+
+```text
+"Palestine","PS","GZ WE"
+"United Kingdom","GB","UK"
+```
+
+The rows of one country should agree on its ISO code. If a later version of the list gives a country two, the script stops with an error instead of silently keeping one of them.
+
+The 246 aircraft rows become 232 models and the 261 country rows become 259 countries. The other three files need no preparation: each of their rows already has an ID of its own.
 
 ## The graph
 
@@ -76,7 +113,7 @@ inCountry: {
 },
 ```
 
-An airport in the United Kingdom points to `urn:ngsi-ld:Country:UnitedKingdom`, the ID produced for the United Kingdom row. A few names differ between the two files; those links are valid URNs, but no country entity matches them.
+An airport in the United Kingdom points to `urn:ngsi-ld:Country:UnitedKingdom`, the ID produced for the United Kingdom row. A few names differ between the two files; those links are valid URNs, but no country entity matches them. The aircraft link has the same gap: routes use some IATA codes that the aircraft list does not have, such as `73H` and `CRJ`, so those routes point to an `AircraftModel` that the run never writes.
 
 ## The route mapping
 
@@ -128,6 +165,18 @@ The Flight model defines all four relationships, so the resulting entity validat
 
 The country list is the only source without a published model, so `country.json5` uses a plain `Country` type. The other four types have Smart Data Model schemas. In `fail-when-schema` mode, Cassiopeia validates those four types and writes `Country` without a schema check.
 
+A country can have several DAFIF codes, so `dafifCode` is always a list, even when it holds one code. That way, a consumer never has to check whether it got a string or an array. `split` turns the space-separated column into a list, and the `array` transformation keeps it as one:
+
+```json5
+dafifCode: {
+    source: "{% if this[2] %}{{ this[2] | split(pat=' ') }}{% endif %}",
+    type: "Property",
+    transformation: "array",
+},
+```
+
+The order of the codes carries no meaning, so this is a plain `Property` with an array value rather than a `ListProperty`. Bonaire, Saint Eustatius and Saba has no DAFIF code at all. The guard skips `split` for it, and its entity has no `dafifCode`.
+
 ## The manifest
 
 ```json5
@@ -135,12 +184,12 @@ The country list is the only source without a published model, so `country.json5
     version: "v1",
     inputs: [
         {
-            source: "data/countries.dat",
+            source: "data/countries.csv",
             mapping: "country.json5",
             format: "csv",
         },
         {
-            source: "data/planes.dat",
+            source: "data/aircraft-models.csv",
             mapping: "plane.json5",
             format: "csv",
         },
@@ -267,7 +316,26 @@ London Heathrow points at its country, which is a real entity in the same run:
     },
     "dafifCode": {
         "type": "Property",
-        "value": "UK"
+        "value": [
+            "UK"
+        ]
+    }
+}
+```
+
+The Embraer 175 is one `AircraftModel` for both wing variants that `E7W` covers. Its name lists both, and it has no `codeICAO` because the two variants have different ICAO codes:
+
+```json
+{
+    "id": "urn:ngsi-ld:AircraftModel:E7W",
+    "type": "AircraftModel",
+    "name": {
+        "type": "Property",
+        "value": "Embraer 175 (long wing); Embraer 175 (short wing)"
+    },
+    "codeIATA": {
+        "type": "Property",
+        "value": "E7W"
     }
 }
 ```

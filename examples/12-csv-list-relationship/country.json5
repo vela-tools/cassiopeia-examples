@@ -5,7 +5,8 @@
     dataModel: "Country",
     identity: {
         // The country name is the identity, so an airport or airline that names its country as text
-        // resolves to the same URN this mapping mints.
+        // resolves to the same URN this mapping mints. The source lists some countries once per DAFIF
+        // code; collapse-countries.awk has already merged those into one row per name.
         entityName: "{{ this[0] }}",
     },
     attributes: {
@@ -19,10 +20,13 @@
             type: "Property",
             transformation: "string",
         },
+        // Every DAFIF code the country has, always as a list so the shape does not depend on how many
+        // there are: ["UK"] for most, ["GZ", "WE"] for Palestine. The collapsed row holds the codes
+        // space-separated; a country with none is guarded off, so the attribute is left out.
         dafifCode: {
-            source: "{% if this[2] %}{{ this[2] }}{% endif %}",
+            source: "{% if this[2] %}{{ this[2] | split(pat=' ') }}{% endif %}",
             type: "Property",
-            transformation: "string",
+            transformation: "array",
         },
     },
 }
