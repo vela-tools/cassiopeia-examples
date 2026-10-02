@@ -1,6 +1,7 @@
 mod assertion_target;
 mod broker;
 mod broker_stack;
+mod cassiopeia_release;
 mod cli;
 mod command_line;
 mod command_line_token;
@@ -21,6 +22,7 @@ mod example_name;
 mod example_selector;
 mod execution;
 mod format_badge;
+mod installed_release;
 mod license_identifier;
 mod listing;
 mod output;
@@ -30,6 +32,7 @@ mod poll_schedule;
 mod preparation;
 mod program_name;
 mod publisher_name;
+mod release_pin;
 mod requirements;
 mod run;
 mod runtime;
@@ -42,6 +45,7 @@ mod volatility;
 
 use crate::{
     cli::{Cli, Task},
+    container_image::ContainerImage,
     docs_metadata::render as render_metadata,
     drift::DriftLog,
     drift_report::{DriftReportError, write as write_drift},
@@ -49,6 +53,7 @@ use crate::{
     execution::{DatasetPolicy, ExecutionError, OutputPolicy, fetch},
     listing::{ExampleEntry, ListingError, examples, names, repository_root, resolve, summary},
     page::{PageError, check},
+    release_pin::{ReleasePinError, pinned_release},
     verification::{VerificationError, require_assertions},
 };
 use clap::Parser;
@@ -94,9 +99,11 @@ fn dispatch(cli: Cli) -> Result<(), RunnerError> {
             drift_report,
         } => {
             let entry = resolve(&root, &example)?;
+            let release = pinned_release(&root)?;
+            let image = image.unwrap_or_else(|| ContainerImage::release(&release));
             let datasets = if skip_fetch { DatasetPolicy::Reuse } else { DatasetPolicy::Download };
             let outputs = if skip_verify { OutputPolicy::Trust } else { OutputPolicy::Verify };
-            let drift = execution::run(&entry, runtime, &image, datasets, outputs)?;
+            let drift = execution::run(&entry, runtime, &release, &image, datasets, outputs)?;
 
             report(&drift, drift_report.as_deref())
         }
@@ -108,10 +115,14 @@ fn dispatch(cli: Cli) -> Result<(), RunnerError> {
             report(&drift, None)
         }
 
-        Task::Check { example } => match example {
-            Some(wanted) => inspect(&resolve(&root, &wanted)?),
-            None => inspect_all(&examples(&root)?),
-        },
+        Task::Check { example } => {
+            let image = ContainerImage::release(&pinned_release(&root)?);
+
+            match example {
+                Some(wanted) => inspect(&resolve(&root, &wanted)?, &image),
+                None => inspect_all(&examples(&root)?, &image),
+            }
+        }
 
         Task::Index { write } => {
             let entries = examples(&root)?;
@@ -153,8 +164,8 @@ fn report(drift: &DriftLog, path: Option<&Path>) -> Result<(), RunnerError> {
 }
 
 /// Checks every example, and reports everything that is wrong rather than only the first thing.
-fn inspect_all(entries: &[ExampleEntry]) -> Result<(), RunnerError> {
-    let failures: Vec<RunnerError> = entries.iter().filter_map(|entry| inspect(entry).err()).collect();
+fn inspect_all(entries: &[ExampleEntry], image: &ContainerImage) -> Result<(), RunnerError> {
+    let failures: Vec<RunnerError> = entries.iter().filter_map(|entry| inspect(entry, image).err()).collect();
 
     if failures.is_empty() {
         Ok(())
@@ -163,9 +174,9 @@ fn inspect_all(entries: &[ExampleEntry]) -> Result<(), RunnerError> {
     }
 }
 
-/// Checks one example's page and the coverage of its assertions.
-fn inspect(entry: &ExampleEntry) -> Result<(), RunnerError> {
-    check(&entry.directory, &entry.descriptor)?;
+/// Checks one example's page against the pinned release's image, and the coverage of its assertions.
+fn inspect(entry: &ExampleEntry, image: &ContainerImage) -> Result<(), RunnerError> {
+    check(&entry.directory, &entry.descriptor, image)?;
 
     require_assertions(&entry.name, &entry.descriptor.outputs).map_err(RunnerError::Verification)
 }
@@ -176,6 +187,10 @@ enum RunnerError {
     /// The examples could not be found or read.
     #[error(transparent)]
     Listing(#[from] ListingError),
+
+    /// The pinned Cassiopeia release could not be read.
+    #[error(transparent)]
+    ReleasePin(#[from] ReleasePinError),
 
     /// An example could not be run.
     #[error(transparent)]
@@ -214,10 +229,12 @@ mod tests {
     use crate::{
         RunnerError,
         cli::{Cli, Task},
+        container_image::ContainerImage,
         dispatch,
         example_selector::ExampleSelector,
         inspect,
         listing::{examples, repository_root},
+        release_pin::pinned_release,
     };
     use std::str::FromStr;
 
@@ -230,10 +247,22 @@ mod tests {
     }
 
     #[test]
-    fn every_page_documents_the_run_its_descriptor_declares() {
-        let listed = repository_root().and_then(|root| examples(&root));
+    fn the_repository_pins_a_release() {
+        let root = repository_root().ok();
 
-        assert!(listed.is_ok_and(|entries| entries.iter().all(|entry| inspect(entry).is_ok())));
+        assert!(root.is_some_and(|root| pinned_release(&root).is_ok()));
+    }
+
+    #[test]
+    fn every_page_documents_the_run_its_descriptor_declares() {
+        let root = repository_root().ok();
+        let image = root
+            .as_deref()
+            .and_then(|root| pinned_release(root).ok())
+            .map(|release| ContainerImage::release(&release));
+        let listed = root.as_deref().and_then(|root| examples(root).ok());
+
+        assert!(matches!((image, listed), (Some(image), Some(entries)) if entries.iter().all(|entry| inspect(entry, &image).is_ok())));
     }
 
     #[test]
@@ -257,6 +286,7 @@ mod tests {
             Err(RunnerError::SeveralExamples { failures }) => !failures.is_empty(),
             Err(
                 RunnerError::Listing(_)
+                | RunnerError::ReleasePin(_)
                 | RunnerError::Execution(_)
                 | RunnerError::Verification(_)
                 | RunnerError::Page(_)

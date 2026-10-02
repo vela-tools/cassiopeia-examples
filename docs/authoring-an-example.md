@@ -169,7 +169,9 @@ The prose rules from the rest of the project apply: no emojis, one paragraph is 
 
 The two command blocks in the "Run it" section are generated from `[run] args`, and `cargo run -- check` fails when the page does not carry them verbatim. Write the descriptor first, run the check, and paste in whatever it says is missing.
 
-The container form follows from the same arguments: `--user` for Docker with the Podman difference stated in prose, `--volume "$PWD:/data"`, the schemas volume only when `smart-data-models = true`, `--workdir /data`, then the image and the arguments in the order the native command uses them. The check enforces all of that, so none of it has to be remembered.
+The container form follows from the same arguments: `--user` for Docker with the Podman difference stated in prose, `--volume "$PWD:/data"`, the schemas volume only when `smart-data-models = true`, `--workdir /data`, then the image of the release `cassiopeia-version` pins and the arguments in the order the native command uses them. The check enforces all of that, so none of it has to be remembered.
+
+Moving the repository to a new Cassiopeia release changes `cassiopeia-version` and the image tag in every page's container block, in one commit. The check fails on any page still naming the old tag, and the whole suite runs against the new release before that commit is tagged with the release's name.
 
 ## Before the example is finished
 

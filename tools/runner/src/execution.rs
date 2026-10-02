@@ -1,9 +1,11 @@
 use crate::{
     broker_stack::{BrokerStack, BrokerStackError},
+    cassiopeia_release::CassiopeiaRelease,
     command_line_token::{CommandLineToken, CommandLineTokenError},
     container_image::ContainerImage,
     dataset::{DatasetError, download_all},
     drift::DriftLog,
+    installed_release::{InstalledReleaseError, require_installed},
     listing::ExampleEntry,
     poll_schedule::PollSchedule,
     preparation::Preparation,
@@ -69,7 +71,20 @@ pub fn fetch(entry: &ExampleEntry) -> Result<(), ExecutionError> {
 ///
 /// Answers with whatever drifted rather than taking a sink for it, so the caller decides what a
 /// live source having moved is worth.
-pub fn run(entry: &ExampleEntry, runtime: Runtime, image: &ContainerImage, datasets: DatasetPolicy, outputs: OutputPolicy) -> Result<DriftLog, ExecutionError> {
+pub fn run(
+    entry: &ExampleEntry,
+    runtime: Runtime,
+    release: &CassiopeiaRelease,
+    image: &ContainerImage,
+    datasets: DatasetPolicy,
+    outputs: OutputPolicy,
+) -> Result<DriftLog, ExecutionError> {
+    // Checked before anything is downloaded, so a wrong binary costs nothing to find out about.
+    match runtime {
+        Runtime::Native => require_installed(release)?,
+        Runtime::Docker | Runtime::Podman => (),
+    }
+
     match datasets {
         DatasetPolicy::Download => fetch(entry)?,
         DatasetPolicy::Reuse => (),
@@ -244,6 +259,10 @@ pub enum ExecutionError {
     #[error(transparent)]
     SchemaCache(#[from] SchemaCacheError),
 
+    /// The Cassiopeia on the `PATH` is not the pinned release.
+    #[error(transparent)]
+    InstalledRelease(#[from] InstalledReleaseError),
+
     /// The broker the example delivers to could not be started.
     #[error(transparent)]
     Broker(#[from] BrokerStackError),
@@ -290,6 +309,7 @@ pub enum ExecutionError {
 #[cfg(test)]
 mod tests {
     use crate::{
+        cassiopeia_release::CassiopeiaRelease,
         container_image::ContainerImage,
         descriptor::Descriptor,
         example_name::ExampleName,
@@ -297,6 +317,7 @@ mod tests {
         listing::ExampleEntry,
         runtime::Runtime,
     };
+    use semver::Version;
     use tempfile::TempDir;
 
     /// An example whose preparation step fails before anything is invoked.
@@ -327,13 +348,17 @@ args = ["map"]
         })
     }
 
+    // A container run, because a native one first asks the host's cassiopeia for its release, and
+    // the host running the tests need not have one.
     #[test]
     fn a_preparation_step_that_fails_stops_the_run_with_its_exit_code() {
+        let release = CassiopeiaRelease::from(Version::new(1, 0, 0));
+        let image = ContainerImage::release(&release);
         let directory = TempDir::new().ok();
         let outcome = directory
             .as_ref()
             .and_then(|directory| entry(directory, FAILING_PREPARATION))
-            .map(|entry| run(&entry, Runtime::Native, &ContainerImage::published(), DatasetPolicy::Reuse, OutputPolicy::Trust));
+            .map(|entry| run(&entry, Runtime::Docker, &release, &image, DatasetPolicy::Reuse, OutputPolicy::Trust));
 
         assert!(outcome.is_some_and(|outcome| matches!(outcome, Err(ExecutionError::PreparationFailed { code: Some(4), .. }))));
     }

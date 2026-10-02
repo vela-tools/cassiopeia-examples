@@ -4,13 +4,19 @@ Every example runs the same way: download its dataset, run its Cassiopeia comman
 
 ## What you need
 
-Cassiopeia, as either a native binary or a container image.
+Cassiopeia, as either a native binary or a container image, at the release the examples are written for. The [cassiopeia-version](../cassiopeia-version) file at the repository root names it.
 
-For the binary, download the archive for your platform from the [latest release](https://github.com/vela-tools/cassiopeia/releases/latest), unzip it, and put `cassiopeia` on your `PATH`. Check it with `cassiopeia --version`.
+For the binary, download the archive for your platform from that release on the [releases page](https://github.com/vela-tools/cassiopeia/releases), unzip it, and put `cassiopeia` on your `PATH`. Check it with `cassiopeia --version`.
 
-The other option is Docker or Podman with no Cassiopeia installed at all. The image is `ghcr.io/vela-tools/cassiopeia:latest`. ecCodes is already inside it, so GRIB1 works as well as GRIB2 with nothing added to the host.
+The other option is Docker or Podman with no Cassiopeia installed at all. The image is `ghcr.io/vela-tools/cassiopeia`, tagged with the release's name, and every page's container command already names the right tag. ecCodes is already inside it, so GRIB1 works as well as GRIB2 with nothing added to the host.
 
 You also need `curl` for the datasets. A handful of examples want `awk`, `jq`, `zip`, or `docker compose`; each of those pages says so, and continuous integration installs the same set. A Rust toolchain is only for the runner below. No example needs one.
+
+## Which release
+
+Every example in a checkout is written and checked against one Cassiopeia release, the one `cassiopeia-version` names. Each tag of this repository is named after the release its examples were checked against, so `git checkout v1.0.3` gives the examples as they stood for Cassiopeia v1.0.3. The `main` branch follows the next release, which may still be a pre-release.
+
+The runner holds every run to that release. A container run uses the release's image. A native run first asks `cassiopeia --version` and stops when the binary on your `PATH` is another release, because an older binary still maps, just not the way the page says it does.
 
 ## From the page
 
@@ -37,7 +43,7 @@ docker run --rm \
     --user "$(id -u):$(id -g)" \
     --volume "$PWD:/data" \
     --workdir /data \
-    ghcr.io/vela-tools/cassiopeia:latest \
+    ghcr.io/vela-tools/cassiopeia:v1.0.2 \
     map \
     --input data/element.json \
     --mapping element.json5 \
@@ -58,7 +64,7 @@ cargo run -- run 01 --runtime docker
 cargo run -- run 01 --runtime podman
 ```
 
-Name an example by its ordinal, its directory name, or a path: `01`, `01-json-field-mapping`, and `examples/01-json-field-mapping` all reach the same one. `--skip-fetch` keeps the datasets already on disk. `--skip-verify` leaves the output unchecked. `--image` pins a release in place of `latest`. `--drift-report drift.json` writes what a live source has drifted to as JSON.
+Name an example by its ordinal, its directory name, or a path: `01`, `01-json-field-mapping`, and `examples/01-json-field-mapping` all reach the same one. `--skip-fetch` keeps the datasets already on disk. `--skip-verify` leaves the output unchecked. `--image` runs another image in place of the pinned release's. `--drift-report drift.json` writes what a live source has drifted to as JSON.
 
 A run can end three ways. It passes; it fails, and the example is broken; or it passes with drift, and a source the descriptor calls `live` has moved under a mapping that still works. Drift leaves the exit code alone.
 

@@ -23,8 +23,9 @@ const FENCE: &str = "```";
 ///
 /// The page is the path for a reader who has neither the runner nor a Rust toolchain, so it has to
 /// carry both forms of the command verbatim. Comparing them here turns drift into a failed check
-/// instead of a reader running something that no longer works.
-pub fn check(directory: &Path, descriptor: &Descriptor) -> Result<(), PageError> {
+/// instead of a reader running something that no longer works. The container form names `image`,
+/// the pinned release's, so a page cannot point a reader at a release it was not checked against.
+pub fn check(directory: &Path, descriptor: &Descriptor, image: &ContainerImage) -> Result<(), PageError> {
     let path = directory.join(PAGE_FILE);
 
     let text = match fs::read_to_string(&path) {
@@ -47,11 +48,10 @@ pub fn check(directory: &Path, descriptor: &Descriptor) -> Result<(), PageError>
     }
 
     let blocks = shell_blocks(&text);
-    let image = ContainerImage::published();
 
     for expected in [
         documented_native_command(&descriptor.run),
-        documented_container_command(&descriptor.run, descriptor.requirements, descriptor.network(), &image),
+        documented_container_command(&descriptor.run, descriptor.requirements, descriptor.network(), image),
     ] {
         if !blocks.iter().any(|block| block.trim() == expected) {
             return Err(PageError::MissingCommand { path, expected });

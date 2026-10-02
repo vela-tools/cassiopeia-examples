@@ -5,11 +5,13 @@ on:
     branches: [main]
     paths:
       - "examples/**"
+      - "cassiopeia-version"
       - "tools/runner/**"
       - ".github/workflows/pages.yaml"
   pull_request:
     paths:
       - "examples/**"
+      - "cassiopeia-version"
       - "tools/runner/**"
       - ".github/workflows/pages.yaml"
 

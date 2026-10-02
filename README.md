@@ -82,7 +82,9 @@ cargo run -- run 01 --runtime docker
 cargo run -- run 01 --runtime podman
 ```
 
-In container mode it forwards to `ghcr.io/vela-tools/cassiopeia:latest` with the example directory mounted at `/data` and set as the working directory. Relative paths then mean the same thing either way, and an example never needs a second set of commands. [Running an example](docs/running-an-example.md) covers the datasets, the schema catalog, Podman's differences from Docker, and the examples that need a broker.
+In container mode it forwards to the image of the Cassiopeia release that [cassiopeia-version](cassiopeia-version) pins, with the example directory mounted at `/data` and set as the working directory. Relative paths then mean the same thing either way, and an example never needs a second set of commands. [Running an example](docs/running-an-example.md) covers the datasets, the schema catalog, Podman's differences from Docker, and the examples that need a broker.
+
+Every example is written for that one release. A tag of this repository is named after the Cassiopeia release its examples were checked against, and `main` follows the next one.
 
 ## The examples
 

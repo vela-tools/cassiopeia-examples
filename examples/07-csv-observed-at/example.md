@@ -107,7 +107,7 @@ docker run --rm \
     --user "$(id -u):$(id -g)" \
     --volume "$PWD:/data" \
     --workdir /data \
-    ghcr.io/vela-tools/cassiopeia:latest \
+    ghcr.io/vela-tools/cassiopeia:v1.0.2 \
     map \
     --input data/gold.csv \
     --mapping gold.json5 \

@@ -32,10 +32,10 @@ pub enum Runtime {
     #[default]
     Native,
 
-    /// The published image, under Docker.
+    /// The pinned release's image, under Docker.
     Docker,
 
-    /// The published image, under Podman.
+    /// The pinned release's image, under Podman.
     Podman,
 }
 
@@ -206,6 +206,7 @@ fn user_arguments() -> Vec<OsString> {
 #[cfg(test)]
 mod tests {
     use crate::{
+        cassiopeia_release::CassiopeiaRelease,
         command_line_token::CommandLineToken,
         container_image::ContainerImage,
         container_network::ContainerNetwork,
@@ -214,7 +215,12 @@ mod tests {
         run::Run,
         runtime::{Runtime, documented_container_command, documented_native_command, invocation},
     };
+    use semver::Version;
     use std::{ffi::OsString, path::Path};
+
+    fn image() -> ContainerImage {
+        ContainerImage::release(&CassiopeiaRelease::from(Version::new(1, 0, 0)))
+    }
 
     fn run() -> Run {
         Run {
@@ -235,7 +241,7 @@ mod tests {
 
     #[test]
     fn the_container_command_mounts_the_example_directory_as_the_working_directory() {
-        let documented = documented_container_command(&run(), Requirements::default(), ContainerNetwork::Isolated, &ContainerImage::published());
+        let documented = documented_container_command(&run(), Requirements::default(), ContainerNetwork::Isolated, &image());
 
         assert!(documented.contains("--volume \"$PWD:/data\""));
         assert!(documented.contains("--workdir /data"));
@@ -244,7 +250,7 @@ mod tests {
 
     #[test]
     fn a_run_without_the_catalog_mounts_no_schema_volume() {
-        let documented = documented_container_command(&run(), Requirements::default(), ContainerNetwork::Isolated, &ContainerImage::published());
+        let documented = documented_container_command(&run(), Requirements::default(), ContainerNetwork::Isolated, &image());
 
         assert!(!documented.contains("schemas"));
     }
@@ -252,7 +258,7 @@ mod tests {
     #[test]
     fn a_run_needing_the_catalog_mounts_the_schema_volume() {
         let requirements = Requirements { smart_data_models: true };
-        let documented = documented_container_command(&run(), requirements, ContainerNetwork::Isolated, &ContainerImage::published());
+        let documented = documented_container_command(&run(), requirements, ContainerNetwork::Isolated, &image());
 
         assert!(documented.contains("$HOME/.cache/cassiopeia-examples/schemas:/var/lib/cassiopeia/schemas"));
     }
@@ -265,7 +271,7 @@ mod tests {
             &run().args,
             None,
             ContainerNetwork::Isolated,
-            &ContainerImage::published(),
+            &image(),
         );
 
         assert_eq!(built.program, ProgramName::Podman);
@@ -280,7 +286,7 @@ mod tests {
             &run().args,
             Some(Path::new("/tmp/cache")),
             ContainerNetwork::Isolated,
-            &ContainerImage::published(),
+            &image(),
         );
 
         assert!(built.arguments.contains(&OsString::from("/tmp/example:/data")));
@@ -289,15 +295,8 @@ mod tests {
 
     #[test]
     fn a_broker_run_documents_and_invokes_host_networking() {
-        let documented = documented_container_command(&run(), Requirements::default(), ContainerNetwork::Host, &ContainerImage::published());
-        let built = invocation(
-            Runtime::Docker,
-            Path::new("/tmp/example"),
-            &run().args,
-            None,
-            ContainerNetwork::Host,
-            &ContainerImage::published(),
-        );
+        let documented = documented_container_command(&run(), Requirements::default(), ContainerNetwork::Host, &image());
+        let built = invocation(Runtime::Docker, Path::new("/tmp/example"), &run().args, None, ContainerNetwork::Host, &image());
 
         assert!(documented.contains("--network host"));
         assert!(built.arguments.contains(&OsString::from("--network")));
@@ -306,7 +305,7 @@ mod tests {
 
     #[test]
     fn a_run_that_needs_no_broker_names_no_network() {
-        let documented = documented_container_command(&run(), Requirements::default(), ContainerNetwork::Isolated, &ContainerImage::published());
+        let documented = documented_container_command(&run(), Requirements::default(), ContainerNetwork::Isolated, &image());
 
         assert!(!documented.contains("--network"));
     }
@@ -319,7 +318,7 @@ mod tests {
             &run().args,
             None,
             ContainerNetwork::Isolated,
-            &ContainerImage::published(),
+            &image(),
         );
 
         assert_eq!(built.program, ProgramName::Cassiopeia);

@@ -181,7 +181,7 @@ docker run --rm \
     --network host \
     --volume "$PWD:/data" \
     --workdir /data \
-    ghcr.io/vela-tools/cassiopeia:latest \
+    ghcr.io/vela-tools/cassiopeia:v1.0.2 \
     map \
     --manifest manifest.json5
 ```

@@ -3,17 +3,22 @@ name: examples
 on:
   push:
     branches: [main]
+    # A tag is named after the Cassiopeia release its examples were checked against, and runs them
+    # against that release's image once more. Path filters are not evaluated for tags.
+    tags: ["v*"]
     # Prose is checked against the descriptors by the pages workflow, so an edit to a page alone
     # does not need the datasets downloaded and the runs repeated.
     paths:
       - "examples/**"
       - "!examples/**/*.md"
+      - "cassiopeia-version"
       - "tools/runner/**"
       - ".github/workflows/examples.yaml"
   pull_request:
     paths:
       - "examples/**"
       - "!examples/**/*.md"
+      - "cassiopeia-version"
       - "tools/runner/**"
       - ".github/workflows/examples.yaml"
   schedule:
@@ -81,8 +86,9 @@ jobs:
       # The container image carries the ecCodes library, so mapping GRIB needs nothing here. The
       # GRIB1 example's preparation step runs on the host, and it trims the file with grib_copy.
       - uses: ./.github/actions/native-dependencies
-      - name: Pull the Cassiopeia image
-        run: docker pull ghcr.io/vela-tools/cassiopeia:latest
+      # The runner defaults to the same image, so the run below uses what is pulled here.
+      - name: Pull the pinned Cassiopeia image
+        run: docker pull "ghcr.io/vela-tools/cassiopeia:$(cat cassiopeia-version)"
       - name: Run the example
         run: ./cassiopeia-example-runner run "${{ matrix.example }}" --runtime docker --drift-report drift.json
       # A leg that failed for another reason still learned whatever it got as far as checking, and

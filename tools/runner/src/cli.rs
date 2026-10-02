@@ -40,9 +40,10 @@ pub enum Task {
         #[arg(short, long, value_enum, default_value_t = Runtime::Native)]
         runtime: Runtime,
 
-        /// The container image, when the runtime is docker or podman.
-        #[arg(short, long, default_value_t = ContainerImage::published())]
-        image: ContainerImage,
+        /// The container image, when the runtime is docker or podman. Defaults to the image of the
+        /// release `cassiopeia-version` pins.
+        #[arg(short, long)]
+        image: Option<ContainerImage>,
 
         /// Keep the datasets already in the example's data directory.
         #[arg(long)]
@@ -92,7 +93,7 @@ mod tests {
     }
 
     #[test]
-    fn a_run_defaults_to_the_host_binary_and_the_published_image() {
+    fn a_run_defaults_to_the_host_binary_and_leaves_the_image_to_the_pin() {
         let parsed = Cli::try_parse_from(["cassiopeia-example-runner", "run", "01"]);
 
         assert!(parsed.is_ok_and(|parsed| match parsed.command {
@@ -104,12 +105,7 @@ mod tests {
                 skip_verify,
                 drift_report,
             } => {
-                example.as_str() == "01"
-                    && runtime.to_string() == "native"
-                    && image.as_str() == "ghcr.io/vela-tools/cassiopeia:latest"
-                    && !skip_fetch
-                    && !skip_verify
-                    && drift_report.is_none()
+                example.as_str() == "01" && runtime.to_string() == "native" && image.is_none() && !skip_fetch && !skip_verify && drift_report.is_none()
             }
             Task::List { .. } | Task::Fetch { .. } | Task::Verify { .. } | Task::Check { .. } | Task::Index { .. } | Task::Metadata => false,
         }));
@@ -131,7 +127,7 @@ mod tests {
         assert!(parsed.is_ok_and(|parsed| match parsed.command {
             Task::Run {
                 runtime, image, skip_fetch, ..
-            } => runtime.to_string() == "podman" && image.as_str() == "ghcr.io/vela-tools/cassiopeia:0.4.1" && skip_fetch,
+            } => runtime.to_string() == "podman" && image.is_some_and(|image| image.as_str() == "ghcr.io/vela-tools/cassiopeia:0.4.1") && skip_fetch,
             Task::List { .. } | Task::Fetch { .. } | Task::Verify { .. } | Task::Check { .. } | Task::Index { .. } | Task::Metadata => false,
         }));
     }
