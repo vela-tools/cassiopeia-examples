@@ -9,6 +9,7 @@ use crate::{
     listing::ExampleEntry,
     poll_schedule::PollSchedule,
     preparation::Preparation,
+    previous_output::{PreviousOutputError, remove_previous_outputs},
     program_name::ProgramName,
     runtime::{Runtime, invocation},
     scheduled_run::{ScheduledRunError, run_bounded},
@@ -104,6 +105,8 @@ pub fn run(
         println!("==> {}: downloading the Smart Data Models catalog", entry.name);
         execute(entry, runtime, &catalog_arguments()?, cache.as_deref(), image)?;
     }
+
+    remove_previous_outputs(&entry.directory, &entry.descriptor.outputs)?;
 
     println!("==> {}: running ({runtime})", entry.name);
     match entry.descriptor.schedule {
@@ -258,6 +261,10 @@ pub enum ExecutionError {
     /// The schema cache could not be placed.
     #[error(transparent)]
     SchemaCache(#[from] SchemaCacheError),
+
+    /// An earlier run's output could not be cleared before this run.
+    #[error(transparent)]
+    PreviousOutput(#[from] PreviousOutputError),
 
     /// The Cassiopeia on the `PATH` is not the pinned release.
     #[error(transparent)]

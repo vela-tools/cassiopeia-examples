@@ -30,6 +30,7 @@ mod page;
 mod poll_interval;
 mod poll_schedule;
 mod preparation;
+mod previous_output;
 mod program_name;
 mod publisher_name;
 mod release_pin;

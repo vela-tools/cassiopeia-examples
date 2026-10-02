@@ -66,6 +66,8 @@ cargo run -- run 01 --runtime podman
 
 Name an example by its ordinal, its directory name, or a path: `01`, `01-json-field-mapping`, and `examples/01-json-field-mapping` all reach the same one. `--skip-fetch` keeps the datasets already on disk. `--skip-verify` leaves the output unchecked. `--image` runs another image in place of the pinned release's. `--drift-report drift.json` writes what a live source has drifted to as JSON.
 
+Before Cassiopeia runs, the runner deletes the files the descriptor's `[[outputs]]` blocks name, so the check afterwards reads only what this run wrote. A run that writes nothing therefore fails, even when an earlier run left good output behind.
+
 A run can end three ways. It passes; it fails, and the example is broken; or it passes with drift, and a source the descriptor calls `live` has moved under a mapping that still works. Drift leaves the exit code alone.
 
 The `volatility` on each `[[datasets]]` block decides which of the three you get. Against a `frozen` source every difference is a defect. Against a `live` one a difference is drift, until the count falls below half the declared figure or climbs past twice it. Outside those rails the mapping is broken, no matter what the publisher has done.
