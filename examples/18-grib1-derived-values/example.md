@@ -145,7 +145,7 @@ docker run --rm \
     --volume "$PWD:/data" \
     --volume "$HOME/.cache/cassiopeia-examples/schemas:/var/lib/cassiopeia/schemas" \
     --workdir /data \
-    ghcr.io/vela-tools/cassiopeia:v1.1.0 \
+    ghcr.io/vela-tools/cassiopeia:v1.1.1 \
     map \
     --input data/nowcast.grb \
     --mapping weather.json5 \

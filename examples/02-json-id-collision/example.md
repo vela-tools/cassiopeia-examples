@@ -116,7 +116,7 @@ docker run --rm \
     --user "$(id -u):$(id -g)" \
     --volume "$PWD:/data" \
     --workdir /data \
-    ghcr.io/vela-tools/cassiopeia:v1.1.0 \
+    ghcr.io/vela-tools/cassiopeia:v1.1.1 \
     map \
     --input data/city.json \
     --mapping city.json5 \
