@@ -4,7 +4,7 @@ The four source files describe regions, subregions, countries, and states. The m
 
 ## Get the data
 
-All four files come from [dr5hn/countries-states-cities-database](https://github.com/dr5hn/countries-states-cities-database), under the Open Database License (ODbL). There are 6 regions, 22 subregions, 250 countries, and 5308 states.
+All four files come from [dr5hn/countries-states-cities-database](https://github.com/dr5hn/countries-states-cities-database), under the Open Database License (ODbL). There are 6 regions, 22 subregions, 250 countries, and 5327 states.
 
 Download them into this example's `data` directory:
 
@@ -201,7 +201,7 @@ cargo run -- run 10
 cargo run -- run 10 --runtime docker
 ```
 
-The run reads all four sources and writes one file per entity type: `out/Region.json` (6), `out/Subregion.json` (22), `out/Country.json` (250), and `out/State.json` (5,308).
+The run reads all four sources and writes one file per entity type: `out/Region.json` (6), `out/Subregion.json` (22), `out/Country.json` (250), and `out/State.json` (5,327).
 
 ## Read the result
 
@@ -334,4 +334,4 @@ California's `State` entity links up to its country:
 }
 ```
 
-All 5,586 records became entities. Missing values affect only their own attributes: the three states without coordinates have no `location`, and Antarctica has no `subregion`. The rest of each entity is still written.
+All 5,605 records became entities. Missing values affect only their own attributes: the four states without coordinates have no `location`, and Antarctica, Bouvet Island, and Heard Island and McDonald Islands have no `subregion`. The rest of each entity is still written.

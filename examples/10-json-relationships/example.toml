@@ -55,7 +55,7 @@ contains = ["urn:ngsi-ld:Region:4"]
 
 [[outputs]]
 file = "out/State.json"
-entities = 5308
+entities = 5327
 contains = ["urn:ngsi-ld:State:1416"]
 
 [[outputs]]
