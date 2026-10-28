@@ -13,6 +13,7 @@ on:
       - "!examples/**/*.md"
       - "cassiopeia-version"
       - "tools/runner/**"
+      - "rust-toolchain.toml"
       - ".github/workflows/examples.yaml"
   pull_request:
     paths:
@@ -20,6 +21,7 @@ on:
       - "!examples/**/*.md"
       - "cassiopeia-version"
       - "tools/runner/**"
+      - "rust-toolchain.toml"
       - ".github/workflows/examples.yaml"
   schedule:
     # The datasets are fetched from their publishers, so an example can break without a commit here.
@@ -42,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@stable
+      - run: rustup toolchain install
       - uses: Swatinem/rust-cache@v2
       - name: Build the runner
         run: cargo build --release --locked

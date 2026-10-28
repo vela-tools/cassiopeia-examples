@@ -156,7 +156,7 @@ mod tests {
     fn a_fence_in_another_language_is_ignored() {
         let text = "```json5\n{ version: \"v4\" }\n```\n";
 
-        assert!(shell_blocks(text).is_empty());
+        assert_eq!(shell_blocks(text), [] as [String; 0]);
     }
 
     #[test]
@@ -168,11 +168,11 @@ mod tests {
 
     #[test]
     fn a_page_without_any_fence_yields_no_blocks() {
-        assert!(shell_blocks("# A page\n\nProse only.\n").is_empty());
+        assert_eq!(shell_blocks("# A page\n\nProse only.\n"), [] as [String; 0]);
     }
 
     #[test]
     fn an_unclosed_fence_yields_no_block() {
-        assert!(shell_blocks("```bash\ncassiopeia map\n").is_empty());
+        assert_eq!(shell_blocks("```bash\ncassiopeia map\n"), [] as [String; 0]);
     }
 }

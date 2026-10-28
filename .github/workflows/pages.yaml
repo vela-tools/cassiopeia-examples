@@ -7,12 +7,14 @@ on:
       - "examples/**"
       - "cassiopeia-version"
       - "tools/runner/**"
+      - "rust-toolchain.toml"
       - ".github/workflows/pages.yaml"
   pull_request:
     paths:
       - "examples/**"
       - "cassiopeia-version"
       - "tools/runner/**"
+      - "rust-toolchain.toml"
       - ".github/workflows/pages.yaml"
 
 concurrency:
@@ -28,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@stable
+      - run: rustup toolchain install
       - uses: Swatinem/rust-cache@v2
       - name: Check that every page documents the run it declares
         run: cargo run --quiet -- check
