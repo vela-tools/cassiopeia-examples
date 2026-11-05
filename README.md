@@ -216,6 +216,10 @@ Give a Movie's hasLeadActor relationship a nested playsCharacter relationship an
 
 Demote an administrative region's MultiPolygon to the largest Polygon and derive a map-pin centroid beside it.
 
+<img src="https://img.shields.io/badge/format-json-d97706" alt="format: json" height="20" align="right"> **[Nested collections](examples/32-json-nested-collections/example.md)** → `AirQualityMonitoringSite` `AirQualityIndexObserved`
+
+Map records nested several arrays deep, each reading what encloses it.
+
 <!-- examples:end -->
 
 ## The runner

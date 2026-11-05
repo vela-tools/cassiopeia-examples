@@ -1,0 +1,61 @@
+{
+    version: "v4",
+    dataModel: "AirQualityIndexObserved",
+    // A reading names its pollutant and nothing else. The site it belongs to comes from the Site
+    // that encloses it in the source, which the reading carries under the name Site.
+    identity: {
+        entityName: "{{ Site['@SiteCode'] }}-{{ this['@SpeciesCode'] }}",
+    },
+    attributes: {
+        pollutant: {
+            source: "{{ this['@SpeciesCode'] }}",
+            type: "Property",
+            transformation: "string",
+        },
+        pollutantName: {
+            source: "{{ this['@SpeciesDescription'] }}",
+            type: "Property",
+            transformation: "string",
+        },
+        airQualityBand: {
+            source: "{{ this['@AirQualityBand'] }}",
+            type: "Property",
+            transformation: "string",
+        },
+        // The feed writes an index of 0 with the band "No data" for a pollutant the site did not
+        // measure this hour. The Daily Air Quality Index runs from 1 to 10, so 0 is no reading, and
+        // the guard leaves the attribute out.
+        airQualityIndex: {
+            source: "{% if this['@AirQualityBand'] != 'No data' %}{{ this['@AirQualityIndex'] }}{% endif %}",
+            type: "Property",
+            transformation: "integer",
+        },
+        // The bulletin time is London local time with no offset. The bracketed zone makes the
+        // conversion to UTC follow British Summer Time.
+        dateObserved: {
+            source: "{{ Site['@BulletinDate'] | replace(from=' ', to='T') }}[Europe/London]",
+            type: "Property",
+            transformation: "datetime",
+        },
+        localAuthority: {
+            source: "{{ LocalAuthority['@LocalAuthorityName'] }}",
+            type: "Property",
+            transformation: "string",
+        },
+        refAirQualityMonitoringSite: {
+            source: "{{ Site['@SiteCode'] }}",
+            type: "Relationship",
+            target: {
+                entity: "AirQualityMonitoringSite",
+            },
+        },
+        location: {
+            source: [
+                "{{ Site['@Longitude'] }}",
+                "{{ Site['@Latitude'] }}",
+            ],
+            type: "GeoProperty",
+            transformation: "point",
+        },
+    },
+}

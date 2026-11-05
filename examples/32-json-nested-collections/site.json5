@@ -1,0 +1,49 @@
+{
+    version: "v4",
+    dataModel: "AirQualityMonitoringSite",
+    // The API is a JSON rendering of XML, so every attribute of a site element is a member whose
+    // name starts with "@". "@" is not a valid template identifier, so each is read through `this`.
+    identity: {
+        entityName: "{{ this['@SiteCode'] }}",
+    },
+    attributes: {
+        name: {
+            source: "{{ this['@SiteName'] }}",
+            type: "Property",
+            transformation: "string",
+        },
+        siteType: {
+            source: "{{ this['@SiteType'] }}",
+            type: "Property",
+            transformation: "string",
+        },
+        localAuthority: {
+            source: "{{ this['@LocalAuthorityName'] }}",
+            type: "Property",
+            transformation: "string",
+        },
+        // The register writes opening and closing as midnight local time, so only the day is kept.
+        dateOpened: {
+            source: "{{ this['@DateOpened'] }}",
+            type: "Property",
+            transformation: "date",
+        },
+        // Only a closed site has a closing date. A site still running has an empty one, which the
+        // guard leaves out instead of failing to read it as a date.
+        dateClosed: {
+            source: "{% if this['@DateClosed'] %}{{ this['@DateClosed'] }}{% endif %}",
+            type: "Property",
+            transformation: "date",
+        },
+        // @LatitudeWGS84 and @LongitudeWGS84 hold Web Mercator metres despite their names; @Latitude
+        // and @Longitude are the WGS 84 degrees a GeoJSON point needs.
+        location: {
+            source: [
+                "{{ this['@Longitude'] }}",
+                "{{ this['@Latitude'] }}",
+            ],
+            type: "GeoProperty",
+            transformation: "point",
+        },
+    },
+}

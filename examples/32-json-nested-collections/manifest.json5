@@ -1,0 +1,39 @@
+{
+    version: "v1",
+    inputs: [
+        {
+            source: "data/sites.json",
+            format: "json",
+            // The register's sites sit two levels down, at Sites.Site. A `mappings` list reads the
+            // document as nested collections, labelled by the member path that leads to them.
+            mappings: [
+                {
+                    collection: "Sites.Site",
+                    mapping: "site.json5",
+                },
+            ],
+        },
+        {
+            source: "data/index.json",
+            format: "json",
+            // One reading per pollutant per site, three levels down. Each reading also carries the
+            // site and the local authority that enclose it, under the names Site and LocalAuthority.
+            mappings: [
+                {
+                    collection: "HourlyAirQualityIndex.LocalAuthority.Site.Species",
+                    mapping: "reading.json5",
+                },
+            ],
+        },
+    ],
+    output: {
+        target: "file",
+        directory: "out",
+        context: "none",
+        // Both types are custom models with no published schema, so fail-when-schema writes them
+        // without a schema check.
+        validation: {
+            mode: "fail-when-schema",
+        },
+    },
+}

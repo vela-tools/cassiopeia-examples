@@ -1,0 +1,44 @@
+[example]
+title = "Mapping nested JSON collections"
+label = "Nested collections"
+summary = "Map records nested several arrays deep, each reading what encloses it."
+formats = ["json"]
+models = ["AirQualityMonitoringSite", "AirQualityIndexObserved"]
+
+[requirements]
+smart-data-models = false
+
+[run]
+args = [
+    "map",
+    "--manifest",
+    "manifest.json5",
+]
+
+[[datasets]]
+file = "data/sites.json"
+url = "https://api.erg.ic.ac.uk/AirQuality/Information/MonitoringSites/GroupName=London/Json"
+source = "London Air Quality Network, Environmental Research Group, Imperial College London"
+# The API documentation states that use of the API is subject to the Open Government Licence v2.
+# https://api.erg.ic.ac.uk/AirQuality/Information/Documentation/pdf
+license = "OGL-UK-2.0"
+volatility = "live"
+
+[[datasets]]
+file = "data/index.json"
+url = "https://api.erg.ic.ac.uk/AirQuality/Hourly/MonitoringIndex/GroupName=London/Json"
+source = "London Air Quality Network, Environmental Research Group, Imperial College London"
+# The API documentation states that use of the API is subject to the Open Government Licence v2.
+# https://api.erg.ic.ac.uk/AirQuality/Information/Documentation/pdf
+license = "OGL-UK-2.0"
+volatility = "live"
+
+[[outputs]]
+file = "out/AirQualityMonitoringSite.json"
+at-least = 200
+contains = ["urn:ngsi-ld:AirQualityMonitoringSite:BG1"]
+
+[[outputs]]
+file = "out/AirQualityIndexObserved.json"
+at-least = 100
+contains = ["urn:ngsi-ld:AirQualityIndexObserved:BG1-NO2", "urn:ngsi-ld:AirQualityIndexObserved:CR5-NO2"]
