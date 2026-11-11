@@ -7,8 +7,9 @@
         entityName: "{{ geohash(lat=latitude, lon=longitude, precision=7) }}",
     },
     attributes: {
-        // SILAM stores its coordinates as 32-bit floats, so the 45.55 a cell centre was written as
-        // reads back as 45.54999923706055. Two decimals are what the 0.1 degree grid holds.
+        // SILAM stores its coordinates as 32-bit floats, and some centres are the neighbour of the
+        // grid's decimal, so 45.65 reads back as 45.649998. Two decimals are what the 0.1 degree grid
+        // holds.
         location: {
             source: [
                 "{{ longitude | round(precision=2) }}",

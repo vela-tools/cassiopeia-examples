@@ -28,8 +28,8 @@ MED_FACIL  = Y
 geometry = {
     "type": "Point",
     "coordinates": [
-        146.83,
-        43.87
+        146.83333333333334,
+        43.86666666666667
     ]
 }
 ```
@@ -56,13 +56,15 @@ The index uses many short codes. The mapping turns each code into a stable, read
 
 ```json5
 harbourType: {
-    source: "{% if properties.HARBORTYPE == 'CN' %}coastalNatural{% elif properties.HARBORTYPE == 'CB' %}coastalBreakwater{% elif properties.HARBORTYPE == 'CT' %}coastalTideGate{% elif properties.HARBORTYPE == 'LC' %}lakeOrCanal{% elif properties.HARBORTYPE == 'OR' %}openRoadstead{% elif properties.HARBORTYPE == 'RB' %}riverBasin{% elif properties.HARBORTYPE == 'RN' %}riverNatural{% elif properties.HARBORTYPE == 'RT' %}riverTideGate{% elif properties.HARBORTYPE == 'TH' %}typhoonHarbour{% endif %}",
+    source: "{% if properties.HARBORTYPE == 'CN' %}{% set label = 'coastalNatural' %}{% elif properties.HARBORTYPE == 'CB' %}{% set label = 'coastalBreakwater' %}{% elif properties.HARBORTYPE == 'CT' %}{% set label = 'coastalTideGate' %}{% elif properties.HARBORTYPE == 'LC' %}{% set label = 'lakeOrCanal' %}{% elif properties.HARBORTYPE == 'OR' %}{% set label = 'openRoadstead' %}{% elif properties.HARBORTYPE == 'RB' %}{% set label = 'riverBasin' %}{% elif properties.HARBORTYPE == 'RN' %}{% set label = 'riverNatural' %}{% elif properties.HARBORTYPE == 'RT' %}{% set label = 'riverTideGate' %}{% elif properties.HARBORTYPE == 'TH' %}{% set label = 'typhoonHarbour' %}{% endif %}{% if label is defined %}{{ label }}{% endif %}",
     type: "Property",
     transformation: "string",
 },
 ```
 
-`harbourSize` (`V`, `S`, `M`, `L`) and `shelter` (`N`, `P`, `F`, `G`, `E`) use the same approach. Empty cells match no branch and omit the attribute, so an emitted enumerated value always belongs to the vocabulary:
+Each branch only sets `label`, and a single expression prints it behind a guard. A template whose whole output is one `{{ }}` expression behind `if` and `set` tags gives no value when the guard suppresses it ([Keep a value's type](https://vela-tools.github.io/cassiopeia/docs/guides/templates#keep-a-values-type)), so a code that matches no branch, or an empty cell, leaves the attribute off. Writing each value as literal text in its branch would not: an unmatched code would then render empty text, and empty text is a value, written as `"value": ""`.
+
+`harbourSize` (`V`, `S`, `M`, `L`) and `shelter` (`N`, `P`, `F`, `G`, `E`) use the same approach, so an emitted enumerated value always belongs to the vocabulary:
 
 | Attribute | Codes | Enumerated values |
 | --- | --- | --- |
@@ -131,7 +133,7 @@ docker run --rm \
     --user "$(id -u):$(id -g)" \
     --volume "$PWD:/data" \
     --workdir /data \
-    ghcr.io/vela-tools/cassiopeia:v1.1.1 \
+    ghcr.io/vela-tools/cassiopeia:v1.2.0 \
     map \
     --manifest manifest.json5
 ```
@@ -162,8 +164,8 @@ A port keyed by its index, located by its shape, and described with decoded valu
         "value": {
             "type": "Point",
             "coordinates": [
-                146.8333,
-                43.8667
+                146.83333333333334,
+                43.86666666666667
             ]
         }
     },

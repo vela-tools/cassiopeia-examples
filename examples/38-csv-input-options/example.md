@@ -41,8 +41,8 @@ The Brussels export starts with a UTF-8 byte order mark, ends its lines with CRL
 
 ```text
 ab_eoi_code;ab_name;timestamp;value;geo_point
-BETB006;41B006 - Bruxelles (Parlement UE);2026-11-11T10:00:00+00:00;16;50.83863118763408, 4.374388283352737
-BETB006;41B006 - Bruxelles (Parlement UE);2026-11-11T06:00:00+00:00;18;50.83863118763408, 4.374388283352737
+BETB006;41B006 - Bruxelles (Parlement UE);2026-11-11T12:00:00+00:00;18;50.83863118763408, 4.374388283352737
+BETB006;41B006 - Bruxelles (Parlement UE);2026-11-11T01:00:00+00:00;15;50.83863118763408, 4.374388283352737
 ```
 
 `ab_eoi_code` is the station's code in the European air quality network, `value` the hourly mean in µg/m³, and `geo_point` the station's latitude and longitude, separated by a comma and a space.
@@ -50,12 +50,12 @@ BETB006;41B006 - Bruxelles (Parlement UE);2026-11-11T06:00:00+00:00;18;50.838631
 The Vienna table, shown here converted to UTF-8 and cut to its first eleven columns, is a different kind of file:
 
 ```text
-Lumes;v2.10;11.11.26-09:30:00
+Lumes;v2.10;11.11.26-12:00:00
 ;Zeit-LTM;LTM;Zeit-Wind;WG;WR;Zeit-RF;RF;Zeit-NO2;NO2;Zeit-NOX
 ;;HMW;;HMW;HMW;;HMW;;HMW;
 ;MESZ;°C;MESZ;km/h;°;MESZ;%;MESZ;µg/m³;MESZ
-STEF;11.11.2026, 09:30;NE;11.11.2026, 09:30;NE;NE;11.11.2026, 09:30;NE;11.11.2026, 09:30;31,94;11.11.2026, 09:30
-AKA;11.11.2026, 09:30;4,94;11.11.2026, 09:30;12,75;149,31;11.11.2026, 09:30;84,21;11.11.2026, 09:30;NE;11.11.2026, 09:30
+STEF;11.11.2026, 12:00;NE;11.11.2026, 12:00;NE;NE;11.11.2026, 12:00;NE;11.11.2026, 12:00;15,09;11.11.2026, 12:00
+AKA;11.11.2026, 12:00;5,47;11.11.2026, 12:00;15,46;155,11;11.11.2026, 12:00;87,08;11.11.2026, 12:00;NE;11.11.2026, 12:00
 ```
 
 The first line is a title: the feed's name, its version, and when it was written. Below it, three rows name each column together: the measurand (`NO2`), the averaging period (`HMW`, the half-hour mean), and the unit (`µg/m³`). Each measurand has a time column of its own (`Zeit-NO2`) beside it. The first column holds the station code and has no header at all. Decimals are written with a comma, and a station that does not measure something writes `NE`, or `---` when the instrument is down. The file is in Windows-1252.
@@ -138,7 +138,7 @@ delimiter ";" · quote "\"" · skipRows 1 · headerRows 3 · terminator "lf" · 
 
 `headerRows 3` is the stacked header. A row directly below the header continues it when each of its non-blank cells is a short label rather than a number or a date, and when it leaves the first column blank while every data row fills it. Each column's header cells are then joined from top to bottom with a space. The NO2 column becomes the field `NO2 HMW µg/m³` and its time column `Zeit-NO2 MESZ`. Two columns that share a measurand but differ further down, such as `PM10 MW24 µg/m³` and `PM10 HMW µg/m³`, become two fields. The first column has no header cell at all, so it is keyed by its zero-based position and read as `{{ this['0'] }}`.
 
-The encoding is the one thing detection gets wrong on the downloaded copy. Windows-1252 and ISO-8859-2 differ only in letters such as `µ` and `³`, which ISO-8859-2 reads as `ľ` and `ł`, and nothing in the bytes tells them apart. Fetched by URL, Cassiopeia weighs the source's domain, and a file from a `.at` domain reads as Windows-1252, but a stated `encoding` settles it either way. `decimalSeparator` and `nullValues` are never detected, since nothing in a file tells a decimal comma or a missing-value token apart from text. Without them, `31,94` and `NE` would both stay strings.
+The encoding is the one thing detection gets wrong on the downloaded copy. Windows-1252 and ISO-8859-2 differ only in letters such as `µ` and `³`, which ISO-8859-2 reads as `ľ` and `ł`, and nothing in the bytes tells them apart. Fetched by URL, Cassiopeia weighs the source's domain, and a file from a `.at` domain reads as Windows-1252, but a stated `encoding` settles it either way. `decimalSeparator` and `nullValues` are never detected, since nothing in a file tells a decimal comma or a missing-value token apart from text. Without them, `15,09` and `NE` would both stay strings.
 
 ## Mapping the two tables
 
@@ -159,7 +159,7 @@ location: {
 },
 ```
 
-The Vienna table writes its times as `11.11.2026, 09:30`, in Vienna local time whatever the `MESZ` label says, and writes midnight as `24:00` of the day before. The mapping rebuilds such a time as `2026-11-11T09:30:00[Europe/Vienna]`, and the `datetime` transformation converts it to UTC with the zone's daylight saving rules:
+The Vienna table writes its times as `11.11.2026, 12:00`, in Vienna local time whatever the `MESZ` label says, and writes midnight as `24:00` of the day before. The mapping rebuilds such a time as `2026-11-11T12:00:00[Europe/Vienna]`, and the `datetime` transformation converts it to UTC with the zone's daylight saving rules:
 
 ```json5
 dateObserved: {
@@ -224,7 +224,7 @@ docker run --rm \
     --volume "$PWD:/data" \
     --volume "$HOME/.cache/cassiopeia-examples/schemas:/var/lib/cassiopeia/schemas" \
     --workdir /data \
-    ghcr.io/vela-tools/cassiopeia:v1.1.1 \
+    ghcr.io/vela-tools/cassiopeia:v1.2.0 \
     map \
     --manifest manifest.json5
 ```
@@ -236,7 +236,7 @@ cargo run -- run 38
 cargo run -- run 38 --runtime docker
 ```
 
-The run fetches the three sources, maps 673 records into 33 entities, 14 from Brussels and 19 from Vienna, validates them, and upserts them. Three Brussels stations had no valid hour in the export when this was written, so they have no entity. The counts move with the feeds.
+The run fetches the three sources, maps 672 records into 33 entities, 14 from Brussels and 19 from Vienna, validates them, and upserts them. Three Brussels stations had no valid hour in the export when this was written, so they have no entity. The counts move with the feeds.
 
 ## Query the broker
 
@@ -267,9 +267,7 @@ curl -sS -G -H "Link: $CONTEXT" http://localhost:1056/ngsi-ld/v1/entities \
 
 ```json
 [
-    { "id": "urn:ngsi-ld:AirQualityObserved:vienna-FLO", "type": "AirQualityObserved", "name": "Gerichtsgasse", "no2": 30.84 },
-    { "id": "urn:ngsi-ld:AirQualityObserved:vienna-LERG", "type": "AirQualityObserved", "name": "Lerchenfelder Gürtel", "no2": 32.21 },
-    { "id": "urn:ngsi-ld:AirQualityObserved:vienna-MBA", "type": "AirQualityObserved", "name": "Hietzinger Kai", "no2": 42.3 }
+    { "id": "urn:ngsi-ld:AirQualityObserved:vienna-MBA", "type": "AirQualityObserved", "name": "Hietzinger Kai", "no2": 34.3 }
 ]
 ```
 
@@ -286,8 +284,8 @@ curl -sS -G -H "Link: $CONTEXT" http://localhost:1056/ngsi-ld/v1/entities \
 [
     { "id": "urn:ngsi-ld:AirQualityObserved:vienna-AKA", "type": "AirQualityObserved", "name": "AKH-Dach" },
     { "id": "urn:ngsi-ld:AirQualityObserved:vienna-AKC", "type": "AirQualityObserved", "name": "AKH" },
-    { "id": "urn:ngsi-ld:AirQualityObserved:vienna-LERG", "type": "AirQualityObserved", "name": "Lerchenfelder Gürtel", "no2": 32.21 },
-    { "id": "urn:ngsi-ld:AirQualityObserved:vienna-STEF", "type": "AirQualityObserved", "name": "Stephansplatz", "no2": 17.76 },
+    { "id": "urn:ngsi-ld:AirQualityObserved:vienna-LERG", "type": "AirQualityObserved", "name": "Lerchenfelder Gürtel", "no2": 26.66 },
+    { "id": "urn:ngsi-ld:AirQualityObserved:vienna-STEF", "type": "AirQualityObserved", "name": "Stephansplatz", "no2": 15.09 },
     { "id": "urn:ngsi-ld:AirQualityObserved:vienna-TAB", "type": "AirQualityObserved", "name": "Taborstraße" }
 ]
 ```
@@ -320,7 +318,7 @@ Retrieving one entity by its identifier returns it in the normalized representat
     "type": "AirQualityObserved",
     "dateObserved": {
         "type": "Property",
-        "value": "2026-11-11T09:30:00Z",
+        "value": "2026-11-11T11:00:00Z",
         "valueType": "DateTime"
     },
     "name": {
@@ -329,9 +327,9 @@ Retrieving one entity by its identifier returns it in the normalized representat
     },
     "no2": {
         "type": "Property",
-        "value": 17.76,
+        "value": 15.09,
         "unitCode": "GQ",
-        "observedAt": "2026-11-11T09:30:00Z"
+        "observedAt": "2026-11-11T11:00:00Z"
     },
     "location": {
         "type": "GeoProperty",
@@ -346,7 +344,7 @@ Retrieving one entity by its identifier returns it in the normalized representat
 }
 ```
 
-The table's `11.11.2026, 10:30` became `09:30:00Z`: Vienna is an hour ahead of UTC in November. `valueType` marks `dateObserved` as a `DateTime` (clause 4.5.2), so a query with a time operand compares it as a time and not as text. `GQ` is the UN/CEFACT Common Code for microgram per cubic metre, and `observedAt` stamps the reading with the instant it was measured (clause 4.8).
+The table's `11.11.2026, 12:00` became `11:00:00Z`: Vienna is an hour ahead of UTC in November. `valueType` marks `dateObserved` as a `DateTime` (clause 4.5.2), so a query with a time operand compares it as a time and not as text. `GQ` is the UN/CEFACT Common Code for microgram per cubic metre, and `observedAt` stamps the reading with the instant it was measured (clause 4.8).
 
 The Brussels entity has the same shape from a different source. Its location came from one text column and its name from another, and of the station's 48 hours only the newest is left:
 
@@ -356,7 +354,7 @@ The Brussels entity has the same shape from a different source. Its location cam
     "type": "AirQualityObserved",
     "dateObserved": {
         "type": "Property",
-        "value": "2026-11-11T10:00:00Z",
+        "value": "2026-11-11T12:00:00Z",
         "valueType": "DateTime"
     },
     "name": {
@@ -365,9 +363,9 @@ The Brussels entity has the same shape from a different source. Its location cam
     },
     "no2": {
         "type": "Property",
-        "value": 16,
+        "value": 18,
         "unitCode": "GQ",
-        "observedAt": "2026-11-11T10:00:00Z"
+        "observedAt": "2026-11-11T12:00:00Z"
     },
     "location": {
         "type": "GeoProperty",

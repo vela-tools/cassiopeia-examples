@@ -27,20 +27,20 @@ Cassiopeia reads one record for every cell of the grid. The cell over Ljubljana 
 
 ```json
 {
-    "latitude": 46.04999923706055,
-    "longitude": 14.550000190734863,
+    "latitude": 46.05,
+    "longitude": 14.55,
     "time": "2026-11-10T09:00:00+00:00",
     "height": 12.5,
     "time_run": "2026-11-10T01:00:00+00:00",
-    "cnc_O3_gas": 2.0954757928848267e-8,
-    "cnc_NO2_gas": 7.450580596923828e-7,
-    "cnc_PM2_5": 5.8006939696042537e-8
+    "cnc_O3_gas": 2.0954758e-8,
+    "cnc_NO2_gas": 7.4505806e-7,
+    "cnc_PM2_5": 5.800694e-8
 }
 ```
 
 Cassiopeia recognises `latitude`, `longitude`, and `time` by their CF attributes and gives them the same keys whatever the file calls them. It decodes the time axis, stored as hours since an epoch, into an RFC 3339 timestamp. `height` is the model layer the query picked, and `time_run` is when the forecast run started. THREDDS writes the run time beside every forecast hour, and Cassiopeia keeps it under the variable's own name. The data variables keep the names SILAM gave them. The mapping reads `latitude`, `longitude`, `time`, and the three concentrations, and ignores `height` and `time_run`. The [NetCDF guide](https://vela-tools.github.io/cassiopeia/docs/guides/source-formats#netcdf) lists everything a record can hold.
 
-SILAM stores its coordinates as 32-bit floating point numbers. The cell centre it wrote as 46.05 reads back as `46.04999923706055`, because that is the nearest value the narrower type holds.
+SILAM stores its coordinates and concentrations as 32-bit floating point numbers, and Cassiopeia writes each one as the shortest decimal that reads back as the same 32-bit value, so the cell centre above reads `46.05`. Not every centre in the file sits exactly on the grid's decimals, though: seven latitudes and three longitudes hold the 32-bit neighbour of their decimal, so 45.65 reads `45.649998` and 14.65 reads `14.650001`.
 
 ## One entity per grid cell
 
@@ -134,7 +134,7 @@ docker run --rm \
     --volume "$PWD:/data" \
     --volume "$HOME/.cache/cassiopeia-examples/schemas:/var/lib/cassiopeia/schemas" \
     --workdir /data \
-    ghcr.io/vela-tools/cassiopeia:v1.1.1 \
+    ghcr.io/vela-tools/cassiopeia:v1.2.0 \
     map \
     --input data/forecast.nc \
     --mapping air-quality-forecast.json5 \

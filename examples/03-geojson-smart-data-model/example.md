@@ -24,24 +24,35 @@ cassiopeia sdm download
 
 ## The record shape
 
-A GeoJSON `FeatureCollection` is a list of features. Cassiopeia exposes each feature as a record with an `id`, `geometry`, and `properties` object. One record looks like this:
+A GeoJSON `FeatureCollection` is a list of features. Cassiopeia exposes each feature as a record with an `id`, `geometry`, and `properties` object, and carries the collection's own members, such as the WFS counts and `crs`, under `featureCollection`. One record looks like this, with four of its properties:
 
 ```json
 {
-    "type": "Feature",
-    "id": "BEHINDERTENPARKPLATZOGD.15652565",
+    "id": "BEHINDERTENPARKPLATZOGD.16010576",
     "geometry": {
         "type": "Point",
         "coordinates": [
-            16.38946141,
-            48.19718606
+            16.31364992,
+            48.2245053
         ]
     },
     "properties": {
-        "STRNAM": "Barichgasse",
+        "STRNAM": "Beringgasse",
         "STELLPL_ANZ": 1,
-        "BEZIRK": 3,
+        "BEZIRK": 17,
         "KATEGORIE": 3
+    },
+    "featureCollection": {
+        "numberMatched": 3873,
+        "numberReturned": 3873,
+        "totalFeatures": 3873,
+        "timeStamp": "2026-11-11T10:37:56.667Z",
+        "crs": {
+            "type": "name",
+            "properties": {
+                "name": "urn:ogc:def:crs:EPSG::4326"
+            }
+        }
     }
 }
 ```
@@ -165,7 +176,7 @@ docker run --rm \
     --volume "$PWD:/data" \
     --volume "$HOME/.cache/cassiopeia-examples/schemas:/var/lib/cassiopeia/schemas" \
     --workdir /data \
-    ghcr.io/vela-tools/cassiopeia:v1.1.1 \
+    ghcr.io/vela-tools/cassiopeia:v1.2.0 \
     map \
     --input data/parking.json \
     --mapping parking.json5 \

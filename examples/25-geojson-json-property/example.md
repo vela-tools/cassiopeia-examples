@@ -27,7 +27,7 @@ That is why this example's descriptor states a floor rather than a count, and th
 
 ## The record shape
 
-Each feature is one alert. Cassiopeia's GeoJSON ingestor exposes it as a record with `id`, `geometry`, and `properties`, accessed as `{{ id }}`, `{{ geometry }}`, and `{{ properties.<field> }}`. This example focuses on `properties.parameters`:
+Each feature is one alert. Cassiopeia's GeoJSON ingestor exposes it as a record with `id`, `geometry`, and `properties`, accessed as `{{ id }}`, `{{ geometry }}`, and `{{ properties.<field> }}`, and with the collection's own members under `featureCollection`. This example focuses on `properties.parameters`:
 
 ```json
 {
@@ -205,7 +205,7 @@ docker run --rm \
     --user "$(id -u):$(id -g)" \
     --volume "$PWD:/data" \
     --workdir /data \
-    ghcr.io/vela-tools/cassiopeia:v1.1.1 \
+    ghcr.io/vela-tools/cassiopeia:v1.2.0 \
     map \
     --input data/alerts.json \
     --mapping alert.json5 \
@@ -257,11 +257,13 @@ A thunderstorm-driven Special Weather Statement with its `parameters` intact und
     },
     "effective": {
         "type": "Property",
-        "value": "2026-08-26T07:13:00.000Z"
+        "value": "2026-08-26T07:13:00Z",
+        "valueType": "DateTime"
     },
     "expires": {
         "type": "Property",
-        "value": "2026-08-26T07:45:00.000Z"
+        "value": "2026-08-26T07:45:00Z",
+        "valueType": "DateTime"
     },
     "location": {
         "type": "GeoProperty",

@@ -146,7 +146,7 @@ docker run --rm \
     --volume "$PWD:/data" \
     --volume "$HOME/.cache/cassiopeia-examples/schemas:/var/lib/cassiopeia/schemas" \
     --workdir /data \
-    ghcr.io/vela-tools/cassiopeia:v1.1.1 \
+    ghcr.io/vela-tools/cassiopeia:v1.2.0 \
     map \
     --input data/weather.grib2 \
     --mapping weather.json5 \
@@ -185,26 +185,27 @@ One cell, over Slovenia:
     },
     "dateObserved": {
         "type": "Property",
-        "value": "2026-08-23T00:00:00.000Z"
+        "value": "2026-08-23T00:00:00Z",
+        "valueType": "DateTime"
     },
     "temperature": {
         "type": "Property",
-        "value": 12.54,
+        "value": 12.536572265625011,
         "unitCode": "CEL"
     },
     "dewPoint": {
         "type": "Property",
-        "value": 11.84,
+        "value": 11.843286132812523,
         "unitCode": "CEL"
     },
     "relativeHumidity": {
         "type": "Property",
-        "value": 0.953,
+        "value": 0.9530000000000001,
         "unitCode": "C62"
     },
     "windSpeed": {
         "type": "Property",
-        "value": 2.05,
+        "value": 2.0528834949196395,
         "unitCode": "MTS"
     },
     "windDirection": {
@@ -214,17 +215,17 @@ One cell, over Slovenia:
     },
     "gustSpeed": {
         "type": "Property",
-        "value": 2.0,
+        "value": 2.0032470703125003,
         "unitCode": "MTS"
     },
     "atmosphericPressure": {
         "type": "Property",
-        "value": 1020.99,
+        "value": 1020.994125,
         "unitCode": "A97"
     },
     "visibility": {
         "type": "Property",
-        "value": 24.13,
+        "value": 24.134945503234864,
         "unitCode": "KMT"
     }
 }

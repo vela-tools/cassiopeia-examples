@@ -6,9 +6,9 @@ Every example runs the same way: download its dataset, run its Cassiopeia comman
 
 Cassiopeia, as either a native binary or a container image, at the release the examples are written for. The [cassiopeia-version](../cassiopeia-version) file at the repository root names it.
 
-For the binary, download the archive for your platform from that release on the [releases page](https://github.com/vela-tools/cassiopeia/releases), unzip it, and put `cassiopeia` on your `PATH`. Check it with `cassiopeia --version`.
+For the binary, download the archive for your platform from that release on the [releases page](https://github.com/vela-tools/cassiopeia/releases), unzip it, and put `cassiopeia` on your `PATH`. Check it with `cassiopeia --version`. The release binaries are built without ecCodes and SQLite, so they cannot run the GRIB1 example or the GeoPackage examples; those pages say so, and a source build with the default features or the container image runs them.
 
-The other option is Docker or Podman with no Cassiopeia installed at all. The image is `ghcr.io/vela-tools/cassiopeia`, tagged with the release's name, and every page's container command already names the right tag. ecCodes is already inside it, so GRIB1 works as well as GRIB2 with nothing added to the host.
+The other option is Docker or Podman with no Cassiopeia installed at all. The image is `ghcr.io/vela-tools/cassiopeia`, tagged with the release's name, and every page's container command already names the right tag. ecCodes and SQLite are already inside it, so GRIB1 and GeoPackage work with nothing added to the host.
 
 You also need `curl` for the datasets. A handful of examples want `awk`, `jq`, `zip`, or `docker compose`; each of those pages says so, and continuous integration installs the same set. A Rust toolchain is only for the runner below. No example needs one.
 
@@ -43,7 +43,7 @@ docker run --rm \
     --user "$(id -u):$(id -g)" \
     --volume "$PWD:/data" \
     --workdir /data \
-    ghcr.io/vela-tools/cassiopeia:v1.1.1 \
+    ghcr.io/vela-tools/cassiopeia:v1.2.0 \
     map \
     --input data/element.json \
     --mapping element.json5 \

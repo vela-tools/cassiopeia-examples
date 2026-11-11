@@ -25,19 +25,23 @@ args = [
     "fail-when-schema",
 ]
 
-# ERDDAP builds the file from the query: the columns named before the first ampersand, and one past
-# day of the network's hourly readings.
+# ERDDAP builds the file from the query: the columns named before the first ampersand, the six
+# Hawaii buoys the station pattern matches, and one past day of their ten-minute readings.
 [[datasets]]
 file = "data/buoys.nc"
-url = "https://erddap.marine.ie/erddap/tabledap/IWBNetwork.ncCF?station_id,longitude,latitude,time,AtmosphericPressure,AirTemperature,RelativeHumidity,WindDirection,WindSpeed,Gust&time%3E=2024-06-01T00:00:00Z&time%3C2024-06-02T00:00:00Z"
-source = "Marine Institute, Irish Weather Buoy Network"
-# The dataset's own license attribute names Creative Commons Attribution 4.0.
-# https://erddap.marine.ie/erddap/info/IWBNetwork/index.html
-license = "CC-BY-4.0"
+url = "https://coastwatch.pfeg.noaa.gov/erddap/tabledap/cwwcNDBCMet.ncCF?station,longitude,latitude,time,WD,WSPD,GST,BAR,ATMP,DEWP&station=~%2251000%7C51001%7C51002%7C51003%7C51004%7C51101%22&time%3E=2024-06-01T00:00:00Z&time%3C2024-06-02T00:00:00Z"
+source = "NOAA National Data Buoy Center (NDBC), served by NOAA ERDDAP"
+# A work of the US federal government. NDBC's disclaimer is the National Weather Service's, which
+# puts NWS information in the public domain unless it is annotated otherwise, and the dataset's own
+# license attribute lets the data be used and redistributed for free, without warranty.
+# https://www.weather.gov/disclaimer
+# https://coastwatch.pfeg.noaa.gov/erddap/info/cwwcNDBCMet/index.html
+license = "Public domain (US Government)"
 volatility = "frozen"
+records = 864
 
-# One entity per buoy that reported that day, M2 to M6.
+# One entity per buoy, 51000 to 51004 and 51101. The identifiers are the two buoys the page quotes.
 [[outputs]]
 file = "out/WeatherObserved.json"
-entities = 5
-contains = ["urn:ngsi-ld:WeatherObserved:M2", "urn:ngsi-ld:WeatherObserved:M6"]
+entities = 6
+contains = ["urn:ngsi-ld:WeatherObserved:51000", "urn:ngsi-ld:WeatherObserved:51101"]

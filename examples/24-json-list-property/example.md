@@ -154,7 +154,7 @@ docker run --rm \
     --user "$(id -u):$(id -g)" \
     --volume "$PWD:/data" \
     --workdir /data \
-    ghcr.io/vela-tools/cassiopeia:v1.1.1 \
+    ghcr.io/vela-tools/cassiopeia:v1.2.0 \
     map \
     --input data/counts.json \
     --mapping counter.json5 \
@@ -186,7 +186,8 @@ One day comes out with its twenty-four counts in order under `valueList`:
     },
     "dateObserved": {
         "type": "Property",
-        "value": "2026-07-01"
+        "value": "2026-07-01",
+        "valueType": "Date"
     },
     "location": {
         "type": "GeoProperty",

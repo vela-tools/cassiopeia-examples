@@ -49,7 +49,7 @@ intenseDays: {
 },
 ```
 
-Cassiopeia preserves headers as written, so the text inside the brackets must match the file exactly.
+Cassiopeia keeps a header's text as written, apart from the spaces around it, so the text inside the brackets must match the header exactly.
 
 ## Write the mapping
 
@@ -128,7 +128,7 @@ docker run --rm \
     --user "$(id -u):$(id -g)" \
     --volume "$PWD:/data" \
     --workdir /data \
-    ghcr.io/vela-tools/cassiopeia:v1.1.1 \
+    ghcr.io/vela-tools/cassiopeia:v1.2.0 \
     map \
     --input data/precipitation.csv \
     --mapping precipitation.json5 \

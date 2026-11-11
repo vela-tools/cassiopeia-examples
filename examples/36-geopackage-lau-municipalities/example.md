@@ -4,6 +4,9 @@ A GeoPackage is a single SQLite file that holds geographic tables. This example 
 
 The idea this example adds is that a GeoPackage carries its own coordinate reference system. This file stores its geometry as metres on the European equal-area grid, EPSG:3035, and Cassiopeia reprojects every outline to the WGS 84 longitude and latitude a `GeoProperty` needs, with nothing in the mapping to ask for it. A shapefile does the same from its `.prj`, as [example 15](../15-shapefile-enum-decoding/example.md) describes for a file already in WGS 84. [The next example](../37-geopackage-multiple-tables/example.md) takes on a GeoPackage with many tables.
 
+> [!WARNING]
+> This example reads a GeoPackage, which needs SQLite. The prebuilt release binaries do not include it (`--no-default-features`) and report a GeoPackage as unsupported, so they cannot run this example; the container image can. A source build with the default features compiles SQLite itself, as described in [Getting started](https://vela-tools.github.io/cassiopeia/docs/guides/getting-started#geopackage-and-sqlite).
+
 ## Get the data
 
 Eurostat's GISCO service publishes the local administrative units (LAU) once a year. The 2024 edition in the EPSG:3035 projection is a single file of 78 MB, and Eurostat offers no per-country cut of it, so the example reads all of Europe. GISCO grants a non-exclusive right to use the data; commercial use needs a EuroGeographics licence, and the boundaries stay their copyright, as in [example 31](../31-geojson-geometry-conversion/example.md).
@@ -104,7 +107,7 @@ docker run --rm \
     --user "$(id -u):$(id -g)" \
     --volume "$PWD:/data" \
     --workdir /data \
-    ghcr.io/vela-tools/cassiopeia:v1.1.1 \
+    ghcr.io/vela-tools/cassiopeia:v1.2.0 \
     map \
     --input data/lau.gpkg \
     --mapping lau.json5 \

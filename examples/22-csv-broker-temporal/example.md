@@ -17,13 +17,13 @@ NOAA's [HURDAT2](https://www.nhc.noaa.gov/data/#hurdat) Atlantic best-track data
 curl --fail --location --output data/hurdat2-atlantic.txt https://www.nhc.noaa.gov/data/hurdat/hurdat2-1851-2025-02272026.txt
 ```
 
-HURDAT2 is not a plain CSV. Before each storm it has a one-line **header** containing the storm's id, name, and number of track rows. The following rows carry no storm id of their own:
+HURDAT2 is not a plain CSV. Before each storm it has a one-line **header** containing the storm's id, name, and number of track rows. The following rows carry no storm id of their own. KATRINA's header and the first three of its 34 track rows:
 
 ```text
 AL122005,            KATRINA,     34,
 20050823, 1800,  , TD, 23.1N,  75.1W,  30, 1008, ...
-20050824, 1200,  , TS, 24.5N,  76.5W,  45, -999, ...
-20050828, 1800,  , HU, 26.3N,  89.6W, 145,  902, ...
+20050824, 0000,  , TD, 23.4N,  75.7W,  30, 1007, ...
+20050824, 0600,  , TD, 23.8N,  76.2W,  30, 1007, ...
 ```
 
 The file has no single header for all rows, so the generic CSV ingestor cannot read it directly. The example includes a small **preprocessing script**, [flatten.awk](flatten.awk), which copies each storm's ID and name onto its track rows and separates the packed date and time. Run it once:
@@ -41,8 +41,8 @@ After flattening, the ingestor sees an ordinary headed CSV with one row per six-
 ```text
 storm_id,name,date,time,record_id,status,lat,lon,max_wind,min_pressure
 AL122005,KATRINA,2005-08-23,18:00,,TD,23.1N,75.1W,30,1008
-AL122005,KATRINA,2005-08-24,12:00,,TS,24.5N,76.5W,45,-999
-AL122005,KATRINA,2005-08-28,18:00,,HU,26.3N,89.6W,145,902
+AL122005,KATRINA,2005-08-24,00:00,,TD,23.4N,75.7W,30,1007
+AL122005,KATRINA,2005-08-24,06:00,,TD,23.8N,76.2W,30,1007
 ```
 
 `lat` and `lon` include hemisphere letters (`23.1N`, `75.1W`). `max_wind` is one-minute sustained wind in knots, and `min_pressure` is central pressure in hectopascals, or `-999` when it was not measured.
@@ -169,31 +169,10 @@ location: {
 Before sending data to a broker, run the mapping twice to a file and compare the two shapes. First, use the default current-state representation:
 
 ```bash
-cassiopeia map \
-    --manifest manifest.json5
+cassiopeia map -i data/cyclones.csv -m cyclone.json5 --type csv --writer file --output out --context none
 ```
 
-The same run in a container mounts this directory at `/data` and makes it the working directory, so the paths do not change. For Podman, replace `docker` with `podman` and drop the `--user` line: rootless Podman already maps the container's root to your user. `--network host` is what lets the container reach the broker: the manifest names `http://localhost:9090/`, and without it `localhost` is the container rather than the machine the broker is published on.
-
-```bash
-docker run --rm \
-    --user "$(id -u):$(id -g)" \
-    --network host \
-    --volume "$PWD:/data" \
-    --workdir /data \
-    ghcr.io/vela-tools/cassiopeia:v1.1.1 \
-    map \
-    --manifest manifest.json5
-```
-
-From the repository root, the runner downloads the dataset, runs the mapping, and checks the output in one step:
-
-```bash
-cargo run -- run 22
-cargo run -- run 22 --runtime docker
-```
-
-`out/TropicalCyclone.json` holds **one** object for the storm, each attribute keeping its latest observation. KATRINA's three rows collapse to the reading from 2005-08-28, its peak:
+`out/TropicalCyclone.json` holds **one** object per storm, each attribute keeping its latest observation. KATRINA's 34 rows collapse to its last fix, from 2005-08-31, when it had weakened to 25 knots:
 
 ```json
 {
@@ -205,31 +184,31 @@ cargo run -- run 22 --runtime docker
     },
     "maxSustainedWind": {
         "type": "Property",
-        "value": 145.0,
-        "observedAt": "2005-08-28T18:00:00Z",
+        "value": 25.0,
+        "observedAt": "2005-08-31T06:00:00Z",
         "unitCode": "KNT"
     },
     "minPressure": {
         "type": "Property",
-        "value": 902,
-        "observedAt": "2005-08-28T18:00:00Z",
+        "value": 996,
+        "observedAt": "2005-08-31T06:00:00Z",
         "unitCode": "A97"
     },
     "category": {
         "type": "Property",
-        "value": "Category 5",
-        "observedAt": "2005-08-28T18:00:00Z"
+        "value": "Tropical Depression",
+        "observedAt": "2005-08-31T06:00:00Z"
     },
     "location": {
         "type": "GeoProperty",
         "value": {
             "type": "Point",
             "coordinates": [
-                -89.6,
-                26.3
+                -82.9,
+                40.1
             ]
         },
-        "observedAt": "2005-08-28T18:00:00Z"
+        "observedAt": "2005-08-31T06:00:00Z"
     }
 }
 ```
@@ -240,7 +219,7 @@ Each attribute's records are ranked by `observedAt`; the latest wins. Now ask fo
 cassiopeia map -i data/cyclones.csv -m cyclone.json5 --type csv --writer file --output out --temporal-representation series --context none
 ```
 
-Now `out/TropicalCyclone.json` holds **one** object per storm, folded into an EntityTemporal, with each temporal attribute stored as a time-ordered array:
+Now `out/TropicalCyclone.json` holds **one** object per storm, folded into an EntityTemporal, with each temporal attribute stored as a time-ordered array. KATRINA's arrays hold 34 instances each; the first three are shown:
 
 ```json
 {
@@ -259,14 +238,14 @@ Now `out/TropicalCyclone.json` holds **one** object per storm, folded into an En
         },
         {
             "type": "Property",
-            "value": 45.0,
-            "observedAt": "2005-08-24T12:00:00Z",
+            "value": 30.0,
+            "observedAt": "2005-08-24T00:00:00Z",
             "unitCode": "KNT"
         },
         {
             "type": "Property",
-            "value": 145.0,
-            "observedAt": "2005-08-28T18:00:00Z",
+            "value": 30.0,
+            "observedAt": "2005-08-24T06:00:00Z",
             "unitCode": "KNT"
         }
     ],
@@ -279,8 +258,14 @@ Now `out/TropicalCyclone.json` holds **one** object per storm, folded into an En
         },
         {
             "type": "Property",
-            "value": 902,
-            "observedAt": "2005-08-28T18:00:00Z",
+            "value": 1007,
+            "observedAt": "2005-08-24T00:00:00Z",
+            "unitCode": "A97"
+        },
+        {
+            "type": "Property",
+            "value": 1007,
+            "observedAt": "2005-08-24T06:00:00Z",
             "unitCode": "A97"
         }
     ],
@@ -292,13 +277,13 @@ Now `out/TropicalCyclone.json` holds **one** object per storm, folded into an En
         },
         {
             "type": "Property",
-            "value": "Tropical Storm",
-            "observedAt": "2005-08-24T12:00:00Z"
+            "value": "Tropical Depression",
+            "observedAt": "2005-08-24T00:00:00Z"
         },
         {
             "type": "Property",
-            "value": "Category 5",
-            "observedAt": "2005-08-28T18:00:00Z"
+            "value": "Tropical Depression",
+            "observedAt": "2005-08-24T06:00:00Z"
         }
     ],
     "location": [
@@ -318,28 +303,28 @@ Now `out/TropicalCyclone.json` holds **one** object per storm, folded into an En
             "value": {
                 "type": "Point",
                 "coordinates": [
-                    -76.5,
-                    24.5
+                    -75.7,
+                    23.4
                 ]
             },
-            "observedAt": "2005-08-24T12:00:00Z"
+            "observedAt": "2005-08-24T00:00:00Z"
         },
         {
             "type": "GeoProperty",
             "value": {
                 "type": "Point",
                 "coordinates": [
-                    -89.6,
-                    26.3
+                    -76.2,
+                    23.8
                 ]
             },
-            "observedAt": "2005-08-28T18:00:00Z"
+            "observedAt": "2005-08-24T06:00:00Z"
         }
     ]
 }
 ```
 
-In the series result, `name` stays a single static value. Each temporal attribute is sorted oldest first, so its array follows the storm through time. `minPressure` has only two instances because the `-999` row contributed nothing. The missing pressure appears as a gap in the series.
+In the series result, `name` stays a single static value. Each temporal attribute is sorted oldest first, so its array follows the storm through time. KATRINA's pressure was measured at every fix, so `minPressure` has as many instances as the other attributes. A `-999` row contributes nothing to `minPressure`, so a storm whose pressure was not always measured has a shorter array: ANNA in 1976 (AL061976) holds 37 wind instances and 9 pressures.
 
 ## Send it to a broker
 
@@ -371,7 +356,28 @@ docker compose up -d
 Then run the mapping through the manifest:
 
 ```bash
-cassiopeia map --manifest manifest.json5
+cassiopeia map \
+    --manifest manifest.json5
+```
+
+The same run in a container mounts this directory at `/data` and makes it the working directory, so the paths do not change. For Podman, replace `docker` with `podman` and drop the `--user` line: rootless Podman already maps the container's root to your user. `--network host` is what lets the container reach the broker: the manifest names `http://localhost:9090/`, and without it `localhost` is the container rather than the machine the broker is published on.
+
+```bash
+docker run --rm \
+    --user "$(id -u):$(id -g)" \
+    --network host \
+    --volume "$PWD:/data" \
+    --workdir /data \
+    ghcr.io/vela-tools/cassiopeia:v1.2.0 \
+    map \
+    --manifest manifest.json5
+```
+
+From the repository root, the runner downloads and prepares the dataset, starts the broker, runs the mapping, and checks KATRINA's track at the temporal endpoint in one step:
+
+```bash
+cargo run -- run 22
+cargo run -- run 22 --runtime docker
 ```
 
 Cassiopeia sends one POST per storm to the temporal endpoint, with the folded track rather than one request per observation.

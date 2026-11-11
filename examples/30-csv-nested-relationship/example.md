@@ -81,14 +81,14 @@ hasCast: {
     source: "{% for member in cast | json_decode %}{{ member.id }} {% endfor %}",
     properties: {
         castSize: {
-            source: "{{ cast | json_decode | length }}",
+            source: "{{ cast | json_decode | group_by(attribute='id') | length }}",
             transformation: "integer",
         },
     },
 },
 ```
 
-The loop prints one id per cast member, separated by spaces. `ListRelationship` splits those ids into target objects, while `castSize` counts the members once for the complete list.
+The loop prints one id per cast member, separated by spaces. `ListRelationship` splits those ids into target objects and links each target once, in the order it first appears, so an actor credited for two roles appears once in the `objectList`. `castSize` counts the same way: `group_by` keys the cast by `id`, and the length of the result is the number of distinct members, which is the size of the list.
 
 ## Run it
 
@@ -104,7 +104,7 @@ docker run --rm \
     --user "$(id -u):$(id -g)" \
     --volume "$PWD:/data" \
     --workdir /data \
-    ghcr.io/vela-tools/cassiopeia:v1.1.1 \
+    ghcr.io/vela-tools/cassiopeia:v1.2.0 \
     map \
     --manifest manifest.json5
 ```

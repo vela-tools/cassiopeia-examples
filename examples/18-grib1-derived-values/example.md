@@ -5,11 +5,11 @@ GRIB stores gridded weather data as one field per parameter. Temperature is in K
 It reuses the coordinate-derived `geohash` identity from [keeping same-named entities apart](../02-json-id-collision/example.md) and the `unitCode` qualifier from [units and a timestamped observation](../14-xml-unit-code/example.md).
 
 > [!WARNING]
-> This example decodes GRIB1 and therefore requires ecCodes. The prebuilt release binaries do not include it (`--no-default-features`), so they cannot run this example. Install ecCodes and build from source with the default features, as described in [Getting started](https://vela-tools.github.io/cassiopeia/docs/guides/getting-started#grib1-and-eccodes). ecCodes also provides the `grib_copy` and `grib_ls` tools used below.
+> This example decodes GRIB1 and therefore needs ecCodes. The prebuilt release binaries do not include it (`--no-default-features`), so they cannot run this example; the container image can. A source build with the default features compiles ecCodes itself and needs CMake, a C and C++ compiler, `git`, `libclang`, and OpenJPEG, as described in [Getting started](https://vela-tools.github.io/cassiopeia/docs/guides/getting-started#grib1-and-eccodes). The `grib_copy` and `grib_ls` tools used below come from a separate ecCodes install.
 
 ## Get the data
 
-GRIB1 support uses ecCodes, so install it first (`brew install eccodes`, or the equivalent package for your platform). Its command-line tools can also trim the file before mapping.
+The commands below trim the file with ecCodes' command-line tools, so install them first (`brew install eccodes`, or the equivalent package for your platform). Cassiopeia does not need them to read the file.
 
 The nowcast files roll over hourly. The commands fetch the newest archive, unpack its single GRIB member, and keep only the analysis step (`+0h`, forecast step `0`) with `grib_copy`:
 
@@ -50,14 +50,14 @@ A GRIB file stores one field per parameter, while an observation entity needs co
 
 ```json
 {
-    "latitude": 46.0658,
-    "longitude": 14.5172,
+    "latitude": 46.06697164994321,
+    "longitude": 14.518358996067146,
     "level_type": "height_above_ground",
     "level": 10,
-    "referenceTime": "2026-08-24T10:00:00+00:00",
-    "forecastTime": "2026-08-24T10:00:00+00:00",
-    "wind_u": -1.42,
-    "wind_v": 0.63
+    "referenceTime": "2026-11-11T10:00:00+00:00",
+    "forecastTime": "2026-11-11T10:00:00+00:00",
+    "wind_u": -0.5100002288818359,
+    "wind_v": -0.6900005340576172
 }
 ```
 
@@ -145,7 +145,7 @@ docker run --rm \
     --volume "$PWD:/data" \
     --volume "$HOME/.cache/cassiopeia-examples/schemas:/var/lib/cassiopeia/schemas" \
     --workdir /data \
-    ghcr.io/vela-tools/cassiopeia:v1.1.1 \
+    ghcr.io/vela-tools/cassiopeia:v1.2.0 \
     map \
     --input data/nowcast.grb \
     --mapping weather.json5 \
@@ -184,21 +184,22 @@ One cell, near Ljubljana, carries the derived quantities with their units:
     },
     "dateObserved": {
         "type": "Property",
-        "value": "2026-08-24T10:00:00.000Z"
+        "value": "2026-11-11T10:00:00Z",
+        "valueType": "DateTime"
     },
     "temperature": {
         "type": "Property",
-        "value": 25.25,
+        "value": 9.659814453125023,
         "unitCode": "CEL"
     },
     "windSpeed": {
         "type": "Property",
-        "value": 2.05,
+        "value": 0.8580215442862271,
         "unitCode": "MTS"
     },
     "windDirection": {
         "type": "Property",
-        "value": 100,
+        "value": 36,
         "unitCode": "DD"
     }
 }

@@ -55,7 +55,7 @@ One projected product looks like this. Nutriment values are under `nutriments`, 
 
 ## Why normalized, and why a custom schema
 
-Smart Data Model schemas describe the simplified form and its three core types: Property, Relationship, and GeoProperty. They cannot describe a LanguageProperty's `languageMap`, a VocabProperty's `vocab`, a ListProperty's `valueList`, or a Property's `unitCode` and `observedAt`, because those details disappear in key-values. To validate them, the run uses the **normalized** representation and a schema written for it. Set `validation.representation` to `"normalized"` and provide the custom schema; the mapping does not change.
+Smart Data Model schemas describe the simplified form and its three core types: Property, Relationship, and GeoProperty. Key-values keeps only an attribute's value: it drops each attribute's `type`, its `unitCode`, `observedAt`, `datasetId`, and sub-attributes, writes a ListProperty as a bare array, and reduces a LanguageProperty or VocabProperty to its `languageMap` or `vocab` member. So the schema cannot check an attribute's type or any of those qualifiers. To validate them, the run uses the **normalized** representation and a schema written for it. Set `validation.representation` to `"normalized"` and provide the custom schema; the mapping does not change.
 
 The `FoodProduct` attributes cover different parts of the normalized shape:
 
@@ -346,7 +346,7 @@ docker run --rm \
     --user "$(id -u):$(id -g)" \
     --volume "$PWD:/data" \
     --workdir /data \
-    ghcr.io/vela-tools/cassiopeia:v1.1.1 \
+    ghcr.io/vela-tools/cassiopeia:v1.2.0 \
     map \
     --manifest manifest.json5
 ```
@@ -384,13 +384,13 @@ One normalized entity looks like this. It includes every wrapper and qualifier c
     "energy": [
         {
             "type": "Property",
-            "value": 539,
+            "value": 539.0,
             "unitCode": "E14",
             "datasetId": "urn:ngsi-ld:Dataset:per-100g"
         },
         {
             "type": "Property",
-            "value": 81,
+            "value": 81.0,
             "unitCode": "E14",
             "datasetId": "urn:ngsi-ld:Dataset:per-serving"
         }

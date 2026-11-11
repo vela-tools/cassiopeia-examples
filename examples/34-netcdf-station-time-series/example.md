@@ -1,17 +1,19 @@
 # Mapping NetCDF station time series
 
-The [previous example](../33-netcdf-grid-subset/example.md) read a NetCDF grid, one record per cell. Weather buoys and monitoring stations publish a different shape: a few fixed stations, each with its own series of observations. The CF conventions call it a time series feature type, and data servers such as ERDDAP write it straight from a query. This example maps a day of the Irish Weather Buoy Network to one `WeatherObserved` entity per buoy. The new idea is how the station layout flattens: every observation becomes a record that carries its station's identifier and position, so a station identity and the `observedAt` of the [observedAt example](../07-csv-observed-at/example.md) apply unchanged.
+The [previous example](../33-netcdf-grid-subset/example.md) read a NetCDF grid, one record per cell. Weather buoys and monitoring stations publish a different shape: a few fixed stations, each with its own series of observations. The CF conventions call it a time series feature type, and data servers such as ERDDAP write it straight from a query. This example maps a day of six NOAA weather buoys around Hawaii to one `WeatherObserved` entity per buoy. The new idea is how the station layout flattens: every observation becomes a record that carries its station's identifier and position, so a station identity and the `observedAt` of the [observedAt example](../07-csv-observed-at/example.md) apply unchanged.
 
 ## Get the data
 
-The [Marine Institute](https://www.marine.ie/) runs the Irish Weather Buoy Network with Met Éireann: five moored buoys around the coast of Ireland that report hourly. The institute serves the readings from its [ERDDAP server](https://erddap.marine.ie/erddap/) under CC BY 4.0. ERDDAP builds a file from the query in the URL. The `.ncCF` suffix asks for NetCDF in the layout CF defines for station data, the part before the first `&` names the columns, and the rest selects one day:
+NOAA's [National Data Buoy Center (NDBC)](https://www.ndbc.noaa.gov/) runs moored weather buoys from the Atlantic to the Pacific. This example takes six of them, moored in open water around Hawaii 150 to 200 nautical miles from the nearest island, which report the weather every ten minutes. The Environmental Research Division of NOAA Fisheries' Southwest Fisheries Science Center serves a standardized copy of NDBC's standard meteorological data from its [ERDDAP server](https://coastwatch.pfeg.noaa.gov/erddap/info/cwwcNDBCMet/index.html). NDBC is part of the National Weather Service, whose information is in the public domain, and the dataset's own licence lets the data be used and redistributed for free, without warranty.
+
+ERDDAP builds a file from the query in the URL. The `.ncCF` suffix asks for NetCDF in the layout CF defines for station data, and the part before the first `&` names the columns. `station=~` takes a regular expression, here the six station numbers joined by `|`, which the URL writes with its quotes as `%22` and its bars as `%7C`. The rest selects one day:
 
 ```bash
 mkdir -p data
-curl --fail --location --output data/buoys.nc "https://erddap.marine.ie/erddap/tabledap/IWBNetwork.ncCF?station_id,longitude,latitude,time,AtmosphericPressure,AirTemperature,RelativeHumidity,WindDirection,WindSpeed,Gust&time%3E=2024-06-01T00:00:00Z&time%3C2024-06-02T00:00:00Z"
+curl --fail --location --output data/buoys.nc "https://coastwatch.pfeg.noaa.gov/erddap/tabledap/cwwcNDBCMet.ncCF?station,longitude,latitude,time,WD,WSPD,GST,BAR,ATMP,DEWP&station=~%2251000%7C51001%7C51002%7C51003%7C51004%7C51101%22&time%3E=2024-06-01T00:00:00Z&time%3C2024-06-02T00:00:00Z"
 ```
 
-The day is 1 June 2024, so the file is the same every time: 115 hourly observations from the five buoys, M2 to M6, in about twenty kilobytes.
+The day is 1 June 2024. A day that old comes from NDBC's quality-controlled yearly archive rather than its real-time feed, so the readings are the same every time: 864 observations, 144 from each of the buoys 51000 to 51004 and 51101, in just under forty kilobytes.
 
 ## Get the schema
 
@@ -26,52 +28,68 @@ cassiopeia sdm download
 The file declares `featureType = "TimeSeries"`. It holds each buoy once, along a `timeseries` dimension, and every observation once, along an `obs` dimension. The observations of one buoy are stored one after another, and `rowSize` says how many belong to each buoy, the contiguous ragged array of CF 1.11 section 9.3.3:
 
 ```text
-char station_id(timeseries, station_id_strlen) ;
-    station_id:cf_role = "timeseries_id" ;
-double longitude(timeseries) ;
-double latitude(timeseries) ;
+char station(timeseries, station_strlen) ;
+    station:cf_role = "timeseries_id" ;
+float longitude(timeseries) ;
+float latitude(timeseries) ;
 int rowSize(timeseries) ;
     rowSize:sample_dimension = "obs" ;
 double time(obs) ;
-double AirTemperature(obs) ;
+    time:units = "seconds since 1970-01-01T00:00:00Z" ;
+float DEWP(obs) ;
+    DEWP:_FillValue = -9999999.f ;
 ```
 
-Cassiopeia works out which buoy each observation belongs to and gives every observation a record of its own, with the buoy's variables copied in. The first observation of M2:
+Cassiopeia works out which buoy each observation belongs to and gives every observation a record of its own, with the buoy's variables copied in. The time axis counts seconds since 1970 and names no calendar, so it is the standard calendar, and Cassiopeia decodes each value into the RFC 3339 timestamp it names. The first observation of 51000:
 
 ```json
 {
-    "latitude": 53.4836,
-    "longitude": -5.4302,
+    "latitude": 23.546,
+    "longitude": -154.056,
     "time": "2024-06-01T00:00:00+00:00",
-    "station_id": "M2",
-    "AtmosphericPressure": 1027.869,
-    "AirTemperature": 11.973,
-    "RelativeHumidity": 83.691,
-    "WindDirection": 349.0,
-    "WindSpeed": 10.929,
-    "Gust": 14.345
+    "station": "51000",
+    "WD": 74.0,
+    "WSPD": 7.7,
+    "GST": 10.1,
+    "BAR": 1020.0,
+    "ATMP": 23.5,
+    "DEWP": 19.8
 }
 ```
 
-A reading a buoy missed is stored as the `_FillValue`, -999, and is left out of the record. The mapping reads every field shown. The [station time series guide](https://vela-tools.github.io/cassiopeia/docs/guides/source-formats#station-time-series) covers the other layouts CF allows, which give the same records.
+`WD` is the wind direction, `WSPD` and `GST` the wind speed and gust, `BAR` the pressure, `ATMP` the air temperature, and `DEWP` the dew point. A reading a buoy missed is stored as the variable's `_FillValue`, -9999999 for the float variables and 32767 for the wind direction, and is left out of the record. On this day 51101 reported no dew point and 51004 no pressure, so every record of 51101 lacks `DEWP`:
 
-The file's time axis declares `calendar = "julian"`. Between 1901 and 2099 the Julian and Gregorian calendars have the same leap years, so counted from a 1970 epoch both give the same dates, and the timestamps come out as the day the query asked for.
+```json
+{
+    "latitude": 24.321,
+    "longitude": -162.058,
+    "time": "2024-06-01T00:00:00+00:00",
+    "station": "51101",
+    "WD": 70.0,
+    "WSPD": 7.2,
+    "GST": 8.6,
+    "BAR": 1022.2,
+    "ATMP": 24.4
+}
+```
+
+The mapping reads every field shown. The [station time series guide](https://vela-tools.github.io/cassiopeia/docs/guides/source-formats#station-time-series) covers the other layouts CF allows, which give the same records.
 
 ## One entity per buoy
 
-`station_id` is the variable the file marks with `cf_role = "timeseries_id"`, the identifier of each series, so it is the identity:
+`station` is the variable the file marks with `cf_role = "timeseries_id"`, the identifier of each series, so it is the identity:
 
 ```json5
 identity: {
-    entityName: "{{ station_id }}",
+    entityName: "{{ station }}",
 },
 ```
 
-All the hourly records of a buoy now share one entity. Each reading carries an `observedAt` read from the record's `time`, so the readings rank by time instead of overwriting one another, and the latest one wins:
+All the records of a buoy now share one entity. Each reading carries an `observedAt` read from the record's `time`, so the readings rank by time instead of overwriting one another, and the latest one wins:
 
 ```json5
 temperature: {
-    source: "{{ AirTemperature }}",
+    source: "{{ ATMP }}",
     type: "Property",
     transformation: "float",
     properties: {
@@ -87,25 +105,26 @@ temperature: {
 },
 ```
 
-`dateObserved`, which the model requires, carries the same `observedAt`, so it follows the readings to the latest hour. The result is each buoy's current state. To keep the whole day as a series instead, add `--temporal-representation series`, as the observedAt example shows.
+`dateObserved`, which the model requires, carries the same `observedAt`, so it follows the readings to the last one of the day, at 23:50. The result is each buoy's current state. To keep the whole day as a series instead, add `--temporal-representation series`, as the observedAt example shows.
 
-## Converting the units
+## From dew point to humidity
 
-The network reports in the units mariners use, and `WeatherObserved` expects SI units and ratios:
+ERDDAP serves NDBC's readings in the units `WeatherObserved` expects, so most of them pass through with only their UN/CEFACT code beside them:
 
-- **Wind speed and gust** are in knots. A knot is 1852 metres an hour, so the mapping multiplies by 1852 and divides by 3600 to get metres per second (`MTS`).
-- **Relative humidity** is a percentage, and the model wants a ratio in `[0, 1]` (`C62`).
-- **Pressure** is in millibars, which are hectopascals (`A97`), so it passes through.
-- **Air temperature** is already in degrees Celsius (`CEL`), and **wind direction** in degrees (`DD`).
+- **Wind speed and gust** are in metres per second (`MTS`).
+- **Pressure** is in hectopascals (`A97`).
+- **Air temperature and dew point** are in degrees Celsius (`CEL`), and **wind direction** in degrees from true north (`DD`).
+
+The model also takes a relative humidity, as a ratio in `[0, 1]` (`C62`). The buoys report the dew point instead: the temperature to which the air would have to cool for its water vapour to condense. Together with the air temperature, the dew point fixes the relative humidity, and the Magnus formula converts one into the other. With the air temperature `T` and the dew point `Td` in degrees Celsius, the ratio is `exp(17.625 Td / (243.04 + Td) - 17.625 T / (243.04 + T))`, with the coefficients of Alduchov and Eskridge (1996):
 
 ```json5
-windSpeed: {
-    source: "{% if WindSpeed is defined %}{% set metres = WindSpeed * 1852 / 3600 %}{{ metres | round(precision=2) }}{% endif %}",
+relativeHumidity: {
+    source: "{% if ATMP is defined and DEWP is defined %}{% set exponent = 17.625 * DEWP / (243.04 + DEWP) - 17.625 * ATMP / (243.04 + ATMP) %}{{ exponent | exp | round(precision=4) }}{% endif %}",
     type: "Property",
     transformation: "float",
     properties: {
         unitCode: {
-            source: "MTS",
+            source: "C62",
         },
         observedAt: {
             source: "{{ time }}",
@@ -116,7 +135,7 @@ windSpeed: {
 },
 ```
 
-The `{% if ... is defined %}` guard matters here. A missed reading is absent from the record, and arithmetic on an absent field fails the template. A plain reference such as `{{ AirTemperature }}` needs no guard: an absent field resolves to nothing, and the attribute is left out of that record.
+The `{% if ... is defined %}` guard matters here. A missed reading is absent from the record, and arithmetic on an absent field fails the template. Without the guard, the template fails for 51101, and the run drops the attribute with a warning that names the missing `DEWP`. With it, 51101 gives no humidity and the run stays clean. A plain reference such as `{{ DEWP }}` or `{{ BAR }}` needs no guard: an absent field resolves to nothing, and the attribute is left out of that record.
 
 ## Run it
 
@@ -140,7 +159,7 @@ docker run --rm \
     --volume "$PWD:/data" \
     --volume "$HOME/.cache/cassiopeia-examples/schemas:/var/lib/cassiopeia/schemas" \
     --workdir /data \
-    ghcr.io/vela-tools/cassiopeia:v1.1.1 \
+    ghcr.io/vela-tools/cassiopeia:v1.2.0 \
     map \
     --input data/buoys.nc \
     --mapping weather.json5 \
@@ -157,138 +176,138 @@ cargo run -- run 34
 cargo run -- run 34 --runtime docker
 ```
 
-This writes `out/WeatherObserved.json`, five `WeatherObserved` entities made from the 115 records, one for each buoy.
+This writes `out/WeatherObserved.json`, six `WeatherObserved` entities made from the 864 records, one for each buoy.
 
 ## Read the result
 
-M2, off the east coast in the Irish Sea, at its last reading of the day:
+51000, about 250 nautical miles northeast of Honolulu, at its last reading of the day:
 
 ```json
 {
-    "id": "urn:ngsi-ld:WeatherObserved:M2",
+    "id": "urn:ngsi-ld:WeatherObserved:51000",
     "type": "WeatherObserved",
     "stationCode": {
         "type": "Property",
-        "value": "M2"
+        "value": "51000"
     },
     "location": {
         "type": "GeoProperty",
         "value": {
             "type": "Point",
             "coordinates": [
-                -5.4302,
-                53.4836
+                -154.056,
+                23.546
             ]
         }
     },
     "dateObserved": {
         "type": "Property",
-        "value": "2024-06-01T23:00:00Z",
+        "value": "2024-06-01T23:50:00Z",
         "valueType": "DateTime",
-        "observedAt": "2024-06-01T23:00:00Z"
+        "observedAt": "2024-06-01T23:50:00Z"
     },
     "temperature": {
         "type": "Property",
-        "value": 11.875,
-        "observedAt": "2024-06-01T23:00:00Z",
+        "value": 23.7,
+        "observedAt": "2024-06-01T23:50:00Z",
+        "unitCode": "CEL"
+    },
+    "dewPoint": {
+        "type": "Property",
+        "value": 19.0,
+        "observedAt": "2024-06-01T23:50:00Z",
         "unitCode": "CEL"
     },
     "relativeHumidity": {
         "type": "Property",
-        "value": 0.8506,
-        "observedAt": "2024-06-01T23:00:00Z",
+        "value": 0.7497,
+        "observedAt": "2024-06-01T23:50:00Z",
         "unitCode": "C62"
     },
     "atmosphericPressure": {
         "type": "Property",
-        "value": 1031.018,
-        "observedAt": "2024-06-01T23:00:00Z",
+        "value": 1019.9,
+        "observedAt": "2024-06-01T23:50:00Z",
         "unitCode": "A97"
     },
     "windDirection": {
         "type": "Property",
-        "value": 3,
-        "observedAt": "2024-06-01T23:00:00Z",
+        "value": 62,
+        "observedAt": "2024-06-01T23:50:00Z",
         "unitCode": "DD"
     },
     "windSpeed": {
         "type": "Property",
-        "value": 6.27,
-        "observedAt": "2024-06-01T23:00:00Z",
+        "value": 8.5,
+        "observedAt": "2024-06-01T23:50:00Z",
         "unitCode": "MTS"
     },
     "gustSpeed": {
         "type": "Property",
-        "value": 7.79,
-        "observedAt": "2024-06-01T23:00:00Z",
+        "value": 10.3,
+        "observedAt": "2024-06-01T23:50:00Z",
         "unitCode": "MTS"
     }
 }
 ```
 
-M6, far out in the Atlantic west of Ireland, at the same hour:
+51101, about 186 nautical miles northwest of Kauai, at the same time. It reported no dew point all day, so its entity has neither `dewPoint` nor `relativeHumidity`:
 
 ```json
 {
-    "id": "urn:ngsi-ld:WeatherObserved:M6",
+    "id": "urn:ngsi-ld:WeatherObserved:51101",
     "type": "WeatherObserved",
     "stationCode": {
         "type": "Property",
-        "value": "M6"
+        "value": "51101"
     },
     "location": {
         "type": "GeoProperty",
         "value": {
             "type": "Point",
             "coordinates": [
-                -15.88135,
-                53.07482
+                -162.058,
+                24.321
             ]
         }
     },
     "dateObserved": {
         "type": "Property",
-        "value": "2024-06-01T23:00:00Z",
+        "value": "2024-06-01T23:50:00Z",
         "valueType": "DateTime",
-        "observedAt": "2024-06-01T23:00:00Z"
+        "observedAt": "2024-06-01T23:50:00Z"
     },
     "temperature": {
         "type": "Property",
-        "value": 12.803,
-        "observedAt": "2024-06-01T23:00:00Z",
+        "value": 24.1,
+        "observedAt": "2024-06-01T23:50:00Z",
         "unitCode": "CEL"
-    },
-    "relativeHumidity": {
-        "type": "Property",
-        "value": 0.9082,
-        "observedAt": "2024-06-01T23:00:00Z",
-        "unitCode": "C62"
     },
     "atmosphericPressure": {
         "type": "Property",
-        "value": 1034.656,
-        "observedAt": "2024-06-01T23:00:00Z",
+        "value": 1022.7,
+        "observedAt": "2024-06-01T23:50:00Z",
         "unitCode": "A97"
     },
     "windDirection": {
         "type": "Property",
-        "value": 269,
-        "observedAt": "2024-06-01T23:00:00Z",
+        "value": 75,
+        "observedAt": "2024-06-01T23:50:00Z",
         "unitCode": "DD"
     },
     "windSpeed": {
         "type": "Property",
-        "value": 4.28,
-        "observedAt": "2024-06-01T23:00:00Z",
+        "value": 7.3,
+        "observedAt": "2024-06-01T23:50:00Z",
         "unitCode": "MTS"
     },
     "gustSpeed": {
         "type": "Property",
-        "value": 5.51,
-        "observedAt": "2024-06-01T23:00:00Z",
+        "value": 9.5,
+        "observedAt": "2024-06-01T23:50:00Z",
         "unitCode": "MTS"
     }
 }
 ```
 
-`observedAt` sits beside each value as the temporal property that records when the reading was observed (ETSI GS CIM 009 v1.9.1, clause 4.8), and `unitCode` beside it gives the reading's unit (clause 4.5.2). M2's 12.182 knots of wind become 6.27 metres per second, and its 85.059 percent humidity becomes the ratio 0.8506.
+`observedAt` sits beside each value as the temporal property that records when the reading was observed (ETSI GS CIM 009 v1.9.1, clause 4.8), and `unitCode` beside it gives the reading's unit (clause 4.5.2). 51000's air temperature of 23.7 degrees and dew point of 19.0 degrees give the relative humidity 0.7497. The entity of 51004, which reported no pressure, has every attribute except `atmosphericPressure`.

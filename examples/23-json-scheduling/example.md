@@ -170,7 +170,7 @@ docker run --rm \
     --volume "$PWD:/data" \
     --volume "$HOME/.cache/cassiopeia-examples/schemas:/var/lib/cassiopeia/schemas" \
     --workdir /data \
-    ghcr.io/vela-tools/cassiopeia:v1.1.1 \
+    ghcr.io/vela-tools/cassiopeia:v1.2.0 \
     map \
     --manifest manifest.json5
 ```
@@ -200,7 +200,8 @@ The station's two sensors become two entities. The SDS011 entity carries the par
     "type": "AirQualityObserved",
     "dateObserved": {
         "type": "Property",
-        "value": "2026-08-25T11:56:33.000Z"
+        "value": "2026-08-25T11:56:33Z",
+        "valueType": "DateTime"
     },
     "location": {
         "type": "GeoProperty",
@@ -235,7 +236,8 @@ The DHT22 entity at the same location carries the climate readings and omits PM1
     "type": "AirQualityObserved",
     "dateObserved": {
         "type": "Property",
-        "value": "2026-08-25T11:56:33.000Z"
+        "value": "2026-08-25T11:56:33Z",
+        "valueType": "DateTime"
     },
     "location": {
         "type": "GeoProperty",

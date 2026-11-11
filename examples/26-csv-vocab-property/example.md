@@ -37,7 +37,7 @@ node	1292047961	46.0457409	14.5061968	bicycle_rental	Bicikelj - Grudnovo nabrež
 
 ## The VocabProperty
 
-A `VocabProperty` stores a vocabulary IRI (ETSI GS CIM 009 v1.9.1 clause 4.5.20). It serializes with a `vocab` member, which must be a well-formed IRI; an invalid bare string produces no attribute. This type suits categories, statuses, and other terms defined by a controlled vocabulary.
+A `VocabProperty` stores a vocabulary IRI (ETSI GS CIM 009 v1.9.1 clause 4.5.20). It serializes with a `vocab` member, which must be an absolute IRI. A value that is not one is dropped, the run warns under `extractor-iri-unreadable`, and the entity is still written. This type suits categories, statuses, and other terms defined by a controlled vocabulary.
 
 The difference from a plain `Property` is the identifier. A `Property` holding `"charging_station"` contains only a literal string, so differently spelled values do not automatically match. A `VocabProperty` holding `https://wiki.openstreetmap.org/wiki/Tag:amenity=charging_station` identifies the term globally. The mapping builds that IRI by inserting the source value into the term's canonical URL:
 
@@ -48,7 +48,7 @@ category: {
 },
 ```
 
-No `transformation` is needed because the resolved source is already an IRI. `VocabProperty` writes it directly to `vocab`: `fuel` yields `.../Tag:amenity=fuel`, `taxi` yields `.../Tag:amenity=taxi`, and so on.
+No `transformation` is needed: a `VocabProperty` defaults to `iri`, which checks that the value is an absolute IRI and writes it in its normal form, and these OpenStreetMap URLs are already normal, so they come out unchanged. Only `iri` or `urn` can be declared on a `VocabProperty`. The result goes to `vocab`: `fuel` yields `.../Tag:amenity=fuel`, `taxi` yields `.../Tag:amenity=taxi`, and so on.
 
 ## Write the mapping
 
@@ -103,7 +103,7 @@ docker run --rm \
     --user "$(id -u):$(id -g)" \
     --volume "$PWD:/data" \
     --workdir /data \
-    ghcr.io/vela-tools/cassiopeia:v1.1.1 \
+    ghcr.io/vela-tools/cassiopeia:v1.2.0 \
     map \
     --input data/amenities.csv \
     --mapping amenity.json5 \

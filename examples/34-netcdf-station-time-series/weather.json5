@@ -1,15 +1,15 @@
 {
     version: "v4",
     dataModel: "dataModel.Weather/WeatherObserved",
-    // One identity per buoy. station_id is the variable the file marks with cf_role
-    // "timeseries_id", and every record of a buoy carries it, so the day's hourly readings are the
-    // same entity observed again. The observedAt on each reading ranks them, and the latest wins.
+    // One identity per buoy. station is the variable the file marks with cf_role "timeseries_id",
+    // and every record of a buoy carries it, so the day's readings are the same entity observed
+    // again. The observedAt on each reading ranks them, and the latest wins.
     identity: {
-        entityName: "{{ station_id }}",
+        entityName: "{{ station }}",
     },
     attributes: {
         stationCode: {
-            source: "{{ station_id }}",
+            source: "{{ station }}",
             type: "Property",
             transformation: "string",
         },
@@ -34,9 +34,9 @@
                 },
             },
         },
-        // The network reports in degrees Celsius. CEL is the UN/CEFACT code for it.
+        // ERDDAP serves NDBC's temperatures in degrees Celsius. CEL is the UN/CEFACT code for it.
         temperature: {
-            source: "{{ AirTemperature }}",
+            source: "{{ ATMP }}",
             type: "Property",
             transformation: "float",
             properties: {
@@ -50,11 +50,28 @@
                 },
             },
         },
-        // The model wants a ratio in [0, 1]; the network reports a percentage. A reading the buoy
-        // missed is masked in the file and absent from the record, and arithmetic on an absent field
-        // fails, so each computed value is guarded.
+        dewPoint: {
+            source: "{{ DEWP }}",
+            type: "Property",
+            transformation: "float",
+            properties: {
+                unitCode: {
+                    source: "CEL",
+                },
+                observedAt: {
+                    source: "{{ time }}",
+                    type: "Property",
+                    transformation: "datetime",
+                },
+            },
+        },
+        // The model wants relative humidity as a ratio in [0, 1]; the buoys report a dew point
+        // instead. The Magnus formula, with the coefficients of Alduchov and Eskridge (1996), gives
+        // the ratio from the dew point and the air temperature. A reading the buoy missed is masked
+        // in the file and absent from the record, and arithmetic on an absent field fails, so the
+        // computation is guarded.
         relativeHumidity: {
-            source: "{% if RelativeHumidity is defined %}{% set ratio = RelativeHumidity / 100 %}{{ ratio | round(precision=4) }}{% endif %}",
+            source: "{% if ATMP is defined and DEWP is defined %}{% set exponent = 17.625 * DEWP / (243.04 + DEWP) - 17.625 * ATMP / (243.04 + ATMP) %}{{ exponent | exp | round(precision=4) }}{% endif %}",
             type: "Property",
             transformation: "float",
             properties: {
@@ -68,9 +85,9 @@
                 },
             },
         },
-        // Millibars and hectopascals are the same unit, so the value passes through. A97 is hectopascal.
+        // NDBC reports pressure in hectopascals, the unit the model uses. A97 is hectopascal.
         atmosphericPressure: {
-            source: "{{ AtmosphericPressure }}",
+            source: "{{ BAR }}",
             type: "Property",
             transformation: "float",
             properties: {
@@ -85,7 +102,7 @@
             },
         },
         windDirection: {
-            source: "{{ WindDirection }}",
+            source: "{{ WD }}",
             type: "Property",
             transformation: "integer",
             properties: {
@@ -99,9 +116,9 @@
                 },
             },
         },
-        // The network reports wind in knots, and a knot is 1852 metres an hour. MTS is metre per second.
+        // NDBC reports wind in metres per second, the unit the model uses. MTS is metre per second.
         windSpeed: {
-            source: "{% if WindSpeed is defined %}{% set metres = WindSpeed * 1852 / 3600 %}{{ metres | round(precision=2) }}{% endif %}",
+            source: "{{ WSPD }}",
             type: "Property",
             transformation: "float",
             properties: {
@@ -116,7 +133,7 @@
             },
         },
         gustSpeed: {
-            source: "{% if Gust is defined %}{% set metres = Gust * 1852 / 3600 %}{{ metres | round(precision=2) }}{% endif %}",
+            source: "{{ GST }}",
             type: "Property",
             transformation: "float",
             properties: {

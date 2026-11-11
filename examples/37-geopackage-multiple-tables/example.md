@@ -4,6 +4,9 @@ A GeoPackage is a single SQLite file that can hold many tables. This example map
 
 The idea this example adds to [mapping a one-table GeoPackage](../36-geopackage-lau-municipalities/example.md) is that one GeoPackage is several collections. Each table is bound to its own mapping in a manifest, and the tables no mapping names are never opened. It builds on [routing KML folders to their own mappings](../17-kml-folder-collections/example.md) and on [relationships between entities](../10-json-relationships/example.md).
 
+> [!WARNING]
+> This example reads a GeoPackage, which needs SQLite. The prebuilt release binaries do not include it (`--no-default-features`) and report a GeoPackage as unsupported, so they cannot run this example; the container image can. A source build with the default features compiles SQLite itself, as described in [Getting started](https://vela-tools.github.io/cassiopeia/docs/guides/getting-started#geopackage-and-sqlite).
+
 ## Get the data
 
 The BKG publishes the administrative units at a scale of 1:5,000,000 as the product VG5000. The archive is 10 MB and holds the documentation and one GeoPackage, `DE_VG5000.gpkg`, which is about 23 MB. The data is licensed under the Data licence Germany, attribution, version 2.0 (`dl-de/by-2-0`): commercial use is allowed with the source named, here the BKG. The file is republished each year and sometimes corrected in between, so a later download can hold a few more or fewer units than quoted here.
@@ -157,7 +160,7 @@ docker run --rm \
     --user "$(id -u):$(id -g)" \
     --volume "$PWD:/data" \
     --workdir /data \
-    ghcr.io/vela-tools/cassiopeia:v1.1.1 \
+    ghcr.io/vela-tools/cassiopeia:v1.2.0 \
     map \
     --manifest manifest.json5
 ```

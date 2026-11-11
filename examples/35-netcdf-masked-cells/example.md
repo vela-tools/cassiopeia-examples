@@ -40,13 +40,12 @@ Of the 825 cells, 506 are land and hold -9.99. The cell at 45.875 degrees north 
     "latitude": 40.125,
     "longitude": 12.125,
     "time": "2024-06-01T12:00:00+00:00",
-    "level_type": "depth_below_sea",
-    "level": 0,
-    "sst": 21.360000610351562
+    "zlev": 0,
+    "sst": 21.36
 }
 ```
 
-The depth axis, `zlev`, holds a single level at 0 metres with `positive = "down"`, so Cassiopeia reads it as `depth_below_sea` level `0`. The mapping reads `latitude`, `longitude`, `time`, and `sst`, and ignores the level. The [NetCDF guide](https://vela-tools.github.io/cassiopeia/docs/guides/source-formats#gridded-records) covers masking in full.
+The depth axis, `zlev`, holds a single level at 0 metres with `positive = "down"`, so Cassiopeia takes it for a depth. CF does not say which surface a depth is measured below, so Cassiopeia reads that from the data variables: a soil quantity gives `depth_below_land` and a sea water quantity `depth_below_sea`. `sst` is a `sea_surface_temperature`, which is neither, so the level keeps its own name and value, `zlev` `0`. The mapping reads `latitude`, `longitude`, `time`, and `sst`, and ignores the level. The [NetCDF guide](https://vela-tools.github.io/cassiopeia/docs/guides/source-formats#gridded-records) covers masking in full.
 
 ## No test for land
 
@@ -54,7 +53,7 @@ Because a land cell never becomes a record, every record the mapping sees has a 
 
 ```json5
 surfaceTemperature: {
-    source: "{{ sst | round(precision=2) }}",
+    source: "{{ sst }}",
     type: "Property",
     transformation: "float",
     properties: {
@@ -67,7 +66,7 @@ surfaceTemperature: {
 
 A file with several data variables behaves differently. A cell masked in one variable and valid in another still gets a record, without the masked field, so a template that does arithmetic on that field needs the `is defined` guard the [station example](../34-netcdf-station-time-series/example.md) uses.
 
-The temperatures are stored as 32-bit floating point numbers, so 21.36 reads back as `21.360000610351562`. Rounding to two decimals gives back the value the analysis holds. `CEL` is the UN/CEFACT Common Code for degree Celsius.
+The temperatures are stored as 32-bit floating point numbers. Cassiopeia writes each one as the shortest decimal that reads back as the same 32-bit value, so 21.36 stays `21.36` and the mapping needs no rounding. `CEL` is the UN/CEFACT Common Code for degree Celsius.
 
 ## One entity per sea cell
 
@@ -101,7 +100,7 @@ docker run --rm \
     --volume "$PWD:/data" \
     --volume "$HOME/.cache/cassiopeia-examples/schemas:/var/lib/cassiopeia/schemas" \
     --workdir /data \
-    ghcr.io/vela-tools/cassiopeia:v1.1.1 \
+    ghcr.io/vela-tools/cassiopeia:v1.2.0 \
     map \
     --input data/sst.nc \
     --mapping sea-conditions.json5 \

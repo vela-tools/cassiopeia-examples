@@ -48,8 +48,10 @@
             // the `objectList`.
             source: "{% for member in cast | json_decode %}{{ member.id }} {% endfor %}",
             properties: {
+                // TMDB credits an actor once per role, and the `objectList` links each target once,
+                // so the size counts distinct ids: group_by keys the cast by id.
                 castSize: {
-                    source: "{{ cast | json_decode | length }}",
+                    source: "{{ cast | json_decode | group_by(attribute='id') | length }}",
                     transformation: "integer",
                 },
             },

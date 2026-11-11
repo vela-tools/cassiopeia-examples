@@ -21,10 +21,10 @@
             transformation: "datetime",
         },
         // A land cell holds the _FillValue and is never a record, so every record has a temperature
-        // and the template needs no guard. The analysis is a 32-bit float, so 21.36 reads back as
-        // 21.360000610351562; two decimals are what it holds. CEL is degree Celsius.
+        // and the template needs no guard. The analysis is a 32-bit float, which is read as the
+        // shortest decimal that round-trips, so it needs no rounding. CEL is degree Celsius.
         surfaceTemperature: {
-            source: "{{ sst | round(precision=2) }}",
+            source: "{{ sst }}",
             type: "Property",
             transformation: "float",
             properties: {

@@ -135,7 +135,7 @@ docker run --rm \
     --volume "$PWD:/data" \
     --volume "$HOME/.cache/cassiopeia-examples/schemas:/var/lib/cassiopeia/schemas" \
     --workdir /data \
-    ghcr.io/vela-tools/cassiopeia:v1.1.1 \
+    ghcr.io/vela-tools/cassiopeia:v1.2.0 \
     map \
     --manifest manifest.json5
 ```
@@ -161,7 +161,8 @@ The output contains one `WeatherObserved` entity. Each measurement carries its u
     },
     "dateObserved": {
         "type": "Property",
-        "value": "2026-08-21T10:00:00.000Z"
+        "value": "2026-08-21T10:00:00Z",
+        "valueType": "DateTime"
     },
     "location": {
         "type": "GeoProperty",
