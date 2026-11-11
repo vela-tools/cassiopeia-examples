@@ -191,7 +191,10 @@ fn attempt(agent: &Agent, url: &Url) -> Attempt {
         return Attempt::Settled(format!("the publisher answered {status}"));
     }
 
-    match response.body_mut().read_to_vec() {
+    // The convenience readers on a body stop at 10 MiB, and a dataset such as the GISCO LAU
+    // GeoPackage is several times that. Every URL here is one an example's author chose, so the
+    // body is read whole, with no cap.
+    match response.body_mut().with_config().read_to_vec() {
         Ok(body) => Attempt::Body(body),
         Err(source) => Attempt::Transient(source.to_string()),
     }
