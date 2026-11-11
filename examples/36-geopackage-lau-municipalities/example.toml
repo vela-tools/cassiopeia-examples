@@ -1,0 +1,42 @@
+[example]
+title = "Mapping a GeoPackage of European municipalities"
+label = "GeoPackage"
+summary = "Reproject a GeoPackage from EPSG:3035 and map its municipalities."
+formats = ["geopackage"]
+models = ["LocalAdministrativeUnit"]
+
+[requirements]
+smart-data-models = false
+
+[run]
+args = [
+    "map",
+    "--input",
+    "data/lau.gpkg",
+    "--mapping",
+    "lau.json5",
+    "--type",
+    "geopackage",
+    "--output",
+    "out",
+    "--context",
+    "none",
+    "--validation-mode",
+    "fail-when-schema",
+]
+
+[[datasets]]
+file = "data/lau.gpkg"
+url = "https://gisco-services.ec.europa.eu/distribution/v2/lau/gpkg/LAU_RG_01M_2024_3035.gpkg"
+source = "Eurostat GISCO"
+# GISCO grants a non-exclusive right to use the data; commercial use needs a EuroGeographics
+# licence, and the boundaries stay their copyright.
+# https://ec.europa.eu/eurostat/web/gisco/geodata/statistical-units
+license = "Free non-commercial reuse; administrative boundaries © EuroGeographics"
+# LAU 2024 is a released edition, though GISCO has amended it once since release.
+volatility = "frozen"
+
+[[outputs]]
+file = "out/LocalAdministrativeUnit.json"
+entities = 97987
+contains = ["urn:ngsi-ld:LocalAdministrativeUnit:SI_061"]

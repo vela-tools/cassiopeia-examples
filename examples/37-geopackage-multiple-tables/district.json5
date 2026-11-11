@@ -1,0 +1,43 @@
+{
+    version: "v4",
+    dataModel: "District",
+    identity: {
+        entityName: "{{ properties.ARS }}",
+    },
+    attributes: {
+        name: {
+            source: "{{ properties.GEN }}",
+            type: "Property",
+            transformation: "string",
+        },
+        designation: {
+            source: "{{ properties.BEZ }}",
+            type: "Property",
+            transformation: "string",
+        },
+        nutsCode: {
+            source: "{{ properties.NUTS }}",
+            type: "Property",
+            transformation: "string",
+        },
+        validFrom: {
+            source: "{{ properties.BEGINN }}",
+            type: "Property",
+            transformation: "datetime",
+        },
+        location: {
+            source: "{{ geometry }}",
+            type: "GeoProperty",
+            transformation: "geometry",
+        },
+        // SN_L is the Land's two-digit state key, which is also the identity the federal-state
+        // mapping mints from its own ARS.
+        federalState: {
+            source: "{{ properties.SN_L }}",
+            type: "Relationship",
+            target: {
+                entity: "FederalState",
+            },
+        },
+    },
+}

@@ -1,0 +1,68 @@
+{
+    version: "v4",
+    dataModel: "dataModel.Environment/AirQualityForecast",
+    // One forecast per grid cell. The download holds a single forecast hour, so the cell alone is the
+    // key, and a geohash of seven characters, about 150 metres across, tells 0.1 degree cells apart.
+    identity: {
+        entityName: "{{ geohash(lat=latitude, lon=longitude, precision=7) }}",
+    },
+    attributes: {
+        // SILAM stores its coordinates as 32-bit floats, so the 45.55 a cell centre was written as
+        // reads back as 45.54999923706055. Two decimals are what the 0.1 degree grid holds.
+        location: {
+            source: [
+                "{{ longitude | round(precision=2) }}",
+                "{{ latitude | round(precision=2) }}",
+            ],
+            type: "GeoProperty",
+            transformation: "point",
+        },
+        // The file gives no averaging period for the concentrations, no cell_methods and no time
+        // bounds, so each value is read as a forecast for the instant its time names, and that
+        // instant is both ends of the validity.
+        validFrom: {
+            source: "{{ time }}",
+            type: "Property",
+            transformation: "datetime",
+        },
+        validTo: {
+            source: "{{ time }}",
+            type: "Property",
+            transformation: "datetime",
+        },
+        // The gases are counted in moles per cubic metre. Each variable's molar_mass attribute gives
+        // the mass SILAM used, in kilograms per mole, and a kilogram is 10^9 micrograms. GQ is the
+        // UN/CEFACT code for microgram per cubic metre.
+        o3: {
+            source: "{% set micrograms = cnc_O3_gas * 0.048 * 1000000000 %}{{ micrograms | round(precision=1) }}",
+            type: "Property",
+            transformation: "float",
+            properties: {
+                unitCode: {
+                    source: "GQ",
+                },
+            },
+        },
+        no2: {
+            source: "{% set micrograms = cnc_NO2_gas * 0.046 * 1000000000 %}{{ micrograms | round(precision=1) }}",
+            type: "Property",
+            transformation: "float",
+            properties: {
+                unitCode: {
+                    source: "GQ",
+                },
+            },
+        },
+        // Particulate matter is already a mass, in kilograms per cubic metre.
+        pm25: {
+            source: "{% set micrograms = cnc_PM2_5 * 1000000000 %}{{ micrograms | round(precision=1) }}",
+            type: "Property",
+            transformation: "float",
+            properties: {
+                unitCode: {
+                    source: "GQ",
+                },
+            },
+        },
+    },
+}

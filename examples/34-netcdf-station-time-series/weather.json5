@@ -1,0 +1,134 @@
+{
+    version: "v4",
+    dataModel: "dataModel.Weather/WeatherObserved",
+    // One identity per buoy. station_id is the variable the file marks with cf_role
+    // "timeseries_id", and every record of a buoy carries it, so the day's hourly readings are the
+    // same entity observed again. The observedAt on each reading ranks them, and the latest wins.
+    identity: {
+        entityName: "{{ station_id }}",
+    },
+    attributes: {
+        stationCode: {
+            source: "{{ station_id }}",
+            type: "Property",
+            transformation: "string",
+        },
+        // A moored buoy's position is a station variable, so every record of the buoy holds it.
+        location: {
+            source: [
+                "{{ longitude }}",
+                "{{ latitude }}",
+            ],
+            type: "GeoProperty",
+            transformation: "point",
+        },
+        dateObserved: {
+            source: "{{ time }}",
+            type: "Property",
+            transformation: "datetime",
+            properties: {
+                observedAt: {
+                    source: "{{ time }}",
+                    type: "Property",
+                    transformation: "datetime",
+                },
+            },
+        },
+        // The network reports in degrees Celsius. CEL is the UN/CEFACT code for it.
+        temperature: {
+            source: "{{ AirTemperature }}",
+            type: "Property",
+            transformation: "float",
+            properties: {
+                unitCode: {
+                    source: "CEL",
+                },
+                observedAt: {
+                    source: "{{ time }}",
+                    type: "Property",
+                    transformation: "datetime",
+                },
+            },
+        },
+        // The model wants a ratio in [0, 1]; the network reports a percentage. A reading the buoy
+        // missed is masked in the file and absent from the record, and arithmetic on an absent field
+        // fails, so each computed value is guarded.
+        relativeHumidity: {
+            source: "{% if RelativeHumidity is defined %}{% set ratio = RelativeHumidity / 100 %}{{ ratio | round(precision=4) }}{% endif %}",
+            type: "Property",
+            transformation: "float",
+            properties: {
+                unitCode: {
+                    source: "C62",
+                },
+                observedAt: {
+                    source: "{{ time }}",
+                    type: "Property",
+                    transformation: "datetime",
+                },
+            },
+        },
+        // Millibars and hectopascals are the same unit, so the value passes through. A97 is hectopascal.
+        atmosphericPressure: {
+            source: "{{ AtmosphericPressure }}",
+            type: "Property",
+            transformation: "float",
+            properties: {
+                unitCode: {
+                    source: "A97",
+                },
+                observedAt: {
+                    source: "{{ time }}",
+                    type: "Property",
+                    transformation: "datetime",
+                },
+            },
+        },
+        windDirection: {
+            source: "{{ WindDirection }}",
+            type: "Property",
+            transformation: "integer",
+            properties: {
+                unitCode: {
+                    source: "DD",
+                },
+                observedAt: {
+                    source: "{{ time }}",
+                    type: "Property",
+                    transformation: "datetime",
+                },
+            },
+        },
+        // The network reports wind in knots, and a knot is 1852 metres an hour. MTS is metre per second.
+        windSpeed: {
+            source: "{% if WindSpeed is defined %}{% set metres = WindSpeed * 1852 / 3600 %}{{ metres | round(precision=2) }}{% endif %}",
+            type: "Property",
+            transformation: "float",
+            properties: {
+                unitCode: {
+                    source: "MTS",
+                },
+                observedAt: {
+                    source: "{{ time }}",
+                    type: "Property",
+                    transformation: "datetime",
+                },
+            },
+        },
+        gustSpeed: {
+            source: "{% if Gust is defined %}{% set metres = Gust * 1852 / 3600 %}{{ metres | round(precision=2) }}{% endif %}",
+            type: "Property",
+            transformation: "float",
+            properties: {
+                unitCode: {
+                    source: "MTS",
+                },
+                observedAt: {
+                    source: "{{ time }}",
+                    type: "Property",
+                    transformation: "datetime",
+                },
+            },
+        },
+    },
+}

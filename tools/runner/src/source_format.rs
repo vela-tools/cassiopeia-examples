@@ -33,6 +33,21 @@ pub enum SourceFormat {
     Grib1,
     /// GRIB edition 2.
     Grib2,
+    /// `NetCDF`, classic or `NetCDF-4`, holding a grid or CF station time series.
+    ///
+    /// Kebab-case would write this `net-cdf`. The token the `--type` flag and a manifest's `format`
+    /// field take is `netcdf`, so that is what a descriptor declares and what the index shows.
+    #[serde(rename = "netcdf")]
+    #[strum(serialize = "netcdf")]
+    NetCdf,
+    /// An OGC `GeoPackage`, a SQLite file whose feature and attribute tables are collections.
+    ///
+    /// Kebab-case would write this `geo-package`, which Cassiopeia accepts only as an alias. The token
+    /// the `--type` flag and a manifest's `format` field take is `geopackage`, so that is what a
+    /// descriptor declares and what the index shows.
+    #[serde(rename = "geopackage")]
+    #[strum(serialize = "geopackage")]
+    GeoPackage,
 }
 
 #[cfg(test)]
@@ -53,6 +68,29 @@ mod tests {
 
         assert_eq!(declaration.map(|declaration| declaration.formats).ok(), Some(vec![SourceFormat::GeoJson]));
         assert_eq!(SourceFormat::GeoJson.to_string(), "geojson");
+    }
+
+    #[test]
+    fn netcdf_is_read_and_printed_as_one_word() {
+        let declaration: Result<Declaration, _> = toml::from_str("formats = [\"netcdf\"]\n");
+
+        assert_eq!(declaration.map(|declaration| declaration.formats).ok(), Some(vec![SourceFormat::NetCdf]));
+        assert_eq!(SourceFormat::NetCdf.to_string(), "netcdf");
+    }
+
+    #[test]
+    fn geopackage_is_read_and_printed_as_one_word() {
+        let declaration: Result<Declaration, _> = toml::from_str("formats = [\"geopackage\"]\n");
+
+        assert_eq!(declaration.map(|declaration| declaration.formats).ok(), Some(vec![SourceFormat::GeoPackage]));
+        assert_eq!(SourceFormat::GeoPackage.to_string(), "geopackage");
+    }
+
+    #[test]
+    fn the_hyphenated_geopackage_token_is_rejected() {
+        let declaration: Result<Declaration, _> = toml::from_str("formats = [\"geo-package\"]\n");
+
+        assert!(declaration.is_err());
     }
 
     #[test]

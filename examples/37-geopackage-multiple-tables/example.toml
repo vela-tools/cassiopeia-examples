@@ -1,0 +1,43 @@
+[example]
+title = "Mapping several GeoPackage tables with one manifest"
+label = "GeoPackage tables"
+summary = "Route three GeoPackage tables to three mappings and link them."
+formats = ["geopackage"]
+models = ["FederalState", "District", "Municipality"]
+
+[requirements]
+smart-data-models = false
+
+[run]
+args = [
+    "map",
+    "--manifest",
+    "manifest.json5",
+]
+
+[[preparation]]
+description = "unpacking the GeoPackage from the archive"
+command = "cd data && unzip -p vg5000.zip vg5000_ebenen_0101/DE_VG5000.gpkg > vg5000.gpkg"
+
+[[datasets]]
+file = "data/vg5000.zip"
+url = "https://daten.gdz.bkg.bund.de/produkte/vg/vg5000_0101/aktuell/vg5000_01-01.utm32s.gpkg.ebenen.zip"
+source = "Federal Agency for Cartography and Geodesy (BKG)"
+# Data licence Germany, attribution, version 2.0: commercial use allowed with the source named.
+license = "DL-DE-BY-2.0"
+volatility = "live"
+
+[[outputs]]
+file = "out/FederalState.json"
+entities = 16
+contains = ["urn:ngsi-ld:FederalState:01"]
+
+[[outputs]]
+file = "out/District.json"
+entities = 401
+contains = ["urn:ngsi-ld:District:01001"]
+
+[[outputs]]
+file = "out/Municipality.json"
+entities = 10939
+contains = ["urn:ngsi-ld:Municipality:010010000000"]

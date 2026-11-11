@@ -1,0 +1,45 @@
+[example]
+title = "Skipping masked NetCDF grid cells"
+label = "Masked cells"
+summary = "Map only the sea cells of a land-masked NetCDF grid."
+formats = ["netcdf"]
+models = ["SeaConditions"]
+
+[requirements]
+smart-data-models = true
+
+[run]
+args = [
+    "map",
+    "--input",
+    "data/sst.nc",
+    "--mapping",
+    "sea-conditions.json5",
+    "--type",
+    "netcdf",
+    "--output",
+    "out",
+    "--context",
+    "none",
+    "--validation-mode",
+    "fail-when-schema",
+]
+
+# ERDDAP cuts the global analysis down to one day and the Adriatic box before anything is
+# downloaded. Each bracket of the query is one dimension: time, depth, latitude, longitude.
+[[datasets]]
+file = "data/sst.nc"
+url = "https://upwell.pfeg.noaa.gov/erddap/griddap/ncdcOisst21Agg_LonPM180.nc?sst%5B(2024-06-01T12:00:00Z)%5D%5B(0.0)%5D%5B(40):(46)%5D%5B(12):(20)%5D"
+source = "NOAA National Centers for Environmental Information (NCEI), OISST v2.1, served by NOAA ERDDAP"
+# The dataset's license attribute: "The data may be used and redistributed for free but is not
+# intended for legal use, since it may contain inaccuracies", with no warranty from NOAA.
+# https://upwell.pfeg.noaa.gov/erddap/info/ncdcOisst21Agg_LonPM180/index.html
+license = "Free use and redistribution, without warranty (NOAA)"
+volatility = "frozen"
+
+# The box holds 25 latitudes by 33 longitudes, 825 cells, and the analysis masks the 506 land cells
+# among them. Only the sea cells become entities. The identifiers are the two cells the page quotes.
+[[outputs]]
+file = "out/SeaConditions.json"
+entities = 319
+contains = ["urn:ngsi-ld:SeaConditions:u21ew1", "urn:ngsi-ld:SeaConditions:srjuq8"]

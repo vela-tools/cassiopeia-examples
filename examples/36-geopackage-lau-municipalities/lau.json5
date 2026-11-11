@@ -1,0 +1,54 @@
+{
+    version: "v4",
+    dataModel: "LocalAdministrativeUnit",
+    // The GISCO identifier is the country code and the unit's national code, so it is unique across
+    // Europe.
+    identity: {
+        entityName: "{{ properties.GISCO_ID }}",
+    },
+    attributes: {
+        name: {
+            source: "{{ properties.LAU_NAME }}",
+            type: "Property",
+            transformation: "string",
+        },
+        countryCode: {
+            source: "{{ properties.CNTR_CODE }}",
+            type: "Property",
+            transformation: "string",
+        },
+        // The column is declared REAL, so the ingestor hands the mapping 297575.0; the integer
+        // transformation writes the head count as a whole number. The file stores 0 for a unit it has
+        // no figure for, as it does for every unit of France, Spain, and Albania, so a 0 leaves the
+        // attribute off and not a population of nobody.
+        population: {
+            source: "{% if properties.POP_2024 > 0 %}{{ properties.POP_2024 }}{% endif %}",
+            type: "Property",
+            transformation: "integer",
+        },
+        populationDensity: {
+            source: "{% if properties.POP_DENS_2024 > 0 %}{{ properties.POP_DENS_2024 }}{% endif %}",
+            type: "Property",
+            transformation: "float",
+        },
+        // KMK is the UN/CEFACT Common Code for square kilometre (ETSI GS CIM 009 v1.9.1 clause
+        // 4.5.2.2).
+        area: {
+            source: "{{ properties.AREA_KM2 }}",
+            type: "Property",
+            transformation: "float",
+            properties: {
+                unitCode: {
+                    source: "KMK",
+                },
+            },
+        },
+        // The table is stored in EPSG:3035, metres on the European equal-area grid. The geometry
+        // arrives already reprojected to WGS 84, so it passes straight through.
+        location: {
+            source: "{{ geometry }}",
+            type: "GeoProperty",
+            transformation: "geometry",
+        },
+    },
+}

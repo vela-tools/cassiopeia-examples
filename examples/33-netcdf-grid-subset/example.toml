@@ -1,0 +1,45 @@
+[example]
+title = "Mapping a NetCDF air quality forecast grid"
+label = "NetCDF grid subset"
+summary = "Fetch a NetCDF forecast subset and convert molar concentrations."
+formats = ["netcdf"]
+models = ["AirQualityForecast"]
+
+[requirements]
+smart-data-models = true
+
+[run]
+args = [
+    "map",
+    "--input",
+    "data/forecast.nc",
+    "--mapping",
+    "air-quality-forecast.json5",
+    "--type",
+    "netcdf",
+    "--output",
+    "out",
+    "--context",
+    "none",
+    "--validation-mode",
+    "fail-when-schema",
+]
+
+# The NetCDF Subset Service cuts the European grid down to Slovenia, the lowest model layer, and the
+# forecast hour nearest the request before anything is downloaded.
+[[datasets]]
+file = "data/forecast.nc"
+url = "https://thredds.silam.fmi.fi/thredds/ncss/grid/silam_europe_v6_1/silam_europe_v6_1_best.ncd?var=cnc_O3_gas&var=cnc_NO2_gas&var=cnc_PM2_5&north=46.9&south=45.4&west=13.3&east=16.6&vertCoord=12.5&time=present&accept=netcdf"
+source = "Finnish Meteorological Institute (FMI), SILAM"
+# FMI publishes its open data, SILAM air quality forecasts included, under CC BY 4.0.
+# https://en.ilmatieteenlaitos.fi/silam-opendata-on-aws-s3
+license = "CC-BY-4.0"
+volatility = "live"
+
+# One entity per cell of the 34 by 16 grid the box selects. The box and the layer fix the grid, so
+# the count holds for every forecast hour, though the concentrations change with each one. The
+# identifier is the cell over Ljubljana the page quotes.
+[[outputs]]
+file = "out/AirQualityForecast.json"
+entities = 544
+contains = ["urn:ngsi-ld:AirQualityForecast:u24mgp4"]

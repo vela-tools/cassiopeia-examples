@@ -1,0 +1,43 @@
+[example]
+title = "Mapping NetCDF station time series"
+label = "Station time series"
+summary = "Map CF station time series from ERDDAP to one observed entity per buoy."
+formats = ["netcdf"]
+models = ["WeatherObserved"]
+
+[requirements]
+smart-data-models = true
+
+[run]
+args = [
+    "map",
+    "--input",
+    "data/buoys.nc",
+    "--mapping",
+    "weather.json5",
+    "--type",
+    "netcdf",
+    "--output",
+    "out",
+    "--context",
+    "none",
+    "--validation-mode",
+    "fail-when-schema",
+]
+
+# ERDDAP builds the file from the query: the columns named before the first ampersand, and one past
+# day of the network's hourly readings.
+[[datasets]]
+file = "data/buoys.nc"
+url = "https://erddap.marine.ie/erddap/tabledap/IWBNetwork.ncCF?station_id,longitude,latitude,time,AtmosphericPressure,AirTemperature,RelativeHumidity,WindDirection,WindSpeed,Gust&time%3E=2024-06-01T00:00:00Z&time%3C2024-06-02T00:00:00Z"
+source = "Marine Institute, Irish Weather Buoy Network"
+# The dataset's own license attribute names Creative Commons Attribution 4.0.
+# https://erddap.marine.ie/erddap/info/IWBNetwork/index.html
+license = "CC-BY-4.0"
+volatility = "frozen"
+
+# One entity per buoy that reported that day, M2 to M6.
+[[outputs]]
+file = "out/WeatherObserved.json"
+entities = 5
+contains = ["urn:ngsi-ld:WeatherObserved:M2", "urn:ngsi-ld:WeatherObserved:M6"]

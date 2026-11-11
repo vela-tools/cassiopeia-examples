@@ -1,0 +1,44 @@
+{
+    version: "v4",
+    dataModel: "Municipality",
+    identity: {
+        entityName: "{{ properties.ARS }}",
+    },
+    attributes: {
+        name: {
+            source: "{{ properties.GEN }}",
+            type: "Property",
+            transformation: "string",
+        },
+        designation: {
+            source: "{{ properties.BEZ }}",
+            type: "Property",
+            transformation: "string",
+        },
+        nutsCode: {
+            source: "{{ properties.NUTS }}",
+            type: "Property",
+            transformation: "string",
+        },
+        validFrom: {
+            source: "{{ properties.BEGINN }}",
+            type: "Property",
+            transformation: "datetime",
+        },
+        location: {
+            source: "{{ geometry }}",
+            type: "GeoProperty",
+            transformation: "geometry",
+        },
+        // The first five digits of a municipality's twelve-digit regional key are the state, the
+        // administrative region, and the district, held in SN_L, SN_R, and SN_K. They are the identity
+        // the district mapping mints from its own ARS, so the three columns joined name the district.
+        district: {
+            source: "{{ properties.SN_L }}{{ properties.SN_R }}{{ properties.SN_K }}",
+            type: "Relationship",
+            target: {
+                entity: "District",
+            },
+        },
+    },
+}

@@ -1,0 +1,36 @@
+{
+    version: "v1",
+    inputs: [
+        {
+            source: "data/vg5000.gpkg",
+            format: "geopackage",
+            // The file lists forty tables and views. A `mappings` list reads only the tables it names,
+            // so the other thirty-seven are never opened: the attribute tables of codes and the views
+            // over them stay unmapped, and the views cannot fail the run.
+            mappings: [
+                {
+                    collection: "vg5000_lan",
+                    mapping: "federal-state.json5",
+                },
+                {
+                    collection: "vg5000_krs",
+                    mapping: "district.json5",
+                },
+                {
+                    collection: "vg5000_gem",
+                    mapping: "municipality.json5",
+                },
+            ],
+        },
+    ],
+    output: {
+        target: "file",
+        directory: "out",
+        context: "none",
+        // The three types are plain data models with no published schema, so fail-when-schema writes
+        // them without a schema check.
+        validation: {
+            mode: "fail-when-schema",
+        },
+    },
+}

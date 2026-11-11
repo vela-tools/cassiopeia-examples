@@ -1,0 +1,39 @@
+{
+    version: "v4",
+    dataModel: "FederalState",
+    // The table holds each Land twice: once with its coast (GF 8, the sea included) and once as land
+    // (GF 9). Only the land rows name an entity, so the other nine resolve to no identity and are
+    // skipped.
+    identity: {
+        entityName: "{% if properties.GF == 9 %}{{ properties.ARS }}{% endif %}",
+    },
+    attributes: {
+        name: {
+            source: "{{ properties.GEN }}",
+            type: "Property",
+            transformation: "string",
+        },
+        designation: {
+            source: "{{ properties.BEZ }}",
+            type: "Property",
+            transformation: "string",
+        },
+        nutsCode: {
+            source: "{{ properties.NUTS }}",
+            type: "Property",
+            transformation: "string",
+        },
+        // The column is declared DATETIME, so the ingestor hands the mapping an ISO 8601 timestamp.
+        validFrom: {
+            source: "{{ properties.BEGINN }}",
+            type: "Property",
+            transformation: "datetime",
+        },
+        // The geometry arrives already reprojected from UTM zone 32N to WGS 84.
+        location: {
+            source: "{{ geometry }}",
+            type: "GeoProperty",
+            transformation: "geometry",
+        },
+    },
+}

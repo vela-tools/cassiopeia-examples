@@ -32,9 +32,9 @@
 
 ## What this is
 
-Worked examples for [Cassiopeia](https://github.com/vela-tools/cassiopeia), the pipeline that turns CSV, JSON, GeoJSON, KML/KMZ, XML, ESRI Shapefiles, and GRIB into validated NGSI-LD entities.
+Worked examples for [Cassiopeia](https://github.com/vela-tools/cassiopeia), the pipeline that turns CSV, JSON, GeoJSON, KML/KMZ, XML, ESRI Shapefiles, GeoPackage, GRIB, and NetCDF into validated NGSI-LD entities.
 
-There are 31 of them. One example is one complete run against a real public dataset: the mapping files, the commands, the output to expect, and the prose that explains why the mapping is shaped the way it is. Nothing here is a fragment. Any machine with Cassiopeia on it, or with Docker or Podman, runs any of them from start to finish.
+There are 35 of them. One example is one complete run against a real public dataset: the mapping files, the commands, the output to expect, and the prose that explains why the mapping is shaped the way it is. Nothing here is a fragment. Any machine with Cassiopeia on it, or with Docker or Podman, runs any of them from start to finish.
 
 The datasets are real because the awkward parts of a mapping come from real data.
 
@@ -219,6 +219,26 @@ Demote an administrative region's MultiPolygon to the largest Polygon and derive
 <img src="https://img.shields.io/badge/format-json-d97706" alt="format: json" height="20" align="right"> **[Nested collections](examples/32-json-nested-collections/example.md)** → `AirQualityMonitoringSite` `AirQualityIndexObserved`
 
 Map records nested several arrays deep, each reading what encloses it.
+
+<img src="https://img.shields.io/badge/format-netcdf-0369a1" alt="format: netcdf" height="20" align="right"> **[NetCDF grid subset](examples/33-netcdf-grid-subset/example.md)** → `AirQualityForecast`
+
+Fetch a NetCDF forecast subset and convert molar concentrations.
+
+<img src="https://img.shields.io/badge/format-netcdf-0369a1" alt="format: netcdf" height="20" align="right"> **[Station time series](examples/34-netcdf-station-time-series/example.md)** → `WeatherObserved`
+
+Map CF station time series from ERDDAP to one observed entity per buoy.
+
+<img src="https://img.shields.io/badge/format-netcdf-0369a1" alt="format: netcdf" height="20" align="right"> **[Masked cells](examples/35-netcdf-masked-cells/example.md)** → `SeaConditions`
+
+Map only the sea cells of a land-masked NetCDF grid.
+
+<img src="https://img.shields.io/badge/format-geopackage-4d7c0f" alt="format: geopackage" height="20" align="right"> **[GeoPackage](examples/36-geopackage-lau-municipalities/example.md)** → `LocalAdministrativeUnit`
+
+Reproject a GeoPackage from EPSG:3035 and map its municipalities.
+
+<img src="https://img.shields.io/badge/format-geopackage-4d7c0f" alt="format: geopackage" height="20" align="right"> **[GeoPackage tables](examples/37-geopackage-multiple-tables/example.md)** → `FederalState` `District` `Municipality`
+
+Route three GeoPackage tables to three mappings and link them.
 
 <!-- examples:end -->
 
