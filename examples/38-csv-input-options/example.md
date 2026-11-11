@@ -380,4 +380,4 @@ The Brussels entity has the same shape from a different source. Its location cam
 }
 ```
 
-[Output](https://vela-tools.github.io/cassiopeia/docs/guides/output) covers the broker operations, and the [manifest guide](https://vela-tools.github.io/cassiopeia/docs/guides/manifest) every input option this example uses.
+[Output](https://vela-tools.github.io/cassiopeia/docs/guides/output) covers the broker operations, and the [manifest guide](https://vela-tools.github.io/cassiopeia/docs/guides/manifests) every input option this example uses.
