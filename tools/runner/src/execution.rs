@@ -204,7 +204,15 @@ fn execute(
     schema_cache: Option<&Path>,
     image: &ContainerImage,
 ) -> Result<(), ExecutionError> {
-    let invocation = invocation(runtime, &entry.directory, arguments, schema_cache, entry.descriptor.network(), image);
+    let invocation = invocation(
+        runtime,
+        &entry.directory,
+        arguments,
+        schema_cache,
+        &entry.descriptor.requirements.environment,
+        entry.descriptor.network(),
+        image,
+    );
 
     let status = Command::new(invocation.program.to_string())
         .args(&invocation.arguments)
@@ -238,6 +246,7 @@ fn execute_scheduled(
         &entry.directory,
         &entry.descriptor.run.args,
         schema_cache,
+        &entry.descriptor.requirements.environment,
         entry.descriptor.network(),
         image,
     );

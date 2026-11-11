@@ -1,0 +1,33 @@
+{
+    version: "v4",
+    dataModel: "RoadWork",
+    // GeoServer names each feature after its layer and a number, as in "baustellen_opendata.4". The
+    // number keys the roadwork.
+    identity: {
+        entityName: "munich-{{ id | split(pat='.') | last }}",
+    },
+    attributes: {
+        category: {
+            source: "{{ properties.art }}",
+        },
+        street: {
+            source: "{{ properties.strasse_hausnr }}",
+        },
+        description: {
+            source: "{{ properties.beschreibung }}",
+        },
+        restriction: {
+            source: "{{ properties.beeintraechtigung }}",
+        },
+        location: {
+            source: "{{ geometry }}",
+            type: "GeoProperty",
+        },
+        // GeoServer stamps the whole response once, in the collection's timeStamp, and every
+        // feature's record carries the collection's members under featureCollection.
+        dateObserved: {
+            source: "{{ featureCollection.timeStamp }}",
+            transformation: "datetime",
+        },
+    },
+}

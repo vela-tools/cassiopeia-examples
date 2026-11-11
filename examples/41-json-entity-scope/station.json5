@@ -1,0 +1,36 @@
+{
+    version: "v4",
+    dataModel: "WaterLevelStation",
+    identity: {
+        entityName: "{{ id }}",
+    },
+    scope: [
+        // affiliations names every observing network a station belongs to, separated by commas, as
+        // in "NWLON,NWLORTS". The template puts a slash in front of each name and splits the text, so
+        // its value is a list, and a list read whole gives one scope per item. A scope query always
+        // starts with a slash (ETSI GS CIM 009 v1.9.1 clause 4.19), so every scope here has one.
+        "{{ ('/' ~ affiliations) | replace(from=',', to=',/') | split(pat=',') }}",
+        // greatlakes is a JSON boolean, and true or false is no scope level the data meant. It only
+        // decides whether the station gets the /GreatLakes scope.
+        "{% if greatlakes %}/GreatLakes{% endif %}",
+    ],
+    attributes: {
+        name: {
+            source: "{{ name }}",
+            transformation: "string",
+        },
+        // A boolean that describes the station belongs in a Property, where it keeps its type.
+        tidal: {
+            source: "{{ tidal }}",
+            transformation: "boolean",
+        },
+        location: {
+            source: [
+                "{{ lng }}",
+                "{{ lat }}",
+            ],
+            type: "GeoProperty",
+            transformation: "point",
+        },
+    },
+}

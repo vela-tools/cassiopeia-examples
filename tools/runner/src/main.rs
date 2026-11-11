@@ -16,6 +16,7 @@ mod drift;
 mod drift_report;
 mod entity_count;
 mod entity_id;
+mod environment_variable_name;
 mod example;
 mod example_index;
 mod example_name;

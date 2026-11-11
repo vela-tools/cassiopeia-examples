@@ -1,0 +1,60 @@
+{
+    version: "v4",
+    dataModel: "Dataset",
+    // The feature id is a URN such as urn:wmo:md:org-woudc:Spectral. Its last segment names the
+    // entity, so the entity keeps its own NGSI-LD identifier and the WMO one is carried as a value.
+    // Two identifiers end in a level such as 1.0, whose dot would be dropped and leave 10, so it is
+    // written as a hyphen.
+    identity: {
+        entityName: "{{ id | split(pat=':') | last | replace(from='.', to='-') }}",
+    },
+    attributes: {
+        title: {
+            source: "{{ properties.title }}",
+            type: "Property",
+            transformation: "string",
+        },
+        description: {
+            source: "{{ properties.description }}",
+            type: "Property",
+            transformation: "string",
+        },
+        // Most records write the version as the text "1.0" and one as the number 2.0, and the string
+        // transformation reads both as text.
+        version: {
+            source: "{{ properties.version }}",
+            type: "Property",
+            transformation: "string",
+        },
+        // The urn transformation admits only a URN and writes it in its normal form.
+        metadataIdentifier: {
+            source: "{{ id }}",
+            type: "Property",
+            transformation: "urn",
+        },
+        // The DOI is a scheme and a suffix in two members, which join into the IRI that resolves it.
+        doi: {
+            source: "{{ properties.externalIds[0].scheme }}/{{ properties.externalIds[0].value }}",
+            type: "Property",
+            transformation: "iri",
+        },
+        contactPage: {
+            source: "{{ properties.contacts[0].links[0].href }}",
+            type: "Property",
+            transformation: "iri",
+        },
+        // A record names one or two vocabularies its themes come from. The template gathers their
+        // schemes into one text and splits it, and the list then reads every item with the iri
+        // transformation.
+        themeSchemes: {
+            source: "{% set_global schemes = '' %}{% for theme in properties.themes %}{% set_global schemes = schemes ~ theme.scheme ~ ' ' %}{% endfor %}{% if schemes != '' %}{{ schemes | trim | split(pat=' ') }}{% endif %}",
+            type: "ListProperty",
+            transformation: "iri",
+        },
+        location: {
+            source: "{{ geometry }}",
+            type: "GeoProperty",
+            transformation: "geometry",
+        },
+    },
+}

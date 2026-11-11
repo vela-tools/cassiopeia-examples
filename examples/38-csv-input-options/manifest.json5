@@ -1,0 +1,63 @@
+{
+    version: "v1",
+    inputs: [
+        {
+            // The Brussels-Capital Region's hourly NO2 means for the last 48 hours, exported as CSV by
+            // the Opendatasoft Explore API. The query string trims the export to the five columns the
+            // mapping reads and keeps only the hours the network marked valid: an hour marked "error"
+            // carries no value.
+            source: "https://opendata.brussels.be/api/explore/v2.1/catalog/datasets/real-time-air-quality-nitrogen-dioxide-no2/exports/csv?select=ab_eoi_code,ab_name,timestamp,value,geo_point&where=status%3D%22valid%22",
+            format: "csv",
+            mapping: "brussels-air-quality.json5",
+            // Opendatasoft reads an API key from the Authorization header under its "Apikey" scheme.
+            // The key comes from the environment, so it is never written into this file, and a run
+            // without BRUSSELS_ODS_APIKEY set stops before anything is fetched.
+            headers: {
+                Authorization: "Apikey ${BRUSSELS_ODS_APIKEY}",
+            },
+            // Every structural member is stated, so the export is read without any detection. The
+            // delimiter is the export's own default, and it is the only one that can work: the
+            // geo_point column holds "latitude, longitude" with an unquoted comma.
+            dialect: {
+                delimiter: ";",
+                quote: "\"",
+                skipRows: 0,
+                headerRows: 1,
+                terminator: "crlf",
+                encoding: "utf-8",
+            },
+        },
+        {
+            // The City of Vienna's current half-hourly concentrations, one row per station. Detection
+            // finds the title row and the three-row header by itself; the dialect states only what no
+            // file can tell a reader: the encoding of the µ and ³ in the units, the decimal comma, and
+            // the two markers the city writes for a missing value.
+            source: "https://www.wien.gv.at/ma22-lgb/umweltgut/lumesakt-v2.csv",
+            format: "csv",
+            mapping: "vienna-air-quality.json5",
+            dialect: {
+                encoding: "windows-1252",
+                decimalSeparator: ",",
+                nullValues: ["NE", "---"],
+            },
+        },
+        {
+            // The station layer gives each Vienna station its location and full name, which the
+            // concentration table does not carry. It builds the same entities, so the two merge.
+            source: "https://data.wien.gv.at/daten/geo?service=WFS&request=GetFeature&version=1.1.0&srsName=EPSG:4326&outputFormat=json&typeName=ogdwien:LUFTGUETENETZOGD",
+            format: "geojson",
+            mapping: "vienna-station.json5",
+        },
+    ],
+    output: {
+        target: "context-broker",
+        url: "http://localhost:1056/",
+        // A station keeps one entity, and each run replaces its reading with the newest one.
+        operation: "upsert",
+        // AirQualityObserved is a published model, so "default" resolves its @context from the catalog.
+        context: "default",
+        validation: {
+            mode: "fail-when-schema",
+        },
+    },
+}

@@ -1,0 +1,43 @@
+[example]
+title = "Reading URNs and IRIs from dataset metadata"
+label = "URN and IRI"
+summary = "Read a WMO URN, a DOI, and a list of vocabulary IRIs as validated values."
+formats = ["geojson"]
+models = ["Dataset"]
+
+[requirements]
+smart-data-models = false
+
+[run]
+args = [
+    "map",
+    "--input",
+    "data/discovery-metadata.json",
+    "--mapping",
+    "dataset.json5",
+    "--type",
+    "geojson",
+    "--output",
+    "out",
+    "--context",
+    "none",
+    "--validation-mode",
+    "fail-when-schema",
+]
+
+[[datasets]]
+file = "data/discovery-metadata.json"
+url = "https://api.woudc.org/collections/discovery_metadata/items?f=json&limit=100"
+source = "World Ozone and Ultraviolet Radiation Data Centre (WOUDC), Environment and Climate Change Canada"
+# Every record carries its terms in its `rights` member: access to the data is unlimited and free of
+# charge for scientific, educational and policy use, with an acknowledgment of the data providers.
+license = "Free for scientific, educational and policy use, with acknowledgment of the data providers"
+volatility = "live"
+records = 11
+
+# The register describes eleven datasets, one entity each. A dataset the centre adds would raise the
+# count, so the descriptor calls the source live and the identifier is one the page quotes.
+[[outputs]]
+file = "out/Dataset.json"
+entities = 11
+contains = ["urn:ngsi-ld:Dataset:Spectral"]

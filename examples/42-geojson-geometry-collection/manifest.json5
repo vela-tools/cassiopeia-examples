@@ -1,0 +1,28 @@
+{
+    version: "v1",
+    inputs: [
+        {
+            source: "data/berlin.geojson",
+            format: "geojson",
+            mapping: "berlin.json5",
+        },
+        {
+            // The download asks Munich's WFS for srsName=EPSG:4326. Without it the server answers in
+            // its own EPSG:25832, which GeoJSON cannot carry (RFC 7946 section 4), and Cassiopeia
+            // refuses every geometry.
+            source: "data/munich.geojson",
+            format: "geojson",
+            mapping: "munich.json5",
+        },
+    ],
+    output: {
+        target: "file",
+        directory: "out",
+        context: "none",
+        // RoadWork is a custom model with no published schema, so fail-when-schema writes it without a
+        // schema check.
+        validation: {
+            mode: "fail-when-schema",
+        },
+    },
+}

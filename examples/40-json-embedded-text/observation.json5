@@ -1,0 +1,73 @@
+{
+    version: "v4",
+    dataModel: "SpeciesObservation",
+    // GBIF gives every occurrence a numeric key, which is stable across downloads.
+    identity: {
+        entityName: "{{ key }}",
+    },
+    attributes: {
+        scientificName: {
+            source: "{{ scientificName }}",
+            type: "Property",
+            transformation: "string",
+        },
+        kingdom: {
+            source: "{{ kingdom }}",
+            type: "Property",
+            transformation: "string",
+        },
+        taxonKey: {
+            source: "{{ taxonKey }}",
+            type: "Property",
+            transformation: "integer",
+        },
+        // The event date is a local date and time without a zone, with or without seconds, so the
+        // mapping keeps only the date, which every record states in full.
+        observationDate: {
+            source: "{{ eventDate | split(pat='T') | first }}",
+            type: "Property",
+            transformation: "date",
+        },
+        location: {
+            source: [
+                "{{ decimalLongitude }}",
+                "{{ decimalLatitude }}",
+            ],
+            type: "GeoProperty",
+            transformation: "point",
+        },
+        // Not every record states how far off its position may be, and a record without the member
+        // simply has no attribute.
+        coordinateUncertainty: {
+            source: "{{ coordinateUncertaintyInMeters }}",
+            type: "Property",
+            transformation: "float",
+            properties: {
+                unitCode: {
+                    source: "MTR",
+                },
+            },
+        },
+        // Both members are absolute URLs. The iri transformation checks them and writes them in their
+        // normal form, so a malformed one is dropped with a warning and the entity is still written.
+        observationPage: {
+            source: "{{ references }}",
+            type: "Property",
+            transformation: "iri",
+        },
+        license: {
+            source: "{{ license }}",
+            type: "Property",
+            transformation: "iri",
+        },
+        // GBIF carries Darwin Core's `dynamicProperties` as the text of a JSON object inside the JSON
+        // record, so the member arrives as a string. The json transformation reads that text as the
+        // object it encodes, and a JsonProperty keeps the object whole. A null member gives no
+        // attribute.
+        evidence: {
+            source: "{{ dynamicProperties }}",
+            type: "JsonProperty",
+            transformation: "json",
+        },
+    },
+}

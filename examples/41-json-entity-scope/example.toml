@@ -1,0 +1,33 @@
+[example]
+title = "Placing entities in NGSI-LD scopes"
+label = "Scopes"
+summary = "Give each water-level station one scope per observing network it belongs to, and one for the Great Lakes."
+formats = ["json"]
+models = ["WaterLevelStation"]
+
+[requirements]
+smart-data-models = false
+
+[run]
+args = [
+    "map",
+    "--manifest",
+    "manifest.json5",
+]
+
+[[datasets]]
+file = "data/stations.json"
+url = "https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations.json?type=waterlevels"
+source = "NOAA Center for Operational Oceanographic Products and Services (CO-OPS)"
+# Information on NOAA's servers is in the public domain unless annotated otherwise, and NOS asks for
+# attribution whenever its material is redistributed.
+# https://tidesandcurrents.noaa.gov/disclaimers.html
+license = "Public domain (US Government)"
+# NOAA opens and retires stations, so the list changes from time to time.
+volatility = "live"
+
+# The list held 303 stations when this was written; the floor leaves room for retired ones.
+[[outputs]]
+file = "out/WaterLevelStation.json"
+at-least = 280
+contains = ["urn:ngsi-ld:WaterLevelStation:9075099", "urn:ngsi-ld:WaterLevelStation:8770475"]

@@ -1,0 +1,36 @@
+{
+    version: "v4",
+    dataModel: "dataModel.Environment/AirQualityObserved",
+    // The station code sits in the table's first column, which the stacked header leaves unlabelled,
+    // so the column is keyed by its position.
+    identity: {
+        entityName: "vienna-{{ this['0'] }}",
+    },
+    attributes: {
+        // Each pollutant has its own time column, written "11.11.2026, 09:30" in Vienna local time
+        // whatever its MESZ label says, with midnight as 24:00 of the day before. The template rebuilds
+        // it as an RFC 3339 local time with the zone appended, which the datetime transformation
+        // converts to UTC.
+        dateObserved: {
+            source: "{% set p = this['Zeit-NO2 MESZ'] | split(pat=', ') %}{% set d = p[0] | split(pat='.') %}{% if p[1] == '24:00' %}{{ (d[2] ~ '-' ~ d[1] ~ '-' ~ d[0] ~ 'T00:00:00Z') | date_subtract_seconds(seconds=-86400, format='%Y-%m-%dT%H:%M:%S') }}{% else %}{{ d[2] }}-{{ d[1] }}-{{ d[0] }}T{{ p[1] }}:00{% endif %}[Europe/Vienna]",
+            transformation: "datetime",
+        },
+        // The three header rows join into one field name per column: NO2 over HMW (the half-hour
+        // mean) over µg/m³. A station that does not measure NO2 holds NE, which the dialect reads as
+        // missing, so the attribute is left out. A negative reading is sensor drift around zero.
+        no2: {
+            source: "{% set v = this['NO2 HMW µg/m³'] %}{% if v is number and v >= 0 %}{{ v }}{% endif %}",
+            transformation: "float",
+            properties: {
+                // GQ is the UN/CEFACT Common Code for microgram per cubic metre.
+                unitCode: {
+                    source: "GQ",
+                },
+                observedAt: {
+                    source: "{% set p = this['Zeit-NO2 MESZ'] | split(pat=', ') %}{% set d = p[0] | split(pat='.') %}{% if p[1] == '24:00' %}{{ (d[2] ~ '-' ~ d[1] ~ '-' ~ d[0] ~ 'T00:00:00Z') | date_subtract_seconds(seconds=-86400, format='%Y-%m-%dT%H:%M:%S') }}{% else %}{{ d[2] }}-{{ d[1] }}-{{ d[0] }}T{{ p[1] }}:00{% endif %}[Europe/Vienna]",
+                    transformation: "datetime",
+                },
+            },
+        },
+    },
+}

@@ -240,6 +240,26 @@ Reproject a GeoPackage from EPSG:3035 and map its municipalities.
 
 Route three GeoPackage tables to three mappings and link them.
 
+<img src="https://img.shields.io/badge/format-geojson-2563eb" alt="format: geojson" height="20" align="right"> <img src="https://img.shields.io/badge/format-csv-1d6f42" alt="format: csv" height="20" align="right"> **[Input options](examples/38-csv-input-options/example.md)** → `AirQualityObserved`
+
+Fetch a keyed CSV export and a stacked-header table, then query both on a broker.
+
+<img src="https://img.shields.io/badge/format-geojson-2563eb" alt="format: geojson" height="20" align="right"> **[URN and IRI](examples/39-geojson-urn-identifier/example.md)** → `Dataset`
+
+Read a WMO URN, a DOI, and a list of vocabulary IRIs as validated values.
+
+<img src="https://img.shields.io/badge/format-json-d97706" alt="format: json" height="20" align="right"> **[Embedded JSON text](examples/40-json-embedded-text/example.md)** → `SpeciesObservation`
+
+Decode a JSON object stored as text inside each record into a JsonProperty.
+
+<img src="https://img.shields.io/badge/format-json-d97706" alt="format: json" height="20" align="right"> **[Scopes](examples/41-json-entity-scope/example.md)** → `WaterLevelStation`
+
+Give each water-level station one scope per observing network it belongs to, and one for the Great Lakes.
+
+<img src="https://img.shields.io/badge/format-geojson-2563eb" alt="format: geojson" height="20" align="right"> **[Roadworks geometry](examples/42-geojson-geometry-collection/example.md)** → `RoadWork`
+
+Keep Berlin's point-and-line roadworks as a GeometryCollection, and read Munich's in WGS 84 with the time its server answered.
+
 <!-- examples:end -->
 
 ## The runner

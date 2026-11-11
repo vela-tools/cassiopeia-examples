@@ -4,7 +4,7 @@ This example turns a JSON array of cities into NGSI-LD `City` entities. The firs
 
 ## Get the data
 
-The dataset is [world-cities](https://github.com/joelacus/world-cities), a list of cities with a population of at least 15,000. It has 34,135 records. The dataset is licensed under Creative Commons Attribution 4.0.
+The dataset is [world-cities](https://github.com/joelacus/world-cities), a list of cities with a population of at least 15,000. It has 34,195 records. The dataset is licensed under Creative Commons Attribution 4.0.
 
 Download it into this example's `data` directory:
 
@@ -41,7 +41,7 @@ For `les Escaldes`, this produces `AD-les Escaldes`. Cassiopeia cleans the name 
 
 This identity still collides. Countries often contain several cities with the same name. The United States alone has eight Springfields, six Middletowns, and hundreds of other repeated names. All eight Springfields therefore produce the same ID, `urn:ngsi-ld:City:US-Springfield`.
 
-When two records resolve to one ID, Cassiopeia merges them instead of writing two entities. If their values disagree, the first record wins. Running the mapping produces 33,021 entities from 34,135 records: 1,114 records merge away during resolution because their IDs collide. Seven of the eight Springfields disappear, including their coordinates, and the output does not flag the collision.
+When two records resolve to one ID, Cassiopeia merges them instead of writing two entities. If their values disagree, the first record wins. Running the mapping produces 33,082 entities from 34,195 records: 1,113 records merge away during resolution because their IDs collide. Seven of the eight Springfields disappear, including their coordinates. The output file does not record the collision; only the run reports it, as a `resolver-records-merged` warning.
 
 ## A stable suffix from the coordinates
 
@@ -55,7 +55,7 @@ identity: {
 }
 ```
 
-The function receives `lat` and `lon` values from this source's numeric strings, plus an optional `precision`. The default precision of nine characters covers a cell only a few metres across, so each city gets a distinct suffix here. `les Escaldes` becomes `urn:ngsi-ld:City:AD-lesEscaldes-sp91ffjnu`, and all 34,135 records remain separate. `precision=7` is enough for this dataset; `precision=5` leaves four pairs sharing an ID.
+The function receives `lat` and `lon` values from this source's numeric strings, plus an optional `precision`. The default precision of nine characters covers a cell only a few metres across, so each city gets a distinct suffix here. `les Escaldes` becomes `urn:ngsi-ld:City:AD-lesEscaldes-sp91ffjnu`, and all 34,195 records remain separate. `precision=7` is enough for this dataset; `precision=5` leaves three pairs sharing an ID.
 
 Because the geohash comes from the coordinates rather than a running counter, the ID stays the same across runs. Re-mapping the same city therefore produces the same entity identity.
 
@@ -134,7 +134,7 @@ cargo run -- run 02 --runtime docker
 
 The command uses `--context none` so the example does not need a JSON-LD context or a Smart Data Models catalog. [Output](https://vela-tools.github.io/cassiopeia/docs/guides/output#deliver-context) explains how to attach a real context later.
 
-Cassiopeia writes one file per entity type. This run therefore creates `out/City.json`, a single JSON array of 34,135 `City` entities.
+Cassiopeia writes one file per entity type. This run therefore creates `out/City.json`, a single JSON array of 34,195 `City` entities.
 
 ## Read the result
 

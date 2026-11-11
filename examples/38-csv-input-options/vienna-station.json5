@@ -1,0 +1,18 @@
+{
+    version: "v4",
+    dataModel: "dataModel.Environment/AirQualityObserved",
+    // NAME_KURZ is the code the concentration table keys its rows by, so a station's location lands
+    // on the same entity as its reading.
+    identity: {
+        entityName: "vienna-{{ properties.NAME_KURZ }}",
+    },
+    attributes: {
+        name: {
+            source: "{{ properties.NAME }}",
+        },
+        location: {
+            type: "GeoProperty",
+            source: "{{ geometry }}",
+        },
+    },
+}

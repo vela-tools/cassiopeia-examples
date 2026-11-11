@@ -1,0 +1,39 @@
+{
+    version: "v4",
+    dataModel: "dataModel.Environment/AirQualityObserved",
+    // The export holds one row per station and hour. The EEA station code keys the station, so every
+    // hour of one station resolves to the same entity, and the observedAt below keeps the newest.
+    identity: {
+        entityName: "brussels-{{ ab_eoi_code }}",
+    },
+    attributes: {
+        name: {
+            source: "{{ ab_name }}",
+        },
+        // The export stamps each hour in UTC with an explicit offset, so it is already RFC 3339.
+        dateObserved: {
+            source: "{{ timestamp }}",
+            transformation: "datetime",
+        },
+        // geo_point is "latitude, longitude"; GeoJSON orders a position longitude first (RFC 7946,
+        // section 3.1.1).
+        location: {
+            type: "GeoProperty",
+            source: "{% set p = geo_point | split(pat=', ') %}{\"type\": \"Point\", \"coordinates\": [{{ p[1] }}, {{ p[0] }}]}",
+        },
+        no2: {
+            source: "{{ value }}",
+            transformation: "float",
+            properties: {
+                // GQ is the UN/CEFACT Common Code for microgram per cubic metre.
+                unitCode: {
+                    source: "GQ",
+                },
+                observedAt: {
+                    source: "{{ timestamp }}",
+                    transformation: "datetime",
+                },
+            },
+        },
+    },
+}

@@ -51,7 +51,7 @@ pub fn check(directory: &Path, descriptor: &Descriptor, image: &ContainerImage) 
 
     for expected in [
         documented_native_command(&descriptor.run),
-        documented_container_command(&descriptor.run, descriptor.requirements, descriptor.network(), image),
+        documented_container_command(&descriptor.run, &descriptor.requirements, descriptor.network(), image),
     ] {
         if !blocks.iter().any(|block| block.trim() == expected) {
             return Err(PageError::MissingCommand { path, expected });

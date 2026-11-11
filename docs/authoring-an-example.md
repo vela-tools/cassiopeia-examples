@@ -148,6 +148,18 @@ contains = ["urn:ngsi-ld:TropicalCyclone:AL122005"]
 
 A block names exactly one of `file`, `broker-entities`, and `broker-temporal`.
 
+## Reading a credential from the environment
+
+A source that needs a key gets it from the environment, never from the example's files: the manifest reads it as `${NAME}` in the input's `source` or `headers`. The descriptor names the variable in `[requirements]`, so the runner and the page know the run needs it:
+
+```toml
+[requirements]
+# The manifest sends this API key as a request header.
+environment = ["BRUSSELS_ODS_APIKEY"]
+```
+
+A native run inherits the variable from the shell that starts the runner. A container run is handed it as `--env BRUSSELS_ODS_APIKEY`, the name without a value, which copies the value from the runner's environment, so the key appears neither on a command line nor on the page. The page's container block carries the same flag, and `cargo run -- check` enforces it. The page says where a reader gets a key and tells them to export it before the run. Continuous integration reads the value from a repository secret of the same name, which the run step of `examples.yaml` passes to the runner.
+
 ## The page
 
 `example.md` is the example. Write it for someone who has read [Concepts](https://vela-tools.github.io/cassiopeia/docs/guides/concepts) and nothing else. It syncs to the documentation site unchanged and has to stand on its own there, and it is the only route open to a reader without the runner. That is why its commands are checked and not trusted.

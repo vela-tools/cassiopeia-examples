@@ -29,9 +29,9 @@ url = "https://raw.githubusercontent.com/joelacus/world-cities/main/world_cities
 source = "joelacus/world-cities"
 license = "CC-BY-4.0"
 volatility = "live"
-records = 34135
+records = 34195
 
 [[outputs]]
 file = "out/City.json"
-entities = 34135
+entities = 34195
 contains = ["urn:ngsi-ld:City:AD-lesEscaldes-sp91ffjnu", "urn:ngsi-ld:City:DE-Hamburg-u1x0eksew"]

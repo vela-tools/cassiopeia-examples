@@ -92,6 +92,10 @@ jobs:
       - name: Pull the pinned Cassiopeia image
         run: docker pull "ghcr.io/vela-tools/cassiopeia:$(cat cassiopeia-version)"
       - name: Run the example
+        # A key an example's manifest reads with ${NAME}, named in its descriptor's
+        # [requirements] environment. The runner hands it to the container by name only.
+        env:
+          BRUSSELS_ODS_APIKEY: ${{ secrets.BRUSSELS_ODS_APIKEY }}
         run: ./cassiopeia-example-runner run "${{ matrix.example }}" --runtime docker --drift-report drift.json
       # A leg that failed for another reason still learned whatever it got as far as checking, and
       # the drift job would otherwise see nothing from it at all.

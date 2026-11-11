@@ -1,0 +1,28 @@
+{
+    version: "v1",
+    inputs: [
+        {
+            source: "data/occurrences.json",
+            format: "json",
+            // The response is an object with a `results` array beside paging members and an empty
+            // `facets` array, so it is no single-array envelope. A `mappings` list reads the document as
+            // collections, and `results` is the one that holds the occurrences.
+            mappings: [
+                {
+                    collection: "results",
+                    mapping: "observation.json5",
+                },
+            ],
+        },
+    ],
+    output: {
+        target: "file",
+        directory: "out",
+        context: "none",
+        // SpeciesObservation is a custom data model with no published schema, so fail-when-schema
+        // writes it without a schema check.
+        validation: {
+            mode: "fail-when-schema",
+        },
+    },
+}

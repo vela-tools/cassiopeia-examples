@@ -1,0 +1,41 @@
+[example]
+title = "Mapping roadworks with mixed and projected geometries"
+label = "Roadworks geometry"
+summary = "Keep Berlin's point-and-line roadworks as a GeometryCollection, and read Munich's in WGS 84 with the time its server answered."
+formats = ["geojson"]
+models = ["RoadWork"]
+
+[requirements]
+smart-data-models = false
+
+[run]
+args = [
+    "map",
+    "--manifest",
+    "manifest.json5",
+]
+
+[[datasets]]
+file = "data/berlin.geojson"
+url = "https://api.viz.berlin.de/daten/baustellen_sperrungen_viz.json"
+source = "Verkehrsinformationszentrale Berlin (VIZ), for the Senate Department for Mobility, Transport, Climate Protection and the Environment"
+# Data licence Germany, attribution, version 2.0, as the Berlin open data register records it.
+# https://datenregister.berlin.de/api/3/action/package_show?id=baustellen-sperrungen-und-sonstige-storungen-von-besonderem-verkehrlichem-interesse
+license = "DL-DE-BY-2.0"
+volatility = "live"
+
+[[datasets]]
+file = "data/munich.geojson"
+url = "https://geoportal.muenchen.de/geoserver/mor_wfs/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=mor_wfs:baustellen_opendata&outputFormat=application/json&srsName=EPSG:4326"
+source = "Mobilitätsreferat der Landeshauptstadt München"
+# Data licence Germany, attribution, version 2.0, as the Munich open data portal records it.
+# https://opendata.muenchen.de/dataset/baustellen_4_weeks_opendata
+license = "DL-DE-BY-2.0"
+volatility = "live"
+
+# Berlin listed 266 roadworks and Munich 5,932 when this was written. Both lists follow the works on
+# the street, so only a floor holds.
+[[outputs]]
+file = "out/RoadWork.json"
+at-least = 4000
+contains = ["urn:ngsi-ld:RoadWork:berlin-285-2026", "urn:ngsi-ld:RoadWork:munich-4"]

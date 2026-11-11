@@ -1,0 +1,27 @@
+{
+    version: "v1",
+    inputs: [
+        {
+            source: "data/stations.json",
+            format: "json",
+            // The metadata API wraps its stations in an object beside a count, so they sit one level
+            // down, at `stations`. A `mappings` list reads them as a collection.
+            mappings: [
+                {
+                    collection: "stations",
+                    mapping: "station.json5",
+                },
+            ],
+        },
+    ],
+    output: {
+        target: "file",
+        directory: "out",
+        context: "none",
+        // WaterLevelStation is a custom model with no published schema, so fail-when-schema writes it
+        // without a schema check.
+        validation: {
+            mode: "fail-when-schema",
+        },
+    },
+}

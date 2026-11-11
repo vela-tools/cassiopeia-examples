@@ -1,0 +1,33 @@
+[example]
+title = "Reading JSON text embedded in a JSON record"
+label = "Embedded JSON text"
+summary = "Decode a JSON object stored as text inside each record into a JsonProperty."
+formats = ["json"]
+models = ["SpeciesObservation"]
+
+[requirements]
+smart-data-models = false
+
+[run]
+args = [
+    "map",
+    "--manifest",
+    "manifest.json5",
+]
+
+[[datasets]]
+file = "data/occurrences.json"
+url = "https://api.gbif.org/v1/occurrence/search?datasetKey=50c9509d-22c7-4a22-a47d-8c48425ef4a7&country=SI&hasCoordinate=true&eventDate=2026-01-01,2026-01-04&limit=300"
+source = "iNaturalist research-grade observations, published through GBIF"
+# GBIF states the licence of each occurrence in its `license` member, and the iNaturalist observers
+# choose it: CC0, CC BY, or CC BY-NC.
+# https://www.gbif.org/dataset/50c9509d-22c7-4a22-a47d-8c48425ef4a7
+license = "Per record: CC0-1.0, CC-BY-4.0, or CC-BY-NC-4.0"
+volatility = "live"
+
+# The window holds one page of occurrences. Observers add records for a past date for days afterwards,
+# so the count is a floor. The identifier is an observation the page quotes.
+[[outputs]]
+file = "out/SpeciesObservation.json"
+at-least = 100
+contains = ["urn:ngsi-ld:SpeciesObservation:5938223171"]

@@ -3,6 +3,7 @@ use crate::{
     command_line_token::CommandLineToken,
     container_image::ContainerImage,
     container_network::ContainerNetwork,
+    environment_variable_name::EnvironmentVariableName,
     program_name::ProgramName,
     requirements::Requirements,
     run::Run,
@@ -83,13 +84,17 @@ pub fn documented_native_command(run: &Run) -> String {
 ///
 /// Podman differs only in the engine name and in dropping `--user`, which the page states in prose
 /// rather than repeating the whole command.
-pub fn documented_container_command(run: &Run, requirements: Requirements, network: ContainerNetwork, image: &ContainerImage) -> String {
+pub fn documented_container_command(run: &Run, requirements: &Requirements, network: ContainerNetwork, image: &ContainerImage) -> String {
     let mut lines = vec!["docker run --rm".to_owned(), "--user \"$(id -u):$(id -g)\"".to_owned()];
 
     match network {
         ContainerNetwork::Host => lines.push(format!("--network {network}")),
         ContainerNetwork::Isolated => (),
     }
+
+    // A name without a value hands the container the reader's own value, which keeps a credential
+    // off the page and out of the shell history.
+    lines.extend(requirements.environment.iter().map(|name| format!("--env {name}")));
 
     lines.push(format!("--volume \"$PWD:{CONTAINER_WORKDIR}\""));
 
@@ -108,12 +113,14 @@ pub fn documented_container_command(run: &Run, requirements: Requirements, netwo
 /// carries shell expansions.
 ///
 /// A schema cache is mounted only when one is given, which is how a run that needs the Smart Data
-/// Models catalog differs from one that does not.
+/// Models catalog differs from one that does not. A native run inherits the runner's environment, so
+/// only a container run is handed the `environment` variables, each by name.
 pub fn invocation(
     runtime: Runtime,
     directory: &Path,
     arguments: &[CommandLineToken],
     schema_cache: Option<&Path>,
+    environment: &[EnvironmentVariableName],
     network: ContainerNetwork,
     image: &ContainerImage,
 ) -> Invocation {
@@ -143,6 +150,10 @@ pub fn invocation(
                 }
                 ContainerNetwork::Isolated => (),
             }
+
+            // The name alone, as the page documents it: the engine copies the runner's own value,
+            // so a credential never appears among the arguments a process listing shows.
+            engine_arguments.extend(environment.iter().flat_map(|name| [OsString::from("--env"), OsString::from(name.as_str())]));
 
             engine_arguments.push(OsString::from("--volume"));
             engine_arguments.push(mount(directory, CONTAINER_WORKDIR));
@@ -210,6 +221,7 @@ mod tests {
         command_line_token::CommandLineToken,
         container_image::ContainerImage,
         container_network::ContainerNetwork,
+        environment_variable_name::EnvironmentVariableName,
         program_name::ProgramName,
         requirements::Requirements,
         run::Run,
@@ -231,6 +243,10 @@ mod tests {
         }
     }
 
+    fn api_key() -> Vec<EnvironmentVariableName> {
+        EnvironmentVariableName::try_from("BRUSSELS_ODS_APIKEY".to_owned()).into_iter().collect()
+    }
+
     #[test]
     fn the_native_command_puts_the_subcommand_beside_the_program() {
         assert_eq!(
@@ -241,7 +257,7 @@ mod tests {
 
     #[test]
     fn the_container_command_mounts_the_example_directory_as_the_working_directory() {
-        let documented = documented_container_command(&run(), Requirements::default(), ContainerNetwork::Isolated, &image());
+        let documented = documented_container_command(&run(), &Requirements::default(), ContainerNetwork::Isolated, &image());
 
         assert!(documented.contains("--volume \"$PWD:/data\""));
         assert!(documented.contains("--workdir /data"));
@@ -250,17 +266,59 @@ mod tests {
 
     #[test]
     fn a_run_without_the_catalog_mounts_no_schema_volume() {
-        let documented = documented_container_command(&run(), Requirements::default(), ContainerNetwork::Isolated, &image());
+        let documented = documented_container_command(&run(), &Requirements::default(), ContainerNetwork::Isolated, &image());
 
         assert!(!documented.contains("schemas"));
     }
 
     #[test]
     fn a_run_needing_the_catalog_mounts_the_schema_volume() {
-        let requirements = Requirements { smart_data_models: true };
-        let documented = documented_container_command(&run(), requirements, ContainerNetwork::Isolated, &image());
+        let requirements = Requirements {
+            smart_data_models: true,
+            ..Requirements::default()
+        };
+        let documented = documented_container_command(&run(), &requirements, ContainerNetwork::Isolated, &image());
 
         assert!(documented.contains("$HOME/.cache/cassiopeia-examples/schemas:/var/lib/cassiopeia/schemas"));
+    }
+
+    #[test]
+    fn a_run_reading_an_environment_variable_documents_it_by_name_before_the_mounts() {
+        let requirements = Requirements {
+            environment: api_key(),
+            ..Requirements::default()
+        };
+        let documented = documented_container_command(&run(), &requirements, ContainerNetwork::Isolated, &image());
+
+        assert_eq!(
+            documented
+                .find("--env BRUSSELS_ODS_APIKEY")
+                .zip(documented.find("--volume"))
+                .map(|(env, volume)| env < volume),
+            Some(true)
+        );
+    }
+
+    #[test]
+    fn a_run_reading_no_environment_variable_documents_no_env_flag() {
+        let documented = documented_container_command(&run(), &Requirements::default(), ContainerNetwork::Isolated, &image());
+
+        assert!(!documented.contains("--env"));
+    }
+
+    #[test]
+    fn a_container_run_is_handed_each_environment_variable_by_name_alone() {
+        let built = invocation(
+            Runtime::Docker,
+            Path::new("/tmp/example"),
+            &run().args,
+            None,
+            &api_key(),
+            ContainerNetwork::Isolated,
+            &image(),
+        );
+
+        assert!(built.arguments.windows(2).any(|pair| pair[0] == "--env" && pair[1] == "BRUSSELS_ODS_APIKEY"));
     }
 
     #[test]
@@ -270,6 +328,7 @@ mod tests {
             Path::new("/tmp/example"),
             &run().args,
             None,
+            &[],
             ContainerNetwork::Isolated,
             &image(),
         );
@@ -285,6 +344,7 @@ mod tests {
             Path::new("/tmp/example"),
             &run().args,
             Some(Path::new("/tmp/cache")),
+            &[],
             ContainerNetwork::Isolated,
             &image(),
         );
@@ -295,8 +355,16 @@ mod tests {
 
     #[test]
     fn a_broker_run_documents_and_invokes_host_networking() {
-        let documented = documented_container_command(&run(), Requirements::default(), ContainerNetwork::Host, &image());
-        let built = invocation(Runtime::Docker, Path::new("/tmp/example"), &run().args, None, ContainerNetwork::Host, &image());
+        let documented = documented_container_command(&run(), &Requirements::default(), ContainerNetwork::Host, &image());
+        let built = invocation(
+            Runtime::Docker,
+            Path::new("/tmp/example"),
+            &run().args,
+            None,
+            &[],
+            ContainerNetwork::Host,
+            &image(),
+        );
 
         assert!(documented.contains("--network host"));
         assert!(built.arguments.contains(&OsString::from("--network")));
@@ -305,7 +373,7 @@ mod tests {
 
     #[test]
     fn a_run_that_needs_no_broker_names_no_network() {
-        let documented = documented_container_command(&run(), Requirements::default(), ContainerNetwork::Isolated, &image());
+        let documented = documented_container_command(&run(), &Requirements::default(), ContainerNetwork::Isolated, &image());
 
         assert!(!documented.contains("--network"));
     }
@@ -317,6 +385,7 @@ mod tests {
             Path::new("/tmp/example"),
             &run().args,
             None,
+            &api_key(),
             ContainerNetwork::Isolated,
             &image(),
         );

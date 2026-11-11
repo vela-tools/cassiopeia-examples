@@ -1,0 +1,39 @@
+[example]
+title = "Reading authenticated and irregular CSV sources"
+label = "Input options"
+summary = "Fetch a keyed CSV export and a stacked-header table, then query both on a broker."
+formats = ["csv", "geojson"]
+models = ["AirQualityObserved"]
+
+[requirements]
+smart-data-models = true
+# The Brussels input sends its Opendatasoft API key as a request header, and the manifest reads the
+# key from this variable. A container run is handed it by name, so the key never reaches the page.
+environment = ["BRUSSELS_ODS_APIKEY"]
+
+# The page tells a reader to start this directory's own stack: Andromeda, with the database it keeps
+# its entities in.
+[context-broker]
+compose = "docker-compose.yml"
+url = "http://localhost:1056/"
+# The manifest writes with context "default", which the catalog resolves to the model's own
+# repository context. A broker expands the type in a query against whichever context the query
+# carries, so asking for a bare "AirQualityObserved" without this would expand it against the core
+# context and match none of the entities the run just wrote.
+context = "https://raw.githubusercontent.com/smart-data-models/dataModel.Environment/master/context.jsonld"
+
+[run]
+args = [
+    "map",
+    "--manifest",
+    "manifest.json5",
+]
+
+# The manifest fetches all three sources as it runs, so nothing is downloaded beforehand. Vienna's
+# table names 19 stations and its station layer locates the same 19. The Brussels export covered 14
+# stations with at least one valid hour in the last 48 when this was written, of the 17 it lists; a
+# station whose analyser is down drops out, so the floor leaves room for a few.
+[[outputs]]
+broker-entities = "AirQualityObserved"
+at-least = 28
+contains = ["urn:ngsi-ld:AirQualityObserved:vienna-STEF", "urn:ngsi-ld:AirQualityObserved:brussels-BETB006"]

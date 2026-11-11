@@ -1,0 +1,39 @@
+# A local NGSI-LD Context Broker for the worked example: Andromeda, backed by PostgreSQL with PostGIS
+# and TimescaleDB. Andromeda serves the NGSI-LD API on port 1056, which matches the manifest's base
+# URL. The password is fixed because the database never leaves this machine and is discarded with
+# the stack; a deployment generates its own.
+#
+#   docker compose up -d --wait   # start the broker's database and wait for it to become healthy
+#   docker compose down -v        # stop the stack and discard the database volume
+
+services:
+  postgresql:
+    image: ghcr.io/mskvarc/postgresql:18.6-timescaledb2.31.0-postgis3.6.4-tsl
+    environment:
+      POSTGRES_USER: andromeda
+      POSTGRES_PASSWORD: andromeda
+      POSTGRES_DB: andromeda
+    # The image tunes PostgreSQL to these limits; without them it tunes for the whole host.
+    mem_limit: 2g
+    cpus: 2
+    # Dynamic shared memory grows with the tenant databases, and Docker's default /dev/shm is 64 MB.
+    shm_size: 1gb
+    # PostgreSQL 18 images keep their data under /var/lib/postgresql, not /var/lib/postgresql/data.
+    volumes:
+      - postgresql-data:/var/lib/postgresql
+
+  andromeda:
+    # Pinned rather than tracking a moving tag: a third-party image that changes under the example
+    # is a source of breakage that has nothing to do with the datasets this repository is about.
+    image: ghcr.io/mskvarc/andromeda:1.0.0
+    # A broker that can't reach the database within a few seconds of starting stops with an error.
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    environment:
+      ANDROMEDA__DATABASE__CONNECTION: postgres://andromeda:andromeda@postgresql:5432/andromeda
+    ports:
+      - "1056:1056"
+
+volumes:
+  postgresql-data:

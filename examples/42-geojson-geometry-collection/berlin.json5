@@ -1,0 +1,48 @@
+{
+    version: "v4",
+    dataModel: "RoadWork",
+    // The VIZ numbers each roadwork within its year, as in "285/2026". A slash would split the
+    // entity's ID in a broker's URL path, so it becomes a hyphen.
+    identity: {
+        entityName: "berlin-{{ properties.id | replace(from='/', to='-') }}",
+    },
+    attributes: {
+        category: {
+            source: "{{ properties.subtype }}",
+        },
+        street: {
+            source: "{{ properties.street }}",
+        },
+        section: {
+            source: "{{ properties.section }}",
+        },
+        description: {
+            source: "{{ properties.content }}",
+        },
+        restriction: {
+            source: "{{ properties.severity }}",
+        },
+        // Berlin dates each record by when the VIZ last stored it.
+        dateModified: {
+            source: "{{ properties.tstore }}",
+            transformation: "datetime",
+        },
+        // A roadwork is a GeometryCollection of a Point, the marker a map shows, followed by the
+        // LineStrings of the road it closes. NGSI-LD admits no GeometryCollection as a GeoProperty
+        // value (ETSI GS CIM 009 v1.9.1 clause 4.7.1), and flatten refuses one that mixes dimensions,
+        // so the GeoProperty takes the Point. A roadwork stored as a lone Point has no geometries,
+        // and the default reads it as a collection of one.
+        location: {
+            source: "{{ geometry.geometries | default(value=[geometry]) | first }}",
+            type: "GeoProperty",
+            transformation: "point",
+        },
+        // A Property's value may be any JSON object, so a Property keeps the whole collection, with
+        // every member checked as a geometry of its own.
+        sourceGeometry: {
+            source: "{{ geometry }}",
+            type: "Property",
+            transformation: "geometry",
+        },
+    },
+}
