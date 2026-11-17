@@ -133,9 +133,9 @@ A route flown with three aircraft types now carries all three links in one attri
     "hasAircraftModel": {
         "type": "ListRelationship",
         "objectList": [
-            "urn:ngsi-ld:AircraftModel:773",
-            "urn:ngsi-ld:AircraftModel:320",
-            "urn:ngsi-ld:AircraftModel:330"
+            { "object": "urn:ngsi-ld:AircraftModel:773" },
+            { "object": "urn:ngsi-ld:AircraftModel:320" },
+            { "object": "urn:ngsi-ld:AircraftModel:330" }
         ],
         "objectType": "AircraftModel"
     }

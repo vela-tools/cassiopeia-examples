@@ -100,8 +100,17 @@
                     "type": "array",
                     "minItems": 1,
                     "items": {
-                        "type": "string",
-                        "pattern": "^urn:ngsi-ld:Person:"
+                        "type": "object",
+                        "required": [
+                            "object"
+                        ],
+                        "properties": {
+                            "object": {
+                                "type": "string",
+                                "pattern": "^urn:ngsi-ld:Person:"
+                            }
+                        },
+                        "additionalProperties": false
                     }
                 },
                 "objectType": {

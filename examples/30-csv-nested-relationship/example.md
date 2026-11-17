@@ -147,8 +147,8 @@ The normalized `Movie` entity for Avatar contains the nested relationship under 
     "hasCast": {
         "type": "ListRelationship",
         "objectList": [
-            "urn:ngsi-ld:Person:65731",
-            "urn:ngsi-ld:Person:8691"
+            { "object": "urn:ngsi-ld:Person:65731" },
+            { "object": "urn:ngsi-ld:Person:8691" }
         ],
         "objectType": "Person",
         "castSize": {
@@ -165,4 +165,4 @@ The normalized `Movie` entity for Avatar contains the nested relationship under 
 
 The manifest selects `fail-when-schema` and points to the hand-authored `movie.schema.json`. Validation uses the normalized representation, so the schema can inspect `type`, `object`, `objectList`, and nested attributes directly.
 
-The schema requires every entity to have an `id` and a `type`. When `hasLeadActor` is present, it must be a Relationship with a Person target. Its `playsCharacter` and `billingOrder` sub-attributes are checked when they are present. `hasCast` is checked in the same way, including its Person `objectList` and integer `castSize`. All 4803 films pass this validation.
+The schema requires every entity to have an `id` and a `type`. When `hasLeadActor` is present, it must be a Relationship with a Person target. Its `playsCharacter` and `billingOrder` sub-attributes are checked when they are present. `hasCast` is checked in the same way, including its integer `castSize` and its `objectList`, whose every element is an object holding a Person target in its single `object` member, as the normalized representation requires (ETSI GS CIM 009 v1.9.1 clause 4.5.22.2). All 4803 films pass this validation.

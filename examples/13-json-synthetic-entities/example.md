@@ -183,8 +183,8 @@ Everest is the first row. Its coordinate is now a point, its height and prominen
     "hasCountry": {
         "type": "ListRelationship",
         "objectList": [
-            "urn:ngsi-ld:Country:Nepal",
-            "urn:ngsi-ld:Country:China"
+            { "object": "urn:ngsi-ld:Country:Nepal" },
+            { "object": "urn:ngsi-ld:Country:China" }
         ],
         "objectType": "Country"
     }
@@ -205,8 +205,8 @@ Lhotse has a parent, and it points straight back at Everest:
     "hasCountry": {
         "type": "ListRelationship",
         "objectList": [
-            "urn:ngsi-ld:Country:China",
-            "urn:ngsi-ld:Country:Nepal"
+            { "object": "urn:ngsi-ld:Country:China" },
+            { "object": "urn:ngsi-ld:Country:Nepal" }
         ],
         "objectType": "Country"
     }
