@@ -1,0 +1,28 @@
+[example]
+title = "Reading SensorThings Things with several Locations"
+label = "SensorThings locations"
+summary = "Map air quality stations whose place is served twice, as a point and as a postal address."
+formats = ["sensorthings"]
+models = ["PointOfInterest"]
+
+[requirements]
+smart-data-models = true
+
+[run]
+args = [
+    "map",
+    "--manifest",
+    "manifest.json5",
+]
+
+# The source is a server, not a downloaded file, so there is no [[datasets]] block and the example is
+# live. Taiwan's Civil IoT datasets are published under the Open Government Data License, version 1.0,
+# as the platform's dataset listing on the National Center for High-performance Computing's catalogue
+# states. https://ark.nchc.org.tw/en/organization/civiliot
+#
+# The service has stopped receiving readings and still serves its 77 stations, one entity each. The
+# identifiers are the two stations the page quotes.
+[[outputs]]
+file = "out/PointOfInterest.jsonld"
+at-least = 75
+contains = ["urn:ngsi-ld:PointOfInterest:taiwan-EPA001", "urn:ngsi-ld:PointOfInterest:taiwan-EPA016"]

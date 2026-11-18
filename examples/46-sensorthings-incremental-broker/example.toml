@@ -1,0 +1,51 @@
+[example]
+title = "Reading new SensorThings readings into a broker on a schedule"
+label = "SensorThings incremental"
+summary = "Read each new river gauge reading once, every five minutes, into a broker's temporal API."
+formats = ["sensorthings"]
+models = ["WaterObserved"]
+
+[requirements]
+smart-data-models = true
+
+# The page tells a reader to start this directory's own stack, an Andromeda broker and its PostgreSQL
+# server.
+[context-broker]
+compose = "docker-compose.yaml"
+url = "http://localhost:1056/"
+# The manifest writes with context "default", which the catalog resolves to the model's own repository
+# context, so a query for the bare type name needs the same context to expand it.
+context = "https://raw.githubusercontent.com/smart-data-models/dataModel.Environment/master/context.jsonld"
+
+# Two cycles show what an incremental read does: the first reads two hours, the second only what
+# arrived since. One interval plus the grace covers the 20 seconds of jitter and the second cycle's
+# reading and delivery.
+[schedule]
+cycles = 2
+interval = "5m"
+grace = "2m"
+
+[run]
+args = [
+    "map",
+    "--manifest",
+    "manifest.json5",
+]
+
+# The source is a server, not a downloaded file, so there is no [[datasets]] block and the example is
+# live. TLUBN names itself as the owner of the data and states no licence for the service.
+# https://kshww2.thueringen.de/FROST-Server/v1.1
+#
+# The first cycle wrote 99 gauges when this was written. The gauges that upload once a day fall
+# outside the two hours, so the count is a floor. A temporal delivery keeps each entity's current state
+# as well, which the broker's entities endpoint answers.
+[[outputs]]
+broker-entities = "WaterObserved"
+at-least = 85
+
+# The temporal endpoint holds the gauge the page quotes as one folded EntityTemporal (ETSI GS CIM 009
+# v1.9.1, clause 5.2.20).
+[[outputs]]
+broker-temporal = "urn:ngsi-ld:WaterObserved:thueringen-570280"
+entities = 1
+contains = ["urn:ngsi-ld:WaterObserved:thueringen-570280"]

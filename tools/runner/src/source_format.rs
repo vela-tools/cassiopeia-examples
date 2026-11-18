@@ -48,6 +48,13 @@ pub enum SourceFormat {
     #[serde(rename = "geopackage")]
     #[strum(serialize = "geopackage")]
     GeoPackage,
+    /// An OGC `SensorThings` API server, read through its service root.
+    ///
+    /// Kebab-case would write this `sensor-things`. The token a manifest's `format` field takes is
+    /// `sensorthings`, so that is what a descriptor declares and what the index shows.
+    #[serde(rename = "sensorthings")]
+    #[strum(serialize = "sensorthings")]
+    SensorThings,
 }
 
 #[cfg(test)]
@@ -84,6 +91,21 @@ mod tests {
 
         assert_eq!(declaration.map(|declaration| declaration.formats).ok(), Some(vec![SourceFormat::GeoPackage]));
         assert_eq!(SourceFormat::GeoPackage.to_string(), "geopackage");
+    }
+
+    #[test]
+    fn sensorthings_is_read_and_printed_as_one_word() {
+        let declaration: Result<Declaration, _> = toml::from_str("formats = [\"sensorthings\"]\n");
+
+        assert_eq!(declaration.map(|declaration| declaration.formats).ok(), Some(vec![SourceFormat::SensorThings]));
+        assert_eq!(SourceFormat::SensorThings.to_string(), "sensorthings");
+    }
+
+    #[test]
+    fn the_hyphenated_sensorthings_token_is_rejected() {
+        let declaration: Result<Declaration, _> = toml::from_str("formats = [\"sensor-things\"]\n");
+
+        assert!(declaration.is_err());
     }
 
     #[test]

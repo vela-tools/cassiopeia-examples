@@ -1,0 +1,29 @@
+[example]
+title = "Listing every station of a SensorThings server"
+label = "SensorThings inventory"
+summary = "Write every Thing of a SensorThings server as a Device, those without data streams included."
+formats = ["sensorthings"]
+models = ["Device"]
+
+[requirements]
+smart-data-models = true
+
+[run]
+args = [
+    "map",
+    "--manifest",
+    "manifest.json5",
+]
+
+# The source is a server, not a downloaded file, so there is no [[datasets]] block and the example is
+# live. Each Thing and Datastream of the British Geological Survey's server states its terms in its
+# data_usage property: the Open Government Licence, with the acknowledgement "Contains UKRI materials
+# ©UKRI [year]". https://sensors.bgs.ac.uk/FROST-Server/v1.1
+#
+# The server held 176 Things when this was written, one Device each. The identifiers are the GasClam
+# probe, which has no data stream at all, and a fibre-optic profile whose only readings are in a
+# MultiDatastream the input does not read.
+[[outputs]]
+file = "out/Device.jsonld"
+at-least = 170
+contains = ["urn:ngsi-ld:Device:bgs-500", "urn:ngsi-ld:Device:bgs-373"]

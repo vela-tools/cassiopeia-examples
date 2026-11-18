@@ -1,0 +1,57 @@
+{
+    version: "v4",
+    dataModel: "dataModel.Device/Device",
+    // One Device per Thing, by the server's id. Thing names are unique here, but several are long
+    // descriptions that the server's operators rename, such as "(retired)" added to a station that
+    // stopped, while the id stays.
+    identity: {
+        entityName: "bgs-{{ thing.id }}",
+    },
+    attributes: {
+        name: {
+            source: "{{ thing.name }}",
+        },
+        description: {
+            source: "{{ thing.description }}",
+        },
+        // Twenty Things have no Location, so they have no location and their Device none either.
+        location: {
+            type: "GeoProperty",
+            source: "{{ location }}",
+        },
+        deviceCategory: {
+            source: "sensor",
+            transformation: "array",
+        },
+        // Device requires controlledProperty, a list of values from a fixed set. Every Thing carries a
+        // monitoring category in its properties, a Thing without readings included, so the list is
+        // chosen by category, and among the groundwater Things by name, since the water temperature
+        // loggers measure temperature alone. Neither soil gas nor ground resistivity is in the set, so those take the
+        // nearest value it has: airPollution for the gas probes and conductivity for the resistivity
+        // arrays. The list is written as JSON text, which the array transformation reads as an array.
+        controlledProperty: {
+            source: "{% set category = thing.properties.category %}{% if category == 'Groundwater Monitoring' and 'Water Temperature Logger' in thing.name %}[\"temperature\"]{% elif category == 'Groundwater Monitoring' %}[\"waterLevel\", \"temperature\"]{% elif category == 'DTS Monitoring' or category == 'DTC Monitoring' %}[\"temperature\"]{% elif category == 'Barometer' %}[\"atmosphericPressure\"]{% elif category == 'Weather Station' %}[\"weatherConditions\"]{% elif category == 'Soil Gas Monitoring' or category == 'Atmospheric Monitoring' %}[\"airPollution\"]{% elif category == 'ERT Monitoring' %}[\"conductivity\"]{% endif %}",
+            transformation: "array",
+        },
+        serialNumber: {
+            source: "{{ thing.properties.serial_no }}",
+        },
+        provider: {
+            source: "{{ thing.properties.provider.name }}",
+        },
+        dateFirstUsed: {
+            source: "{{ thing.properties.observation_start_date }}",
+            transformation: "datetime",
+        },
+        // When the station last reported: the latest end of its Datastreams' phenomenonTime, the
+        // interval each Datastream's Observations span. The end of an interval is the instant after
+        // its "/", and an instant holds no "/", so last gives it whole. The filters fail on a missing
+        // field, so a Datastream without a phenomenonTime is passed over. A loop over a missing field
+        // fails as well, so a Thing without readings is passed over by the outer test, and its Device
+        // gets no dateLastValueReported.
+        dateLastValueReported: {
+            source: "{% if readings %}{% set_global latest = '' %}{% for key, reading in readings %}{% if reading.datastream.phenomenonTime %}{% set end = reading.datastream.phenomenonTime | split(pat='/') | last %}{% if latest == '' or end > latest %}{% set_global latest = end %}{% endif %}{% endif %}{% endfor %}{{ latest }}{% endif %}",
+            transformation: "datetime",
+        },
+    },
+}

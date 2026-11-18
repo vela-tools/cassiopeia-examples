@@ -1,0 +1,31 @@
+{
+    version: "v1",
+    inputs: [
+        {
+            source: "https://kshww2.thueringen.de/FROST-Server/v1.1",
+            format: "sensorthings",
+            mapping: "water-observed.json5",
+            sensorthings: {
+                // The 15-minute water level and discharge of every gauge, as in the latest read.
+                datastreams: "properties/type eq 'TH_PEGELDATEN_15MIN'",
+                // Every reading of the six hours before the run starts, which gives one record per
+                // Observation rather than one per Thing.
+                read: { range: { last: "6h" } },
+            },
+        },
+    ],
+    output: {
+        target: "file",
+        directory: "out",
+        context: "default",
+        // A range read gives several records per gauge, and current-state output keeps one record per
+        // entity. Series output keeps every reading as an instance of its attribute instead, so a run
+        // without it is refused before it sends any request.
+        temporal: {
+            representation: "series",
+        },
+        validation: {
+            mode: "fail-when-schema",
+        },
+    },
+}

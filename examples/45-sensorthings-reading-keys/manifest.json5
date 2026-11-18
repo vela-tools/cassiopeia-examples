@@ -1,0 +1,28 @@
+{
+    version: "v1",
+    inputs: [
+        {
+            source: "https://kshww2.thueringen.de/FROST-Server/v1.1",
+            format: "sensorthings",
+            mapping: "water-observed.json5",
+            sensorthings: {
+                // Every water level and every discharge, whatever their resolution: the daily values,
+                // the 15-minute readings, and the water levels of the LoRa gauges. Most gauges then
+                // serve two Datastreams of each property.
+                datastreams: "ObservedProperty/name eq 'W' or ObservedProperty/name eq 'Q'",
+                read: "latest",
+                // 584 Datastreams with their newest Observations, in six pages.
+                pageSize: 100,
+                delay: "200ms",
+            },
+        },
+    ],
+    output: {
+        target: "file",
+        directory: "out",
+        context: "default",
+        validation: {
+            mode: "fail-when-schema",
+        },
+    },
+}

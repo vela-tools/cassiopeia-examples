@@ -1,0 +1,126 @@
+{
+    version: "v4",
+    dataModel: "dataModel.Weather/WeatherObserved",
+    // One entity for the station, by the server's id: four Things here are called "FT-0310 Weather
+    // Station".
+    identity: {
+        entityName: "staplus-{{ thing.id }}",
+    },
+    attributes: {
+        name: {
+            source: "{{ thing.name }}",
+        },
+        location: {
+            type: "GeoProperty",
+            source: "{{ location }}",
+        },
+        // WeatherObserved requires dateObserved. Every record holds the readings of one Observation,
+        // which share its time, so the first reading's time is the record's. dateObserved has no
+        // observedAt, so series output keeps it once, from the entity's first record.
+        dateObserved: {
+            source: "{% for key, reading in readings %}{% if loop.first %}{{ reading.time }}{% endif %}{% endfor %}",
+            transformation: "datetime",
+        },
+        // The two values of each Observation of MultiDatastream 4, read by the names of the
+        // ObservedProperties at their positions, wspeed first and wgust second.
+        windSpeed: {
+            source: "{{ readings.wspeed.result }}",
+            transformation: "float",
+            properties: {
+                unitCode: {
+                    source: "{% if readings.wspeed %}{{ readings.wspeed.unit | cefact_unit }}{% endif %}",
+                },
+                observedAt: {
+                    source: "{{ readings.wspeed.time }}",
+                    transformation: "datetime",
+                },
+            },
+        },
+        // The second value of the same Observation, so its time is the time of windSpeed's.
+        gustSpeed: {
+            source: "{{ readings.wgust.result }}",
+            transformation: "float",
+            properties: {
+                unitCode: {
+                    source: "{% if readings.wgust %}{{ readings.wgust.unit | cefact_unit }}{% endif %}",
+                },
+                observedAt: {
+                    source: "{{ readings.wgust.time }}",
+                    transformation: "datetime",
+                },
+            },
+        },
+        // The Datastreams of the same station, one Observation and one record each.
+        windDirection: {
+            source: "{{ readings.wdir.result }}",
+            transformation: "float",
+            properties: {
+                unitCode: {
+                    source: "{% if readings.wdir %}{{ readings.wdir.unit | cefact_unit }}{% endif %}",
+                },
+                observedAt: {
+                    source: "{{ readings.wdir.time }}",
+                    transformation: "datetime",
+                },
+            },
+        },
+        // Degrees Celsius. The server gives the unit's QUDT definition, which cefact_unit resolves to CEL.
+        temperature: {
+            source: "{{ readings.temp.result }}",
+            transformation: "float",
+            properties: {
+                unitCode: {
+                    source: "{% if readings.temp %}{{ readings.temp.unit | cefact_unit }}{% endif %}",
+                },
+                observedAt: {
+                    source: "{{ readings.temp.time }}",
+                    transformation: "datetime",
+                },
+            },
+        },
+        // The model gives relative humidity as a fraction from 0 to 1, and the server serves
+        // percent, so the value is divided by 100 and written with C62, the code for one. Arithmetic
+        // fails on a missing field, hence the guard.
+        relativeHumidity: {
+            source: "{% if readings.RH %}{{ readings.RH.result / 100 }}{% endif %}",
+            transformation: "float",
+            properties: {
+                unitCode: {
+                    source: "C62",
+                },
+                observedAt: {
+                    source: "{{ readings.RH.time }}",
+                    transformation: "datetime",
+                },
+            },
+        },
+        // Millimetres of rain.
+        precipitation: {
+            source: "{{ readings.rain.result }}",
+            transformation: "float",
+            properties: {
+                unitCode: {
+                    source: "{% if readings.rain %}{{ readings.rain.unit | cefact_unit }}{% endif %}",
+                },
+                observedAt: {
+                    source: "{{ readings.rain.time }}",
+                    transformation: "datetime",
+                },
+            },
+        },
+        // Lux.
+        illuminance: {
+            source: "{{ readings.light.result }}",
+            transformation: "float",
+            properties: {
+                unitCode: {
+                    source: "{% if readings.light %}{{ readings.light.unit | cefact_unit }}{% endif %}",
+                },
+                observedAt: {
+                    source: "{{ readings.light.time }}",
+                    transformation: "datetime",
+                },
+            },
+        },
+    },
+}

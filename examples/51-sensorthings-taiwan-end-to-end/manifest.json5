@@ -1,0 +1,104 @@
+{
+    version: "v1",
+    // Five services of Taiwan's Civil IoT platform, each its own SensorThings server under one host,
+    // each read incrementally through a cursor of its own. Every cycle reads what each service gained
+    // since the last cycle that succeeded, maps it, and delivers all of it to the broker at once.
+    inputs: [
+        {
+            // Air quality micro-sensors of the Ministry of Environment.
+            source: "https://sta.colife.org.tw/STA_AirQuality_EPAIoT/v1.0",
+            format: "sensorthings",
+            mapping: "air-quality-observed.json5",
+            sensorthings: {
+                // The PM2.5 Datastreams of the sensors in Taipei City. The server applies filters on a
+                // Thing's properties, so the city written in each Thing selects them.
+                datastreams: "Thing/properties/city eq '臺北市' and name eq 'PM2.5'",
+                read: { incremental: { cursor: "taiwan-air", initial: "1h", lookback: "30m" } },
+                // Each reading with its FeatureOfInterest, the place it was taken at.
+                featuresOfInterest: true,
+                delay: "100ms",
+            },
+        },
+        {
+            // Weather stations of the Central Weather Administration, hourly.
+            source: "https://sta.colife.org.tw/STA_Weather/v1.0",
+            format: "sensorthings",
+            mapping: "weather-observed.json5",
+            sensorthings: {
+                // Eight of the twenty properties of the 19 stations in Taipei City. The others are
+                // times written as text, or are served by the staffed stations only.
+                datastreams: "Thing/properties/CountyName eq '臺北市' and (name eq 'AirTemperature' or name eq 'RelativeHumidity' or name eq 'WindSpeed' or name eq 'WindDirection' or name eq 'AirPressure' or name eq 'Precipitation' or name eq 'PeakGustSpeed' or name eq 'Weather')",
+                read: { incremental: { cursor: "taiwan-weather", initial: "3h", lookback: "1h" } },
+                delay: "100ms",
+            },
+        },
+        {
+            // Rain gauges of the Central Weather Administration, every ten minutes.
+            source: "https://sta.colife.org.tw/STA_Rain/v1.0",
+            format: "sensorthings",
+            mapping: "rain-gauge.json5",
+            sensorthings: {
+                // One of the nine accumulation windows each gauge serves: the rain of the past ten
+                // minutes, which matches the gauges' cadence.
+                datastreams: "Thing/properties/CountyName eq '臺北市' and name eq 'Past10Min'",
+                read: { incremental: { cursor: "taiwan-rain", initial: "1h", lookback: "30m" } },
+                delay: "100ms",
+            },
+        },
+        {
+            // Storm sewer water levels of the National Land Management Agency.
+            source: "https://sta.colife.org.tw/STA_RainSewer/v1.0",
+            format: "sensorthings",
+            mapping: "water-observed.json5",
+            sensorthings: {
+                datastreams: "Thing/properties/CountyName eq '臺北市'",
+                read: { incremental: { cursor: "taiwan-sewer", initial: "1h", lookback: "30m" } },
+                delay: "100ms",
+            },
+        },
+        {
+            // Flood depth sensors of the Water Resources Agency and the local governments.
+            source: "https://sta.colife.org.tw/STA_WaterResource_v2/v1.0",
+            format: "sensorthings",
+            mapping: "flood-monitoring.json5",
+            sensorthings: {
+                // The service's Things carry no county, only the authority that runs them, and Taipei
+                // City runs no flood sensor here, so the flood depth input reads New Taipei City's,
+                // which surrounds it. The property filter also leaves out the service's camera frames,
+                // which are stamped 2099.
+                datastreams: "ObservedProperty/name eq '淹水深度' and substringof('新北市',Thing/properties/authority)",
+                // A dry sensor reports once an hour, a wet one every five or ten minutes.
+                read: { incremental: { cursor: "taiwan-flood", initial: "3h", lookback: "1h" } },
+                delay: "100ms",
+            },
+        },
+    ],
+    output: {
+        target: "context-broker",
+        url: "http://localhost:1056/",
+        operation: "temporal",
+        // A cycle is held back until all five inputs have been read and mapped, then delivered. A
+        // cycle that fails sends nothing and moves no cursor.
+        atomicity: "atomic",
+        temporal: {
+            representation: "series",
+        },
+        // Every model is published, so default resolves each entity's @context from the catalog.
+        context: "default",
+        validation: {
+            mode: "fail-when-schema",
+        },
+    },
+    schedule: {
+        mode: "every",
+        value: "15m",
+        jitter: "30s",
+        retry: {
+            maxAttempts: 3,
+            backoff: "30s",
+        },
+    },
+    // A failed cycle, once its retries are spent, is reported and the schedule goes on; its cursors
+    // stay where they were.
+    onFailure: "continue",
+}

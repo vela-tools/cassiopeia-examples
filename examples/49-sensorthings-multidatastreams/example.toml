@@ -1,0 +1,27 @@
+[example]
+title = "Reading SensorThings MultiDatastreams"
+label = "SensorThings MultiDatastreams"
+summary = "Read a weather station whose wind speed and gust are measured together, beside its other readings."
+formats = ["sensorthings"]
+models = ["WeatherObserved"]
+
+[requirements]
+smart-data-models = true
+
+[run]
+args = [
+    "map",
+    "--manifest",
+    "manifest.json5",
+]
+
+# The source is a server, not a downloaded file, so there is no [[datasets]] block and the example is
+# live, although the range it reads is fixed and the station stopped reporting in 2024. The server
+# serves a License with each data stream: the Datastreams and the MultiDatastream read here are
+# CC BY 3.0. https://citiobs.demo.secure-dimensions.de/staplustest/v1.1/MultiDatastreams(4)/License
+#
+# The mapping folds every reading of the one station into one entity.
+[[outputs]]
+file = "out/WeatherObserved.jsonld"
+entities = 1
+contains = ["urn:ngsi-ld:WeatherObserved:staplus-116"]

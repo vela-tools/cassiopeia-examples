@@ -1,0 +1,23 @@
+{
+    version: "v1",
+    inputs: [
+        {
+            // Taiwan's national air quality monitoring stations, as the Civil IoT platform served them.
+            // The service no longer receives readings, but its Things and Locations are still served.
+            source: "https://sta.colife.org.tw/STA_AirQuality_v2/v1.0",
+            format: "sensorthings",
+            mapping: "point-of-interest.json5",
+            // No sensorthings block: every Datastream with the defaults, a latest read in pages of
+            // 1000. The server holds 77 stations and 1,386 Datastreams.
+        },
+    ],
+    output: {
+        target: "file",
+        directory: "out",
+        // PointOfInterest is a published model, so default resolves its @context from the catalog.
+        context: "default",
+        validation: {
+            mode: "fail-when-schema",
+        },
+    },
+}

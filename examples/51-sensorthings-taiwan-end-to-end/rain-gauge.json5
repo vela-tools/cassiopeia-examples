@@ -1,0 +1,37 @@
+{
+    version: "v4",
+    dataModel: "dataModel.Weather/WeatherObserved",
+    // One entity per rain gauge. The gauges are Things of their own, apart from the weather stations,
+    // so they are entities of their own as well.
+    identity: {
+        entityName: "taiwan-rain-{{ thing.properties.stationID }}",
+    },
+    attributes: {
+        name: {
+            source: "{{ thing.properties.stationName }}",
+        },
+        location: {
+            type: "GeoProperty",
+            source: "{{ location }}",
+        },
+        dateObserved: {
+            source: "{{ readings.Past10Min.time }}",
+            transformation: "datetime",
+        },
+        // The rain of the past ten minutes, in millimetres. A missing value is a negative sentinel, which
+        // the model's minimum of 0 does not allow.
+        precipitation: {
+            source: "{% if readings.Past10Min.result >= 0 %}{{ readings.Past10Min.result }}{% endif %}",
+            transformation: "float",
+            properties: {
+                unitCode: {
+                    source: "MMT",
+                },
+                observedAt: {
+                    source: "{{ readings.Past10Min.time }}",
+                    transformation: "datetime",
+                },
+            },
+        },
+    },
+}

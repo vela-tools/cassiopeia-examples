@@ -260,6 +260,42 @@ Give each water-level station one scope per observing network it belongs to, and
 
 Keep Berlin's point-and-line roadworks as a GeometryCollection, and read Munich's in WGS 84 with the time its server answered.
 
+<img src="https://img.shields.io/badge/format-sensorthings-4338ca" alt="format: sensorthings" height="20" align="right"> **[SensorThings latest](examples/43-sensorthings-latest-read/example.md)** → `WaterObserved`
+
+Read the newest water level and discharge of every river gauge from a SensorThings server.
+
+<img src="https://img.shields.io/badge/format-sensorthings-4338ca" alt="format: sensorthings" height="20" align="right"> **[SensorThings range](examples/44-sensorthings-range-read/example.md)** → `WaterObserved`
+
+Read six hours of river gauge readings and write each gauge as a series of instances.
+
+<img src="https://img.shields.io/badge/format-sensorthings-4338ca" alt="format: sensorthings" height="20" align="right"> **[SensorThings reading keys](examples/45-sensorthings-reading-keys/example.md)** → `WaterObserved`
+
+Read gauges that serve each property twice and pick each gauge's finest reading.
+
+<img src="https://img.shields.io/badge/format-sensorthings-4338ca" alt="format: sensorthings" height="20" align="right"> **[SensorThings incremental](examples/46-sensorthings-incremental-broker/example.md)** → `WaterObserved`
+
+Read each new river gauge reading once, every five minutes, into a broker's temporal API.
+
+<img src="https://img.shields.io/badge/format-sensorthings-4338ca" alt="format: sensorthings" height="20" align="right"> **[SensorThings inventory](examples/47-sensorthings-station-inventory/example.md)** → `Device`
+
+Write every Thing of a SensorThings server as a Device, those without data streams included.
+
+<img src="https://img.shields.io/badge/format-sensorthings-4338ca" alt="format: sensorthings" height="20" align="right"> **[SensorThings locations](examples/48-sensorthings-multiple-locations/example.md)** → `PointOfInterest`
+
+Map air quality stations whose place is served twice, as a point and as a postal address.
+
+<img src="https://img.shields.io/badge/format-sensorthings-4338ca" alt="format: sensorthings" height="20" align="right"> **[SensorThings MultiDatastreams](examples/49-sensorthings-multidatastreams/example.md)** → `WeatherObserved`
+
+Read a weather station whose wind speed and gust are measured together, beside its other readings.
+
+<img src="https://img.shields.io/badge/format-sensorthings-4338ca" alt="format: sensorthings" height="20" align="right"> **[SensorThings historical locations](examples/50-sensorthings-historical-locations/example.md)** → `TrafficFlowObserved`
+
+Read a counting station's daily counts with the places it was recorded at, as a track.
+
+<img src="https://img.shields.io/badge/format-sensorthings-4338ca" alt="format: sensorthings" height="20" align="right"> **[SensorThings end to end](examples/51-sensorthings-taiwan-end-to-end/example.md)** → `AirQualityObserved` `WeatherObserved` `WaterObserved` `FloodMonitoring`
+
+Read five live SensorThings services incrementally into one broker every fifteen minutes.
+
 <!-- examples:end -->
 
 ## The runner

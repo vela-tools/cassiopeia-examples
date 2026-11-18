@@ -1,0 +1,38 @@
+{
+    version: "v4",
+    dataModel: "dataModel.Environment/FloodMonitoring",
+    // One entity per flood sensor, by the station code the Water Resources Agency gives it.
+    identity: {
+        entityName: "taiwan-flood-{{ thing.properties.stationCode }}",
+    },
+    attributes: {
+        name: {
+            source: "{{ thing.properties.stationName }}",
+        },
+        stationID: {
+            source: "{{ thing.properties.stationCode }}",
+        },
+        location: {
+            type: "GeoProperty",
+            source: "{{ location }}",
+        },
+        observationDateTime: {
+            source: "{{ readings['淹水深度'].time }}",
+            transformation: "datetime",
+        },
+        // The depth of water on the street, served in centimetres and written in metres.
+        currentLevel: {
+            source: "{% if readings['淹水深度'].result >= 0 %}{{ readings['淹水深度'].result / 100 }}{% endif %}",
+            transformation: "float",
+            properties: {
+                unitCode: {
+                    source: "MTR",
+                },
+                observedAt: {
+                    source: "{{ readings['淹水深度'].time }}",
+                    transformation: "datetime",
+                },
+            },
+        },
+    },
+}

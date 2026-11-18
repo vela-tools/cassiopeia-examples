@@ -199,7 +199,7 @@ output: {
 
 ## Start the broker
 
-The [docker-compose.yml](docker-compose.yml) starts [Andromeda](https://github.com/mskvarc/andromeda), an NGSI-LD broker backed by PostgreSQL. It serves the API on port 1056, the address the manifest sends to. Start it, and wait for both containers to report healthy:
+The [docker-compose.yaml](docker-compose.yaml) starts [Andromeda](https://github.com/mskvarc/andromeda), an NGSI-LD broker backed by PostgreSQL. It serves the API on port 1056, the address the manifest sends to. Start it, and wait for both containers to report healthy:
 
 ```bash
 docker compose up -d --wait

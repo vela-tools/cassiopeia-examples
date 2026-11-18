@@ -1,0 +1,55 @@
+{
+    version: "v4",
+    dataModel: "dataModel.PointOfInterest/PointOfInterest",
+    // One entity per station, by the station code the Ministry of Environment gives it, such as EPA001.
+    identity: {
+        entityName: "taiwan-{{ thing.properties.stationID }}",
+    },
+    attributes: {
+        // PointOfInterest requires a name. The Thing's own name is Chinese, 空氣品質測站-基隆, "air
+        // quality station Keelung"; its properties hold the station's English and Chinese names apart.
+        name: {
+            source: "{{ thing.properties.englishName }}",
+        },
+        alternateName: {
+            source: "{{ thing.properties.stationName }}",
+        },
+        description: {
+            source: "{{ thing.name }}",
+        },
+        // The station type as the ministry writes it, such as 一般測站, a general station.
+        category: {
+            source: "{{ thing.properties.stationType }}",
+            transformation: "array",
+        },
+        dataProvider: {
+            source: "{{ thing.properties.authority }}",
+        },
+        // The geometry of the Thing's GeoJSON Location. Cassiopeia picks it by its encoding, so the
+        // address Location beside it never becomes the location, whichever has the lower id.
+        location: {
+            type: "GeoProperty",
+            source: "{{ location }}",
+        },
+        // The station's postal address is a Location of its own, with encodingType "address" and a
+        // location of {"type": "Address", "address": "..."}. The template finds it by its encoding
+        // rather than by its position in locations, so it does not depend on the order of the ids.
+        address: {
+            transformation: "object",
+            mappings: {
+                streetAddress: {
+                    source: "{% for place in locations %}{% if place.encodingType == 'address' %}{{ place.location.address }}{% endif %}{% endfor %}",
+                },
+                addressLocality: {
+                    source: "{{ thing.properties.township }}",
+                },
+                addressRegion: {
+                    source: "{{ thing.properties.city }}",
+                },
+                addressCountry: {
+                    source: "TW",
+                },
+            },
+        },
+    },
+}

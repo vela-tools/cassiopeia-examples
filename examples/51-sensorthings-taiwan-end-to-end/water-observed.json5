@@ -1,0 +1,39 @@
+{
+    version: "v4",
+    dataModel: "dataModel.Environment/WaterObserved",
+    // One entity per monitoring point, by its station id, a UUID.
+    identity: {
+        entityName: "taiwan-sewer-{{ thing.properties.stationID }}",
+    },
+    attributes: {
+        name: {
+            source: "{{ thing.properties.stationName }}",
+        },
+        location: {
+            type: "GeoProperty",
+            source: "{{ location }}",
+        },
+        dateObserved: {
+            source: "{{ readings['水位'].time }}",
+            transformation: "datetime",
+        },
+        // The service serves the water surface as an elevation, which is negative where a sewer lies
+        // below the datum, and writes each point's base elevation into its Datastream's description as
+        // Datastream_Base_Elev=-1.4. The water level written is the surface above that base, in metres:
+        // the depth of water at the point, which the model's minimum of 0 allows. The difference of two
+        // decimals is rounded to the millimetre, the precision the service serves.
+        waterLevel: {
+            source: "{% set level = readings['水位'].result - readings['水位'].datastream.description | split(pat='Datastream_Base_Elev=') | last | float %}{% if level >= 0 %}{{ level | round(precision=3) }}{% endif %}",
+            transformation: "float",
+            properties: {
+                unitCode: {
+                    source: "MTR",
+                },
+                observedAt: {
+                    source: "{{ readings['水位'].time }}",
+                    transformation: "datetime",
+                },
+            },
+        },
+    },
+}

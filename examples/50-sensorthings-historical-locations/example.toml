@@ -1,0 +1,28 @@
+[example]
+title = "Reading where a SensorThings Thing has been"
+label = "SensorThings historical locations"
+summary = "Read a counting station's daily counts with the places it was recorded at, as a track."
+formats = ["sensorthings"]
+models = ["TrafficFlowObserved"]
+
+[requirements]
+smart-data-models = true
+
+[run]
+args = [
+    "map",
+    "--manifest",
+    "manifest.json5",
+]
+
+# The source is a server, not a downloaded file, so there is no [[datasets]] block and the example is
+# live, although the range it reads is fixed and the station was replaced. The Free and Hanseatic City
+# of Hamburg publishes the data of its Urban Data Platform under the Datenlizenz Deutschland
+# Namensnennung 2.0; the server states no licence of its own.
+# https://www.govdata.de/dl-de/by-2-0
+#
+# The mapping folds the station's counts and places into one entity.
+[[outputs]]
+file = "out/TrafficFlowObserved.jsonld"
+entities = 1
+contains = ["urn:ngsi-ld:TrafficFlowObserved:hamburg-5564"]

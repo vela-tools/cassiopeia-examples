@@ -1,0 +1,27 @@
+{
+    version: "v1",
+    inputs: [
+        {
+            source: "https://sensors.bgs.ac.uk/FROST-Server/v1.1",
+            format: "sensorthings",
+            mapping: "device.json5",
+            sensorthings: {
+                // No datastreams filter: the server is small, 176 Things and 494 Datastreams, and an
+                // inventory wants every station.
+                read: "latest",
+                // After the Datastreams, list every Thing by itself as well, so a Thing that has no
+                // Datastream still gives a record, one without readings.
+                things: true,
+            },
+        },
+    ],
+    output: {
+        target: "file",
+        directory: "out",
+        // Device is a published model, so default resolves its @context from the catalog.
+        context: "default",
+        validation: {
+            mode: "fail-when-schema",
+        },
+    },
+}

@@ -90,7 +90,7 @@ Publishers also move files for good. If a fetch reports a 404, or the mapping su
 
 Validating against a published Smart Data Model takes the schema catalog. Those examples declare `smart-data-models = true` and run `cassiopeia sdm download` first, and every later example reuses what that leaves behind.
 
-The broker examples declare a `[context-broker]` block naming a `docker-compose.yml` and the URL the broker answers at. The runner brings that stack up, waits for the broker to serve the API, and takes it down again at the end, whether the mapping succeeded or failed. Their pages walk through the same thing by hand. One extra flag shows up in the container form, `--network host`, because the URL in the manifest is `localhost`.
+The broker examples declare a `[context-broker]` block naming a `docker-compose.yaml` and the URL the broker answers at. The runner brings that stack up, waits for the broker to serve the API, and takes it down again at the end, whether the mapping succeeded or failed. Their pages walk through the same thing by hand. One extra flag shows up in the container form, `--network host`, because the URL in the manifest is `localhost`.
 
 A scheduled example never exits on its own. By hand you stop it with an interrupt, and the runner does the same, reading `[schedule]` for how many cycles are worth watching and interrupting once they have had time to happen.
 

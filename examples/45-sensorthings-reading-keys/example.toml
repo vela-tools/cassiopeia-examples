@@ -1,0 +1,28 @@
+[example]
+title = "Choosing among repeated SensorThings readings"
+label = "SensorThings reading keys"
+summary = "Read gauges that serve each property twice and pick each gauge's finest reading."
+formats = ["sensorthings"]
+models = ["WaterObserved"]
+
+[requirements]
+smart-data-models = true
+
+[run]
+args = [
+    "map",
+    "--manifest",
+    "manifest.json5",
+]
+
+# The source is a server, not a downloaded file, so there is no [[datasets]] block and the example is
+# live. TLUBN names itself as the owner of the data and states no licence for the service.
+# https://kshww2.thueringen.de/FROST-Server/v1.1
+#
+# 180 gauges had at least one reading when this was written, one entity each; a gauge set up without
+# readings yet writes none. The identifiers are a gauge with daily and 15-minute Datastreams and a LoRa
+# gauge, both quoted on the page.
+[[outputs]]
+file = "out/WaterObserved.jsonld"
+at-least = 170
+contains = ["urn:ngsi-ld:WaterObserved:thueringen-570280", "urn:ngsi-ld:WaterObserved:thueringen-58778093"]

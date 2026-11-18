@@ -1,0 +1,35 @@
+{
+    version: "v1",
+    inputs: [
+        {
+            // The SensorThings server of Hamburg's Urban Data Platform.
+            source: "https://iot.hamburg.de/v1.1",
+            format: "sensorthings",
+            mapping: "traffic-flow-observed.json5",
+            sensorthings: {
+                // The daily bicycle count of one counting station, by the Datastream's id.
+                datastreams: "id eq 11798",
+                // Three months of autumn 2020, in which the station was given a new position. The
+                // station has since been replaced, so the range reads the same data on every run.
+                read: { range: { from: "2020-09-01T00:00:00Z", to: "2020-12-01T00:00:00Z" } },
+                // After the Observations, read the HistoricalLocations of the station's Thing within
+                // the same range: each place it was recorded at, and when.
+                historicalLocations: true,
+            },
+        },
+    ],
+    output: {
+        target: "file",
+        directory: "out",
+        // TrafficFlowObserved is a published model, so default resolves its @context from the catalog.
+        context: "default",
+        // A range read gives one record per Observation and one per HistoricalLocation, so it runs only
+        // into series output.
+        temporal: {
+            representation: "series",
+        },
+        validation: {
+            mode: "fail-when-schema",
+        },
+    },
+}

@@ -1,0 +1,28 @@
+[example]
+title = "Reading a time range from a SensorThings server"
+label = "SensorThings range"
+summary = "Read six hours of river gauge readings and write each gauge as a series of instances."
+formats = ["sensorthings"]
+models = ["WaterObserved"]
+
+[requirements]
+smart-data-models = true
+
+[run]
+args = [
+    "map",
+    "--manifest",
+    "manifest.json5",
+]
+
+# The source is a server, not a downloaded file, so there is no [[datasets]] block and the example is
+# live. TLUBN names itself as the owner of the data and states no licence for the service.
+# https://kshww2.thueringen.de/FROST-Server/v1.1
+#
+# 94 gauges had readings in the six hours when this was written, one entity each, holding 2,226 water
+# levels and 2,223 discharges between them. The gauges that upload late fall outside the range, so the
+# count is a floor.
+[[outputs]]
+file = "out/WaterObserved.jsonld"
+at-least = 85
+contains = ["urn:ngsi-ld:WaterObserved:thueringen-570280"]

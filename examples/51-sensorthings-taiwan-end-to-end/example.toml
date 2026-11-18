@@ -1,0 +1,82 @@
+[example]
+title = "Keeping a broker up to date from Taiwan's Civil IoT services"
+label = "SensorThings end to end"
+summary = "Read five live SensorThings services incrementally into one broker every fifteen minutes."
+formats = ["sensorthings"]
+models = ["AirQualityObserved", "WeatherObserved", "WaterObserved", "FloodMonitoring"]
+
+[requirements]
+smart-data-models = true
+
+[context-broker]
+compose = "docker-compose.yaml"
+url = "http://localhost:1056/"
+# The context the counts by type below are asked under. AirQualityObserved, WaterObserved and
+# FloodMonitoring are models of dataModel.Environment; WeatherObserved, of dataModel.Weather, is checked
+# by id at the temporal endpoint instead, since a type is expanded against the one context a query
+# carries.
+context = "https://raw.githubusercontent.com/smart-data-models/dataModel.Environment/master/context.jsonld"
+
+# Two cycles fifteen minutes apart: the first reads each service's initial span, the second only what
+# each gained since. A cycle took about a minute when this was written, and the grace covers the
+# manifest's 30 seconds of jitter and the second cycle's reading and delivery.
+[schedule]
+cycles = 2
+interval = "15m"
+grace = "3m"
+
+[run]
+args = [
+    "map",
+    "--manifest",
+    "manifest.json5",
+]
+
+# The sources are five servers, not downloaded files, so there is no [[datasets]] block and the
+# example is live. Taiwan's Civil IoT datasets are published under the Open Government Data License,
+# version 1.0, as the platform's dataset listing on the National Center for High-performance
+# Computing's catalogue states. https://ark.nchc.org.tw/en/organization/civiliot
+#
+# A temporal delivery keeps each entity's current state as well, so the broker's entities endpoint
+# counts the entities of each type of dataModel.Environment. The first cycle wrote 62 air quality
+# sensors, 127 storm sewer points and 128 flood sensors when this was written; sensors that send
+# nothing within the initial span are not written, so the counts are floors. Each service also has one
+# entity checked at the temporal endpoint, folded into one EntityTemporal (ETSI GS CIM 009 v1.9.1,
+# clause 5.2.20): an air quality sensor, a weather station, a rain gauge, a storm sewer point and a
+# flood sensor.
+[[outputs]]
+broker-entities = "AirQualityObserved"
+at-least = 45
+
+[[outputs]]
+broker-entities = "WaterObserved"
+at-least = 110
+
+[[outputs]]
+broker-entities = "FloodMonitoring"
+at-least = 110
+
+[[outputs]]
+broker-temporal = "urn:ngsi-ld:AirQualityObserved:taiwan-air-10639632197"
+entities = 1
+contains = ["urn:ngsi-ld:AirQualityObserved:taiwan-air-10639632197"]
+
+[[outputs]]
+broker-temporal = "urn:ngsi-ld:WeatherObserved:taiwan-weather-C0A9C0"
+entities = 1
+contains = ["urn:ngsi-ld:WeatherObserved:taiwan-weather-C0A9C0"]
+
+[[outputs]]
+broker-temporal = "urn:ngsi-ld:WeatherObserved:taiwan-rain-01A410"
+entities = 1
+contains = ["urn:ngsi-ld:WeatherObserved:taiwan-rain-01A410"]
+
+[[outputs]]
+broker-temporal = "urn:ngsi-ld:WaterObserved:taiwan-sewer-256df54d-5bf7-fcfd-e394-8a6e6bb18bdb"
+entities = 1
+contains = ["urn:ngsi-ld:WaterObserved:taiwan-sewer-256df54d-5bf7-fcfd-e394-8a6e6bb18bdb"]
+
+[[outputs]]
+broker-temporal = "urn:ngsi-ld:FloodMonitoring:taiwan-flood-3822500FL0112"
+entities = 1
+contains = ["urn:ngsi-ld:FloodMonitoring:taiwan-flood-3822500FL0112"]

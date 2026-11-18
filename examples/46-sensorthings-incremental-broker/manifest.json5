@@ -1,0 +1,60 @@
+{
+    version: "v1",
+    inputs: [
+        {
+            source: "https://kshww2.thueringen.de/FROST-Server/v1.1",
+            format: "sensorthings",
+            mapping: "water-observed.json5",
+            sensorthings: {
+                // The 15-minute water level and discharge of every gauge, as in the range read.
+                datastreams: "properties/type eq 'TH_PEGELDATEN_15MIN'",
+                read: {
+                    incremental: {
+                        // The cursor keeps, per Datastream, the time of the latest reading written. It
+                        // is a store named thueringen-gauges.redb in the cursors folder, and it moves
+                        // only after a whole cycle has been delivered.
+                        cursor: "thueringen-gauges",
+                        // Where a Datastream the cursor has no position for starts: two hours before
+                        // the first cycle.
+                        initial: "2h",
+                        // How far behind its latest reading each Datastream is read again, for readings
+                        // the server receives late. A reading already written is dropped.
+                        lookback: "1h",
+                    },
+                },
+                delay: "100ms",
+            },
+        },
+    ],
+    output: {
+        target: "context-broker",
+        url: "http://localhost:1056/",
+        // Each reading is an instance of its attribute, so the broker's temporal API keeps the history.
+        operation: "temporal",
+        // A cycle is held back until it has been read and mapped whole, then delivered. A cycle that
+        // fails sends nothing and moves no cursor, so the next cycle sends its readings once.
+        atomicity: "atomic",
+        temporal: {
+            representation: "series",
+        },
+        // WaterObserved is a published model, so default resolves its @context from the catalog.
+        context: "default",
+        validation: {
+            mode: "fail-when-schema",
+        },
+    },
+    // A cycle every five minutes. The gauges report every quarter of an hour, at staggered times, so
+    // most cycles find new readings, and a cycle that finds none sends nothing.
+    schedule: {
+        mode: "every",
+        value: "5m",
+        jitter: "20s",
+        retry: {
+            maxAttempts: 3,
+            backoff: "30s",
+        },
+    },
+    // A failed cycle, once its retries are spent, is reported and the schedule goes on. The cursors
+    // stay where they were, so the next cycle reads the failed cycle's readings again.
+    onFailure: "continue",
+}

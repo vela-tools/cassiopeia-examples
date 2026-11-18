@@ -49,6 +49,7 @@ const fn colour(format: SourceFormat) -> &'static str {
         SourceFormat::Grib2 => "0d9488",
         SourceFormat::NetCdf => "0369a1",
         SourceFormat::GeoPackage => "4d7c0f",
+        SourceFormat::SensorThings => "4338ca",
     }
 }
 

@@ -1,0 +1,64 @@
+{
+    version: "v4",
+    dataModel: "dataModel.Environment/WaterObserved",
+    // A gauge whose Datastreams hold no Observation yet gives a record without readings. It has no
+    // dateObserved, which WaterObserved requires, so its identity resolves to nothing and the record
+    // is skipped rather than written as an entity that fails validation.
+    identity: {
+        entityName: "{% if readings %}thueringen-{{ thing.properties.station_id }}{% endif %}",
+    },
+    attributes: {
+        name: {
+            source: "{{ thing.name }}",
+        },
+        description: {
+            source: "Gauge on the {{ thing.properties.gewaesser }}",
+        },
+        location: {
+            type: "GeoProperty",
+            source: "{{ location }}",
+        },
+        // The newest time among the gauge's readings. A record's readings are keyed by name, not
+        // ordered by time, so the loop keeps the latest it meets; instants in UTC written the same way
+        // compare correctly as text.
+        dateObserved: {
+            source: "{% set_global newest = '' %}{% for key, reading in readings %}{% if newest == '' or reading.time > newest %}{% set_global newest = reading.time %}{% endif %}{% endfor %}{{ newest }}",
+            transformation: "datetime",
+        },
+        // Which key a reading has, W or W@<id>, follows from the ids of the gauge's Datastreams, not from
+        // what they are: on most gauges W is the daily value and the 15-minute reading is W@<id>. So
+        // the template loops over the readings and picks by the Datastream's type. It takes any water
+        // level with a result, and a reading that is not a daily value replaces it, so a gauge gives
+        // its 15-minute or LoRa reading when it has one and its daily value otherwise. A negative value,
+        // below the model's minimum of 0, is passed over, as a missing result is. observedAt repeats
+        // the same choice, so the time belongs to the value.
+        waterLevel: {
+            source: "{% set_global value = '' %}{% for key, reading in readings %}{% if reading.observedProperty.name == 'W' and reading.result is defined and reading.result >= 0 %}{% if value == '' or reading.datastream.properties.type != 'TH_PEGELDATEN_1D' %}{% set_global value = reading.result / 100 %}{% endif %}{% endif %}{% endfor %}{{ value }}",
+            transformation: "float",
+            properties: {
+                unitCode: {
+                    source: "MTR",
+                },
+                observedAt: {
+                    source: "{% set_global time = '' %}{% for key, reading in readings %}{% if reading.observedProperty.name == 'W' and reading.result is defined and reading.result >= 0 %}{% if time == '' or reading.datastream.properties.type != 'TH_PEGELDATEN_1D' %}{% set_global time = reading.time %}{% endif %}{% endif %}{% endfor %}{{ time }}",
+                    transformation: "datetime",
+                },
+            },
+        },
+        // The same choice for discharge, in cubic metres per second, the unit every Q Datastream of the
+        // server serves: MQS.
+        flow: {
+            source: "{% set_global value = '' %}{% for key, reading in readings %}{% if reading.observedProperty.name == 'Q' and reading.result is defined and reading.result >= 0 %}{% if value == '' or reading.datastream.properties.type != 'TH_PEGELDATEN_1D' %}{% set_global value = reading.result %}{% endif %}{% endif %}{% endfor %}{{ value }}",
+            transformation: "float",
+            properties: {
+                unitCode: {
+                    source: "MQS",
+                },
+                observedAt: {
+                    source: "{% set_global time = '' %}{% for key, reading in readings %}{% if reading.observedProperty.name == 'Q' and reading.result is defined and reading.result >= 0 %}{% if time == '' or reading.datastream.properties.type != 'TH_PEGELDATEN_1D' %}{% set_global time = reading.time %}{% endif %}{% endif %}{% endfor %}{{ time }}",
+                    transformation: "datetime",
+                },
+            },
+        },
+    },
+}

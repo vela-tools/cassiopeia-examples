@@ -1,0 +1,28 @@
+[example]
+title = "Reading the newest readings from a SensorThings server"
+label = "SensorThings latest"
+summary = "Read the newest water level and discharge of every river gauge from a SensorThings server."
+formats = ["sensorthings"]
+models = ["WaterObserved"]
+
+[requirements]
+smart-data-models = true
+
+[run]
+args = [
+    "map",
+    "--manifest",
+    "manifest.json5",
+]
+
+# The source is a server, not a downloaded file, so there is no [[datasets]] block and the example is
+# live. The server is run by the Thuringian State Office for Environment, Mining and Nature
+# Conservation (TLUBN), which names itself as the owner of the data and states no licence for the
+# service; the page says so. https://kshww2.thueringen.de/FROST-Server/v1.1
+#
+# The filter selected 127 gauges with 15-minute data when this was written, one entity each. A gauge
+# that is taken out of service drops out, so the count is a floor.
+[[outputs]]
+file = "out/WaterObserved.jsonld"
+at-least = 120
+contains = ["urn:ngsi-ld:WaterObserved:thueringen-570280"]

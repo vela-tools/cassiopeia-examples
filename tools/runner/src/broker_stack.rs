@@ -159,20 +159,20 @@ mod tests {
     #[test]
     fn a_compose_failure_names_the_file_and_the_exit_code() {
         let failure = BrokerStackError::ComposeFailed {
-            compose: PathBuf::from("docker-compose.yml"),
+            compose: PathBuf::from("docker-compose.yaml"),
             code: Some(1),
         };
 
-        assert_eq!(failure.to_string(), "compose exited with 1 for docker-compose.yml");
+        assert_eq!(failure.to_string(), "compose exited with 1 for docker-compose.yaml");
     }
 
     #[test]
     fn a_stack_stopped_by_a_signal_is_reported_as_such() {
         let failure = BrokerStackError::ComposeFailed {
-            compose: PathBuf::from("docker-compose.yml"),
+            compose: PathBuf::from("docker-compose.yaml"),
             code: None,
         };
 
-        assert_eq!(failure.to_string(), "compose exited with a signal for docker-compose.yml");
+        assert_eq!(failure.to_string(), "compose exited with a signal for docker-compose.yaml");
     }
 }

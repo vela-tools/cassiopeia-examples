@@ -23,7 +23,7 @@ examples/24-json-list-property/
     *.schema.json       Present when the example validates against a local schema.
     *.jsonld            Present when the example defines its own @context.
     *.awk               Present when a preparation step reshapes the download.
-    docker-compose.yml  Present when the example delivers to a broker.
+    docker-compose.yaml Present when the example delivers to a broker.
 ```
 
 Everything else is generated. `data/` holds the downloaded dataset and `out/` holds the entities; git ignores both. Never commit either, and never commit a dataset in any other form. Filenames are kebab-case.
@@ -112,7 +112,7 @@ An example that delivers to a context broker declares where the broker is and ho
 [context-broker]
 # The compose file, relative to the example directory. Each example ships its own copy, even when
 # another example starts the same stack.
-compose = "docker-compose.yml"
+compose = "docker-compose.yaml"
 # Where the broker answers, matching the URL the manifest delivers to.
 url = "http://localhost:9090/"
 # The `@context` the run's entities were written under. Only an example that asserts on a whole

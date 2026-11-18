@@ -1,0 +1,135 @@
+{
+    version: "v4",
+    dataModel: "dataModel.Weather/WeatherObserved",
+    // One entity per station, by the Central Weather Administration's station code.
+    identity: {
+        entityName: "taiwan-weather-{{ thing.properties.stationID }}",
+    },
+    attributes: {
+        name: {
+            source: "{{ thing.properties.stationName }}",
+        },
+        location: {
+            type: "GeoProperty",
+            source: "{{ location }}",
+        },
+        // Each record of an incremental read holds one reading, so its time is the record's. Without
+        // an observedAt, dateObserved is kept once, from the entity's first record.
+        dateObserved: {
+            source: "{% for key, reading in readings %}{{ reading.time }}{% endfor %}",
+            transformation: "datetime",
+        },
+        // The service marks a value it does not have with -99, and a precipitation it does not have with
+        // -990, rather than leaving the Observation out. Each attribute's guard drops such a value: a
+        // temperature below -90, and anything else below 0. The outer guard leaves the attribute out
+        // of a record of another property, since a comparison fails on a missing field.
+        temperature: {
+            source: "{% if readings.AirTemperature %}{% if readings.AirTemperature.result > -90 %}{{ readings.AirTemperature.result }}{% endif %}{% endif %}",
+            transformation: "float",
+            properties: {
+                unitCode: {
+                    source: "CEL",
+                },
+                observedAt: {
+                    source: "{{ readings.AirTemperature.time }}",
+                    transformation: "datetime",
+                },
+            },
+        },
+        // Percent, written as the fraction from 0 to 1 the model takes, with C62, the code for one.
+        relativeHumidity: {
+            source: "{% if readings.RelativeHumidity %}{% if readings.RelativeHumidity.result >= 0 %}{{ readings.RelativeHumidity.result / 100 }}{% endif %}{% endif %}",
+            transformation: "float",
+            properties: {
+                unitCode: {
+                    source: "C62",
+                },
+                observedAt: {
+                    source: "{{ readings.RelativeHumidity.time }}",
+                    transformation: "datetime",
+                },
+            },
+        },
+        // The server writes the unit m/sec, which cefact_unit resolves, but not degrees, so every unit is
+        // written as a constant for consistency: MTS, metre per second.
+        windSpeed: {
+            source: "{% if readings.WindSpeed %}{% if readings.WindSpeed.result >= 0 %}{{ readings.WindSpeed.result }}{% endif %}{% endif %}",
+            transformation: "float",
+            properties: {
+                unitCode: {
+                    source: "MTS",
+                },
+                observedAt: {
+                    source: "{{ readings.WindSpeed.time }}",
+                    transformation: "datetime",
+                },
+            },
+        },
+        // DD, degree of angle, from 0 to 360 as the model takes it.
+        windDirection: {
+            source: "{% if readings.WindDirection %}{% if readings.WindDirection.result >= 0 %}{{ readings.WindDirection.result }}{% endif %}{% endif %}",
+            transformation: "float",
+            properties: {
+                unitCode: {
+                    source: "DD",
+                },
+                observedAt: {
+                    source: "{{ readings.WindDirection.time }}",
+                    transformation: "datetime",
+                },
+            },
+        },
+        // The strongest gust of the hour.
+        gustSpeed: {
+            source: "{% if readings.PeakGustSpeed %}{% if readings.PeakGustSpeed.result >= 0 %}{{ readings.PeakGustSpeed.result }}{% endif %}{% endif %}",
+            transformation: "float",
+            properties: {
+                unitCode: {
+                    source: "MTS",
+                },
+                observedAt: {
+                    source: "{{ readings.PeakGustSpeed.time }}",
+                    transformation: "datetime",
+                },
+            },
+        },
+        // Hectopascal, A97.
+        atmosphericPressure: {
+            source: "{% if readings.AirPressure %}{% if readings.AirPressure.result >= 0 %}{{ readings.AirPressure.result }}{% endif %}{% endif %}",
+            transformation: "float",
+            properties: {
+                unitCode: {
+                    source: "A97",
+                },
+                observedAt: {
+                    source: "{{ readings.AirPressure.time }}",
+                    transformation: "datetime",
+                },
+            },
+        },
+        // Millimetres since midnight, local time, MMT.
+        precipitation: {
+            source: "{% if readings.Precipitation %}{% if readings.Precipitation.result >= 0 %}{{ readings.Precipitation.result }}{% endif %}{% endif %}",
+            transformation: "float",
+            properties: {
+                unitCode: {
+                    source: "MMT",
+                },
+                observedAt: {
+                    source: "{{ readings.Precipitation.time }}",
+                    transformation: "datetime",
+                },
+            },
+        },
+        // The weather as text, such as 陰, overcast. It has no unit, and the service writes NA for one.
+        weatherType: {
+            source: "{{ readings.Weather.result }}",
+            properties: {
+                observedAt: {
+                    source: "{{ readings.Weather.time }}",
+                    transformation: "datetime",
+                },
+            },
+        },
+    },
+}

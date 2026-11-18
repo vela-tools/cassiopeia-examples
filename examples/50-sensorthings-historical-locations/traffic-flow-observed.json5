@@ -1,0 +1,59 @@
+{
+    version: "v4",
+    dataModel: "dataModel.Transportation/TrafficFlowObserved",
+    // One entity per counting station, by the server's id. The station's asset number, 0295970, also
+    // names the Thing that replaced it in 2026, which is another station with its own data.
+    identity: {
+        entityName: "hamburg-{{ thing.id }}",
+    },
+    attributes: {
+        name: {
+            source: "{{ thing.name }}",
+        },
+        description: {
+            source: "{{ thing.description }}",
+        },
+        vehicleType: {
+            source: "bicycle",
+        },
+        // A record of an Observation holds one reading, keyed by its ObservedProperty's name. The name
+        // has spaces, parentheses and umlauts, so it is read with brackets, and the record of a
+        // HistoricalLocation has no readings, which the guard leaves out: printing a field the record
+        // does not have fails.
+        intensity: {
+            source: "{% if readings %}{{ readings['Anzahl Fahrräder je Zählstelle (veraltet)'].result }}{% endif %}",
+            transformation: "integer",
+            properties: {
+                observedAt: {
+                    source: "{% if readings %}{{ readings['Anzahl Fahrräder je Zählstelle (veraltet)'].time }}{% endif %}",
+                    transformation: "datetime",
+                },
+            },
+        },
+        // The day each count covers, as the interval the server serves, such as
+        // 2020-09-01T22:00:00Z/2020-09-02T21:59:59Z: the model takes an ISO 8601 interval here. With an
+        // observedAt of its own it is a series beside intensity, one instance per day.
+        dateObserved: {
+            source: "{% if readings %}{{ readings['Anzahl Fahrräder je Zählstelle (veraltet)'].phenomenonTime }}{% endif %}",
+            properties: {
+                observedAt: {
+                    source: "{% if readings %}{{ readings['Anzahl Fahrräder je Zählstelle (veraltet)'].time }}{% endif %}",
+                    transformation: "datetime",
+                },
+            },
+        },
+        // The track: each HistoricalLocation's place, observed at its time. A record of an Observation
+        // has no historicalLocation, so the plain references resolve to nothing and location is left
+        // out of it.
+        location: {
+            type: "GeoProperty",
+            source: "{{ historicalLocation.location }}",
+            properties: {
+                observedAt: {
+                    source: "{{ historicalLocation.time }}",
+                    transformation: "datetime",
+                },
+            },
+        },
+    },
+}

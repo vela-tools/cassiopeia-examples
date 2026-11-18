@@ -1,0 +1,66 @@
+{
+    version: "v4",
+    dataModel: "dataModel.Environment/WaterObserved",
+    // One entity per gauge. The gauge number the state publishes is stable and unique, while a Thing's
+    // name is only the place, and two gauges can share one.
+    identity: {
+        entityName: "thueringen-{{ thing.properties.station_id }}",
+    },
+    attributes: {
+        name: {
+            source: "{{ thing.name }}",
+        },
+        description: {
+            source: "Gauge on the {{ thing.properties.gewaesser }}",
+        },
+        // The GeoJSON geometry of the Thing's Location, which a GeoProperty takes as it is.
+        location: {
+            type: "GeoProperty",
+            source: "{{ location }}",
+        },
+        // WaterObserved requires dateObserved. The water level's time is used, and the discharge's when
+        // a gauge serves no water level.
+        dateObserved: {
+            source: "{% if readings.W %}{{ readings.W.time }}{% elif readings.Q %}{{ readings.Q.time }}{% endif %}",
+            transformation: "datetime",
+        },
+        // The model gives waterLevel in metres, and the server serves centimetres, so the value is
+        // divided by 100 and written with MTR, the UN/CEFACT code for metre. Arithmetic fails on a
+        // missing field, so the guards leave the attribute out of a record without a water level, and
+        // out of one whose Observation the server served with a null result. The inner one tests
+        // whether the result is defined rather than whether it is truthy, which would drop a level of
+        // 0, and it needs the outer one: a test on a field of a missing reading fails too. The model's
+        // waterLevel has a minimum of 0, and a gauge near its zero can report a little below it, which
+        // would fail validation and stop the run, so a negative level is left out as well.
+        waterLevel: {
+            source: "{% if readings.W %}{% if readings.W.result is defined and readings.W.result >= 0 %}{{ readings.W.result / 100 }}{% endif %}{% endif %}",
+            transformation: "float",
+            properties: {
+                unitCode: {
+                    source: "MTR",
+                },
+                observedAt: {
+                    source: "{{ readings.W.time }}",
+                    transformation: "datetime",
+                },
+            },
+        },
+        // Discharge is written in the unit the server serves. cefact_unit turns the Datastream's unit
+        // into its UN/CEFACT code, MQS for cubic metre per second. A filter fails on a missing field,
+        // and a qualifier is resolved even when its attribute is not, hence the guard on unitCode. The
+        // model's flow has a minimum of 0 as well, so a negative discharge is left out.
+        flow: {
+            source: "{% if readings.Q %}{% if readings.Q.result is defined and readings.Q.result >= 0 %}{{ readings.Q.result }}{% endif %}{% endif %}",
+            transformation: "float",
+            properties: {
+                unitCode: {
+                    source: "{% if readings.Q %}{{ readings.Q.unit | cefact_unit }}{% endif %}",
+                },
+                observedAt: {
+                    source: "{{ readings.Q.time }}",
+                    transformation: "datetime",
+                },
+            },
+        },
+    },
+}

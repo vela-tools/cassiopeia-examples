@@ -1,0 +1,39 @@
+{
+    version: "v4",
+    dataModel: "dataModel.Environment/AirQualityObserved",
+    // One entity per sensor, by the station code in the Thing's properties.
+    identity: {
+        entityName: "taiwan-air-{{ thing.properties.stationID }}",
+    },
+    attributes: {
+        name: {
+            source: "{{ thing.properties.stationName }}",
+        },
+        // Where the reading was taken: its FeatureOfInterest, which the input reads with
+        // featuresOfInterest. For a sensor that stays put it repeats the sensor's point; for one that
+        // moves, it would place each reading. Without an observedAt it is kept once, from the entity's
+        // first record. The reading's key, PM2.5, holds a dot, so it is read with brackets.
+        location: {
+            type: "GeoProperty",
+            source: "{{ readings['PM2.5'].featureOfInterest.feature }}",
+        },
+        dateObserved: {
+            source: "{{ readings['PM2.5'].time }}",
+            transformation: "datetime",
+        },
+        // The model's pm25 has a minimum of 0, which a faulty sensor's reading can fall below.
+        pm25: {
+            source: "{% if readings['PM2.5'].result >= 0 %}{{ readings['PM2.5'].result }}{% endif %}",
+            transformation: "float",
+            properties: {
+                unitCode: {
+                    source: "{{ readings['PM2.5'].unit | cefact_unit }}",
+                },
+                observedAt: {
+                    source: "{{ readings['PM2.5'].time }}",
+                    transformation: "datetime",
+                },
+            },
+        },
+    },
+}

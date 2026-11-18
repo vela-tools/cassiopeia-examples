@@ -1,0 +1,35 @@
+{
+    version: "v1",
+    inputs: [
+        {
+            // The service root of the Thuringian state gauge network: every resource of the server is
+            // addressed under it, and it ends with the SensorThings version the server serves.
+            source: "https://kshww2.thueringen.de/FROST-Server/v1.1",
+            format: "sensorthings",
+            mapping: "water-observed.json5",
+            sensorthings: {
+                // An OData $filter over Datastreams, sent to the server as written. Each gauge serves
+                // its water level and discharge twice, as daily means and as 15-minute readings, and
+                // the type in each Datastream's properties tells them apart. This keeps the 15-minute
+                // ones, one water level and one discharge per gauge.
+                datastreams: "properties/type eq 'TH_PEGELDATEN_15MIN'",
+                // The newest reading of every selected Datastream, which gives one record per Thing.
+                read: "latest",
+                // The server finds the newest Observation of each Datastream as it builds the page, so a
+                // page holding all 250 takes about 30 seconds, as long as Cassiopeia waits for an
+                // answer by default. A page of 100 answers in about 10 seconds.
+                pageSize: 100,
+                delay: "200ms",
+            },
+        },
+    ],
+    output: {
+        target: "file",
+        directory: "out",
+        // WaterObserved is a published model, so default resolves its @context from the catalog.
+        context: "default",
+        validation: {
+            mode: "fail-when-schema",
+        },
+    },
+}

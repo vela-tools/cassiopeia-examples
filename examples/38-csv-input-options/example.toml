@@ -14,7 +14,7 @@ environment = ["BRUSSELS_ODS_APIKEY"]
 # The page tells a reader to start this directory's own stack: Andromeda, with the database it keeps
 # its entities in.
 [context-broker]
-compose = "docker-compose.yml"
+compose = "docker-compose.yaml"
 url = "http://localhost:1056/"
 # The manifest writes with context "default", which the catalog resolves to the model's own
 # repository context. A broker expands the type in a query against whichever context the query

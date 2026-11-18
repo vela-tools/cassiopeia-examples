@@ -40,17 +40,17 @@ mod tests {
 
     #[test]
     fn a_block_carries_the_compose_file_and_the_url() {
-        let declared = broker("compose = \"docker-compose.yml\"\nurl = \"http://localhost:9090/\"\n");
+        let declared = broker("compose = \"docker-compose.yaml\"\nurl = \"http://localhost:9090/\"\n");
 
         assert_eq!(
             declared.map(|declared| (declared.compose, declared.url.to_string())),
-            Some((PathBuf::from("docker-compose.yml"), "http://localhost:9090/".to_owned()))
+            Some((PathBuf::from("docker-compose.yaml"), "http://localhost:9090/".to_owned()))
         );
     }
 
     #[test]
     fn a_block_naming_the_context_its_entities_were_written_under_reads_it() {
-        let declared = broker("compose = \"docker-compose.yml\"\nurl = \"http://localhost:9090/\"\ncontext = \"https://example.invalid/context.jsonld\"\n");
+        let declared = broker("compose = \"docker-compose.yaml\"\nurl = \"http://localhost:9090/\"\ncontext = \"https://example.invalid/context.jsonld\"\n");
 
         assert_eq!(
             declared.and_then(|declared| declared.context).map(|context| context.to_string()),
@@ -60,23 +60,23 @@ mod tests {
 
     #[test]
     fn a_block_without_a_context_reads_as_having_none() {
-        let declared = broker("compose = \"docker-compose.yml\"\nurl = \"http://localhost:9090/\"\n");
+        let declared = broker("compose = \"docker-compose.yaml\"\nurl = \"http://localhost:9090/\"\n");
 
         assert!(declared.is_some_and(|declared| declared.context.is_none()));
     }
 
     #[test]
     fn a_block_without_a_url_is_rejected() {
-        assert!(broker("compose = \"docker-compose.yml\"\n").is_none());
+        assert!(broker("compose = \"docker-compose.yaml\"\n").is_none());
     }
 
     #[test]
     fn a_url_without_a_scheme_is_rejected() {
-        assert!(broker("compose = \"docker-compose.yml\"\nurl = \"localhost/ngsi-ld\"\n").is_none());
+        assert!(broker("compose = \"docker-compose.yaml\"\nurl = \"localhost/ngsi-ld\"\n").is_none());
     }
 
     #[test]
     fn an_unknown_key_is_rejected() {
-        assert!(broker("compose = \"docker-compose.yml\"\nurl = \"http://localhost:9090/\"\ntoken = \"secret\"\n").is_none());
+        assert!(broker("compose = \"docker-compose.yaml\"\nurl = \"http://localhost:9090/\"\ntoken = \"secret\"\n").is_none());
     }
 }

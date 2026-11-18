@@ -148,7 +148,7 @@ The first run starts immediately; later runs wait for the schedule trigger. Add 
 
 ## Start the broker
 
-The [docker-compose.yml](docker-compose.yml) starts [Scorpio](https://github.com/ScorpioBroker/ScorpioBroker), an open-source NGSI-LD broker backed by PostGIS. It serves the API on port 9090, the address the manifest sends to. Start it and wait for it to become healthy:
+The [docker-compose.yaml](docker-compose.yaml) starts [Scorpio](https://github.com/ScorpioBroker/ScorpioBroker), an open-source NGSI-LD broker backed by PostGIS. It serves the API on port 9090, the address the manifest sends to. Start it and wait for it to become healthy:
 
 ```bash
 docker compose up -d

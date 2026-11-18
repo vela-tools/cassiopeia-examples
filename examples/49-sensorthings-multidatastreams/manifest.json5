@@ -1,0 +1,36 @@
+{
+    version: "v1",
+    inputs: [
+        {
+            // The STAplus test server of Secure Dimensions, a FROST-Server with the MultiDatastream
+            // extension and the STAplus data model on top.
+            source: "https://citiobs.demo.secure-dimensions.de/staplustest/v1.1",
+            format: "sensorthings",
+            mapping: "weather-observed.json5",
+            sensorthings: {
+                // The six Datastreams of one weather station, Thing 116. Four Things on this server
+                // share its name, so it is selected by id.
+                datastreams: "Thing/id eq 116",
+                // Its MultiDatastream of wind speed and gust, which a Datastream filter never selects:
+                // each kind of data stream has a filter of its own.
+                multiDatastreams: "id eq 4",
+                // A fixed two hours of January 2024. The station stopped reporting soon after, so the
+                // range reads the same Observations on every run.
+                read: { range: { from: "2024-01-19T18:00:00Z", to: "2024-01-19T20:00:00Z" } },
+            },
+        },
+    ],
+    output: {
+        target: "file",
+        directory: "out",
+        // WeatherObserved is a published model, so default resolves its @context from the catalog.
+        context: "default",
+        // A range read gives one record per Observation, so it runs only into series output.
+        temporal: {
+            representation: "series",
+        },
+        validation: {
+            mode: "fail-when-schema",
+        },
+    },
+}

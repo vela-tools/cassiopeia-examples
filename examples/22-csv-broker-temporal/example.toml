@@ -11,7 +11,7 @@ smart-data-models = false
 # The broker the manifest delivers to. The runner brings this stack up, waits for the broker to
 # answer, and takes it down again once the run is over.
 [context-broker]
-compose = "docker-compose.yml"
+compose = "docker-compose.yaml"
 url = "http://localhost:9090/"
 
 [run]
