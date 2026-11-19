@@ -185,7 +185,7 @@ docker run --rm \
     --volume "$PWD:/data" \
     --volume "$HOME/.cache/cassiopeia-examples/schemas:/var/lib/cassiopeia/schemas" \
     --workdir /data \
-    ghcr.io/vela-tools/cassiopeia:v1.2.0 \
+    ghcr.io/vela-tools/cassiopeia:v1.3.0 \
     map \
     --input data/bikemi_stazioni.csv \
     --mapping station.json5 \
