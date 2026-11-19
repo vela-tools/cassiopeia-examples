@@ -106,7 +106,7 @@ identity: {
 },
 ```
 
-A guarded template that renders nothing names no entity, so Cassiopeia skips the record and counts one `expander-urn-ungeneratable` warning per skipped row. The run therefore reports nine warnings by design, and writes sixteen `FederalState` entities. The district and municipality tables hold `GF` 9 only, so they need no guard.
+A guarded template that renders nothing names no entity, so Cassiopeia skips the record and counts one `expander-id-absent` warning per skipped row. The run therefore reports nine warnings by design, and writes sixteen `FederalState` entities. The district and municipality tables hold `GF` 9 only, so they need no guard.
 
 ## Linking the levels
 

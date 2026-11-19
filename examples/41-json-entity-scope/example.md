@@ -70,7 +70,7 @@ The networks are the scopes this example wants, but they arrive in one text fiel
   ╰─ '/PORTS,TCOON' is not a legal NGSI-LD scope: a scope is one or more '/'-separated levels, each starting with a Unicode letter and continuing with Unicode letters, numbers or underscores (ETSI GS CIM 009 v1.9.1 clause 4.18)
 ```
 
-That run skips 23 stations, one for each station in more than one network, and counts each under `expander-urn-ungeneratable`. The rest of the run carries on.
+That run skips 23 stations, one for each station in more than one network, and counts each under `expander-scope-unreadable`. The rest of the run carries on.
 
 A template that reads a list whole gives one scope per item, so the mapping turns the text into a list first:
 
