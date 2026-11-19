@@ -123,7 +123,7 @@ cargo run -- run 07
 cargo run -- run 07 --runtime docker
 ```
 
-The run creates `out/GoldPriceObserved.json` with a **single** object: the entity in its current state, `price` keeping the most recent observation and its `observedAt`.
+The run creates `out/GoldPriceObserved.json` with a **single** object: the entity in its current state, `price` keeping the most recent observation and its `observedAt`. `GoldPriceObserved` is a plain data model with no published schema, so the entity is written without a schema check and the run counts that as one `schema-absent` warning.
 
 ```json
 [

@@ -163,7 +163,7 @@ The Flight model defines all four relationships, so the resulting entity validat
 
 ## The country, without a schema
 
-The country list is the only source without a published model, so `country.json5` uses a plain `Country` type. The other four types have Smart Data Model schemas. In `fail-when-schema` mode, Cassiopeia validates those four types and writes `Country` without a schema check.
+The country list is the only source without a published model, so `country.json5` uses a plain `Country` type. The other four types have Smart Data Model schemas. In `fail-when-schema` mode, Cassiopeia validates those four types and writes `Country` without a schema check, which the run counts once per country as `schema-absent`.
 
 A country can have several DAFIF codes, so `dafifCode` is always a list, even when it holds one code. That way, a consumer never has to check whether it got a string or an array. `split` turns the space-separated column into a list, and the `array` transformation keeps it as one:
 

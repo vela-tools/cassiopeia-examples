@@ -74,7 +74,7 @@ Each branch only sets `label`, and a single expression prints it behind a guard.
 
 ## A measured value and a flag
 
-Two more columns complete the port. Tidal range is measured in metres, so it carries the `MTR` unit code (see the [units example](../14-xml-unit-code/example.md)). The medical-facility column contains `Y` when the facility is present and null otherwise; the boolean attribute appears as `true` only for the marked ports:
+Two more columns complete the port. Tidal range is measured in metres, so it carries the `MTR` unit code (see the [units example](../14-xml-unit-code/example.md)). The medical-facility column holds `Y` for 2,724 ports, `N` for 90, and nothing for the other 855. The mapping writes `true` for a `Y` and nothing otherwise, so `medicalFacilities` appears only on the ports with a recorded facility, and an `N` gives no attribute rather than `false`:
 
 ```json5
 tidalRange: {
@@ -145,7 +145,7 @@ cargo run -- run 15
 cargo run -- run 15 --runtime docker
 ```
 
-The run writes one file, `Port.json`, with 3669 entities.
+The run writes one file, `Port.json`, with 3669 entities. `Port` is a plain data model with no published schema, so every entity is written without a schema check and the run counts that once per entity as `schema-absent`.
 
 ## Read the result
 

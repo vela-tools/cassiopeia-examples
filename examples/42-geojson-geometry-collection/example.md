@@ -306,7 +306,7 @@ The Munich mapping, in [munich.json5](munich.json5), keys each roadwork by the n
 }
 ```
 
-A Munich geometry is already a `Polygon` or a `MultiPolygon`, so the default `geometry` transformation takes it as it is.
+A Munich geometry is already a `Polygon` or a `MultiPolygon`, so the default `geometry` transformation keeps its type and its positions. It does not keep their order: RFC 7946 clause 3.1.6 asks for counterclockwise exterior rings and clockwise holes, and most Munich rings arrive the other way round, so the default `winding: "rfc7946"` writes them rewound. `winding: "keep"` in the attribute's `geometry` block would write them as the server sent them.
 
 ## Run it
 
@@ -334,7 +334,7 @@ cargo run -- run 42
 cargo run -- run 42 --runtime docker
 ```
 
-The custom model needs no context or schema. The run writes `out/RoadWork.json`, one entity per roadwork from both cities, 6,199 when this was written.
+The custom model needs no context or schema. The run writes `out/RoadWork.json`, one entity per roadwork from both cities, 6,199 when this was written. With no published schema, every entity is written without a schema check, and the run counts that once per entity as `schema-absent`.
 
 ## Read the result
 

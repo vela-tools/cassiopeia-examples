@@ -176,7 +176,7 @@ The first dataset carries all three kinds of identifier. The description and the
         "type": "GeoProperty",
         "value": {
             "type": "Polygon",
-            "coordinates": [[[-156.68, -89.9965], [-156.68, 82.5]]]
+            "coordinates": [[[-156.68, -89.9965], [169.684, -89.9965], [169.684, 82.5], [-156.68, 82.5], [-156.68, -89.9965]]]
         }
     }
 }

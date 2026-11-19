@@ -172,7 +172,7 @@ Before sending data to a broker, run the mapping twice to a file and compare the
 cassiopeia map -i data/cyclones.csv -m cyclone.json5 --type csv --writer file --output out --context none
 ```
 
-`out/TropicalCyclone.json` holds **one** object per storm, each attribute keeping its latest observation. KATRINA's 34 rows collapse to its last fix, from 2005-08-31, when it had weakened to 25 knots:
+`out/TropicalCyclone.json` holds **one** object per storm, each attribute keeping its latest observation. `TropicalCyclone` is a plain data model with no published schema, so every entity is written without a schema check and the run reports that as `schema-absent`. KATRINA's 34 rows collapse to its last fix, from 2005-08-31, when it had weakened to 25 knots:
 
 ```json
 {

@@ -238,6 +238,8 @@ AirQualityMonitoringSite.json   258 entities
 AirQualityIndexObserved.json    194 entities
 ```
 
+Neither type has a published schema, so every entity is written without a schema check and the run counts that once per entity as `schema-absent`.
+
 The index sometimes lists one pollutant twice for a site. Both entries name the same entity, so a run can write a few entities fewer than the feed has readings.
 
 ## Read the result

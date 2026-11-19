@@ -28,7 +28,7 @@ source = "US National Park Service, Yosemite National Park"
 # https://hub.arcgis.com/datasets/nps::yosemite-national-park-points-of-interest-open-data
 license = "Public domain (US Government)"
 volatility = "live"
-records = 553
+records = 552
 
 [[outputs]]
 file = "out/ParkPointOfInterest.json"

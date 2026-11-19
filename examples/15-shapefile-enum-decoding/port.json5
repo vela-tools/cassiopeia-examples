@@ -64,8 +64,8 @@
                 },
             },
         },
-        // A facility flag: the index marks a medical facility with "Y" and leaves it null otherwise, so
-        // the attribute is present and true only where one is recorded.
+        // A facility flag: the index marks a medical facility with "Y", its absence with "N" or nothing,
+        // so the attribute is present and true only where one is recorded.
         medicalFacilities: {
             source: "{% if properties.MED_FACIL == 'Y' %}true{% endif %}",
             type: "Property",

@@ -118,7 +118,7 @@ The first cycle fires at once. When this was written, it read the last two hours
 
 ## Inspect the cursor
 
-The cursor outlives the run. Between two runs, or beside a running one in another shell, list the cursors and show one:
+The cursor outlives the run. Once the run has stopped, list the cursors and show one:
 
 ```bash
 cassiopeia sensorthings cursor list
@@ -150,7 +150,7 @@ cassiopeia sensorthings cursor reset thueringen-gauges --datastream 7668 --to 3h
 
 Without `--to`, a reset removes the positions, so each data stream starts at `initial` again. With `--to`, an RFC 3339 instant or a span before now, it sets the high-water marks there, and the next cycle reads each data stream from that point minus the lookback and sends those readings again. `--datastream` limits a reset to one Datastream.
 
-A run holds the stores of its cursors from start to end. A second run through the same cursor is refused with `run-cursor-unusable` before it sends a request. A cursor command against a running job's cursor is refused too: it fails with `cursor 'thueringen-gauges' is in use by a running job` and changes nothing.
+A run holds the stores of its cursors from start to end. A second run through the same cursor is refused with `run-cursor-unusable` before it sends a request. A cursor command against a running job's cursor is refused too: it fails with `cursor 'thueringen-gauges' is in use by a running job` and changes nothing. `cursor list` reads every cursor in the folder, so it fails this way while any job runs.
 
 ## Where the cursors live
 

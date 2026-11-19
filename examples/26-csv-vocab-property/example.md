@@ -119,7 +119,7 @@ cargo run -- run 26
 cargo run -- run 26 --runtime docker
 ```
 
-The custom model needs no context or schema, so `--context none`. The run writes `out/UrbanMobilityPoint.json`, one entity per amenity.
+The custom model needs no context or schema, so `--context none`. The run writes `out/UrbanMobilityPoint.json`, one entity per amenity. With no published schema, every entity is written without a schema check, and the run counts that once per entity as `schema-absent`.
 
 ## Read the result
 

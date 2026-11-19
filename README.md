@@ -32,9 +32,9 @@
 
 ## What this is
 
-Worked examples for [Cassiopeia](https://github.com/vela-tools/cassiopeia), the pipeline that turns CSV, JSON, GeoJSON, KML/KMZ, XML, ESRI Shapefiles, GeoPackage, GRIB, and NetCDF into validated NGSI-LD entities.
+Worked examples for [Cassiopeia](https://github.com/vela-tools/cassiopeia), the pipeline that turns CSV, JSON, GeoJSON, KML/KMZ, XML, ESRI Shapefiles, GeoPackage, GRIB, NetCDF, and OGC SensorThings API servers into validated NGSI-LD entities.
 
-There are 35 of them. One example is one complete run against a real public dataset: the mapping files, the commands, the output to expect, and the prose that explains why the mapping is shaped the way it is. Nothing here is a fragment. Any machine with Cassiopeia on it, or with Docker or Podman, runs any of them from start to finish.
+There are 51 of them. One example is one complete run against a real public dataset: the mapping files, the commands, the output to expect, and the prose that explains why the mapping is shaped the way it is. Nothing here is a fragment. Any machine with Cassiopeia on it, or with Docker or Podman, runs any of them from start to finish.
 
 The datasets are real because the awkward parts of a mapping come from real data.
 

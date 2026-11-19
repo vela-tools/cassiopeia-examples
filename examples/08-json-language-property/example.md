@@ -163,7 +163,7 @@ cargo run -- run 08
 cargo run -- run 08 --runtime docker
 ```
 
-The command uses `--context none` so the example needs no JSON-LD context or Smart Data Models catalog. Cassiopeia writes one file per entity type, so this run creates `out/Region.json`, a single JSON array of 6 `Region` entities.
+The command uses `--context none` so the example needs no JSON-LD context or Smart Data Models catalog. Cassiopeia writes one file per entity type, so this run creates `out/Region.json`, a single JSON array of 6 `Region` entities. `Region` is a plain data model with no published schema, so every entity is written without a schema check and the run counts that once per entity as `schema-absent`.
 
 ## Read the result
 

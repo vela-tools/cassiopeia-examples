@@ -103,7 +103,7 @@ The [datasetId example](../21-json-dataset-id/example.md) uses the same mapping 
 
 ## Why validation still uses `fail-when-schema`
 
-The manifest uses `mode: "fail-when-schema"`. Cassiopeia validates the four Aeronautics types against their published schemas and writes the schemaless `Country` entities without validation.
+The manifest uses `mode: "fail-when-schema"`. Cassiopeia validates the four Aeronautics types against their published schemas and writes the schemaless `Country` entities without validation, which the run counts once per country as `schema-absent`.
 
 The cached `dataModel.Aeronautics/Flight` schema requires `id` and `type`, but it does not set `additionalProperties: false`. It therefore accepts the new `servesAirport` attribute because the mapping adds a new attribute rather than changing one defined by the model. This differs from the [ListRelationship example](../12-csv-list-relationship/example.md), where changing `hasAircraftModel` from a Relationship to a ListRelationship no longer matches the published schema.
 

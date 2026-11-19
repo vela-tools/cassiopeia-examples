@@ -62,10 +62,16 @@ The source needs no `split`; `ListRelationship` reads it as a collection of iden
 The Flight model predates `ListRelationship`. Its schema describes `hasAircraftModel` as an array of relationship instances, not as an `objectList`, so this output does not conform. Strict validation fails with:
 
 ```text
-Path '/hasAircraftModel': ["urn:ngsi-ld:AircraftModel:CR2"] is not valid under any of the schemas listed in the 'anyOf' keyword
+× Entity urn:ngsi-ld:Flight:2B-AER-KZN of type 'Flight' does not conform to its schema: 1 violation(s), first at '/hasAircraftModel': ["urn:ngsi-ld:AircraftModel:CR2"] is not valid under any of the schemas listed in the 'anyOf' keyword
 ```
 
-That mismatch is intentional. `ListRelationship` describes the route more accurately than the published schema does. The manifest sets `validation.mode` to `"warn"`, so Cassiopeia reports the mismatch and continues. The four other schema-backed types still pass, while `Country` has no schema.
+That mismatch is intentional. `ListRelationship` describes the route more accurately than the published schema does. The manifest sets `validation.mode` to `"warn"`, so Cassiopeia writes every Flight and counts the mismatch as one warning per entity, reported once for the type:
+
+```text
+! 67645 'Flight' entities do not conform to their schema (first: urn:ngsi-ld:Flight:2B-AER-KZN)
+```
+
+The 18 Flights left out of that count have no `hasAircraftModel` at all, because their equipment field is blank or `\N`. The other three schema-backed types, `Airport`, `Airline`, and `AircraftModel`, still pass, while `Country` has no schema, which `warn` mode lets through without a word.
 
 ```json5
 output: {

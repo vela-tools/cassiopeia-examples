@@ -63,7 +63,7 @@ totalSpotNumber: {
 },
 ```
 
-The guard has two parts. `properties.STELLPL_ANZ and ...` checks that the field exists before evaluating `... > 0`; without that short-circuit, comparing a missing value with `0` would lose the record. The second part rejects the `-1` sentinel. If either check fails, the template is empty, the integer transformation returns null, and the attribute is skipped.
+The guard has two parts. `properties.STELLPL_ANZ and ...` checks that the field exists before evaluating `... > 0`; without that short-circuit, comparing a missing value with `0` fails to render, and the run drops `totalSpotNumber` with an `extractor-template-unresolvable` warning for every such record, though it keeps the entity. The second part rejects the `-1` sentinel. If either check fails, the template is empty, the integer transformation returns null, and the attribute is skipped.
 
 ## Write the mapping
 

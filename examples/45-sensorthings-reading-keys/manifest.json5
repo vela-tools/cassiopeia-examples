@@ -11,7 +11,7 @@
                 // serve two Datastreams of each property.
                 datastreams: "ObservedProperty/name eq 'W' or ObservedProperty/name eq 'Q'",
                 read: "latest",
-                // 584 Datastreams with their newest Observations, in six pages.
+                // About 580 Datastreams with their newest Observations, in six pages.
                 pageSize: 100,
                 delay: "200ms",
             },

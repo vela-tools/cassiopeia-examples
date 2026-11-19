@@ -177,7 +177,7 @@ cargo run -- run 51
 cargo run -- run 51 --runtime docker
 ```
 
-The first cycle fires at once. When this was written, it read 7,699 Observations into 468 entities: 62 air quality sensors, 19 weather stations, 70 rain gauges, 127 sewer monitoring points and 128 flood sensors. Stop the run with Ctrl-C.
+The first cycle fires at once. When this was written, it read 7,699 Observations into 406 entities: 62 air quality sensors, 19 weather stations, 70 rain gauges, 127 sewer monitoring points and 128 flood sensors. Stop the run with Ctrl-C.
 
 ## Read the result
 

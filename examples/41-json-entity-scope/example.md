@@ -193,7 +193,7 @@ cargo run -- run 41
 cargo run -- run 41 --runtime docker
 ```
 
-The custom model needs no context or schema. The run writes `out/WaterLevelStation.json`, one entity per station, 303 when this was written.
+The custom model needs no context or schema. The run writes `out/WaterLevelStation.json`, one entity per station, 303 when this was written. With no published schema, every entity is written without a schema check, and the run counts that once per entity as `schema-absent`.
 
 ## Read the result
 

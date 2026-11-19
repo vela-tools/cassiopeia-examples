@@ -144,7 +144,7 @@ cargo run -- run 06
 cargo run -- run 06 --runtime docker
 ```
 
-The run creates `out/MonthlyPrecipitationObserved.json`, one entity per month.
+The run creates `out/MonthlyPrecipitationObserved.json`, one entity per month. `MonthlyPrecipitationObserved` is a plain data model with no published schema, so every entity is written without a schema check and the run counts that once per entity as `schema-absent`.
 
 ## Read the result
 

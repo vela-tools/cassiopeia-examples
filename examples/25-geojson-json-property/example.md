@@ -221,7 +221,7 @@ cargo run -- run 25
 cargo run -- run 25 --runtime docker
 ```
 
-The custom model needs no context or schema, so `--context none`. The run writes `out/WeatherAlert.json`, one entity per alert.
+The custom model needs no context or schema, so `--context none`. The run writes `out/WeatherAlert.json`, one entity per alert. With no published schema, every entity is written without a schema check, and the run counts that once per entity as `schema-absent`.
 
 ## Read the result
 

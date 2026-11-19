@@ -33,7 +33,7 @@
         target: "file",
         directory: "out",
         context: "none",
-        // Validation reports rather than aborts: the four schema-backed types still conform, while
+        // Validation reports rather than aborts: Airport, Airline and AircraftModel still conform, while
         // the Flight's ListRelationship is off-spec for its model and would fail a strict run.
         validation: {
             mode: "warn",

@@ -18,7 +18,7 @@ That map belongs to somebody else, and this example leans on more of it than mos
 
 ## The record shape
 
-The file holds five folders. Four contain point placemarks that this example maps; the fifth is a driving route and is left alone:
+The file holds five folders. Four contain point placemarks that this example maps; the fifth holds the route itself and is left alone:
 
 | Folder | What it holds | Mapped to |
 | --- | --- | --- |
@@ -26,7 +26,7 @@ The file holds five folders. Four contain point placemarks that this example map
 | `Where to Get Bikes` | 8 rental-shop branches | `BikeRentalShop` |
 | `Places to Stop` | sights along the way | `Sightseeing` |
 | `Restrooms` | public restrooms | `PublicRestroom` |
-| `Directions from the route` | a route line | _(unmapped)_ |
+| `Directions from Hudson River Greenway, New York, NY 10040, USA to 388 Hudson River Greenway, New York, NY 10004, USA` | the route line and its two end points | _(unmapped)_ |
 
 As with any foldered KML, each record is nested under a lower-case, underscored version of its folder name. A placemark in `Citi Bike Stations` is under `citi_bike_stations`; one in `Where to Get Bikes` is under `where_to_get_bikes`. Each mapping uses its folder's prefix.
 
@@ -59,7 +59,13 @@ The manifest contains the key part of the example. One input has a `mappings` li
 }
 ```
 
-Each folder's placemarks go only to its own mapping, so one file produces four entity types. The unlisted `Directions` folder is skipped, and an unbound collection is not an error.
+Each folder's placemarks go only to its own mapping, so one file produces four entity types. The unlisted `Directions from ...` folder is skipped. An unbound collection is not an error: the run writes the four types and reports the folder it left unmapped as one warning, counted once for each of its three placemarks:
+
+```text
+! No mapping is bound to the source collection 'Directions from Hudson River Greenway, New York, NY 10040, USA to 388 Hudson River Greenway, New York, NY 10004, USA'
+```
+
+That is why the run summary shows 39 input records but only 36 fragments.
 
 ## Four small mappings
 
@@ -129,6 +135,8 @@ BikeRentalShop.json     8 entities
 Sightseeing.json        7 entities
 PublicRestroom.json     7 entities
 ```
+
+None of the four types has a published schema, so every entity is written without a schema check and the run counts that once per entity as `schema-absent`.
 
 ## Read the result
 

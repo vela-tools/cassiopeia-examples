@@ -134,7 +134,7 @@ cargo run -- run 02 --runtime docker
 
 The command uses `--context none` so the example does not need a JSON-LD context or a Smart Data Models catalog. [Output](https://vela-tools.github.io/cassiopeia/docs/guides/output#deliver-context) explains how to attach a real context later.
 
-Cassiopeia writes one file per entity type. This run therefore creates `out/City.json`, a single JSON array of 34,195 `City` entities.
+Cassiopeia writes one file per entity type. This run therefore creates `out/City.json`, a single JSON array of 34,195 `City` entities. `City` is a plain data model with no published schema, so every entity is written without a schema check and the run counts that once per entity as `schema-absent`.
 
 ## Read the result
 

@@ -177,7 +177,7 @@ cargo run -- run 20
 cargo run -- run 20 --runtime docker
 ```
 
-`--context local` with `--context-file` tells Cassiopeia to read `@context` from the local JSON-LD file. It does not resolve a catalog context (`default`) or use a URL (`url`). Since the context is embedded in each entity, the run writes `out/ExoPlanet.jsonld` and `out/Star.jsonld` rather than `.json`. No catalog download or schema validation is needed for these custom models.
+`--context local` with `--context-file` tells Cassiopeia to read `@context` from the local JSON-LD file. It does not resolve a catalog context (`default`) or use a URL (`url`). Since the context is embedded in each entity, the run writes `out/ExoPlanet.jsonld` and `out/Star.jsonld` rather than `.json`. No catalog download is needed for these custom models. They have no published schema, so every entity is written without a schema check and the run counts that once per entity as `schema-absent`.
 
 ## Read the result
 

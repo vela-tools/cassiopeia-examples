@@ -297,7 +297,7 @@ cassiopeia map \
     --validation-schema exoplanet.schema.json
 ```
 
-With the column gone, Cassiopeia never produces `discoveryMethod`, so the `required` check in `exoplanet.schema.json` fails. `--validation-mode fail` aborts without writing output. With `warn`, the run completes, writes every entity, and reports each violation as a warning. The [validation guide](https://vela-tools.github.io/cassiopeia/docs/guides/validation#validation-modes) describes the available outcomes.
+With the column gone, Cassiopeia never produces `discoveryMethod`, so the `required` check in `exoplanet.schema.json` fails. `--validation-mode fail` aborts the run at the first entity that violates its schema, and never writes that entity. Here every planet fails, so `out/` stays empty. When the violation comes later in a file, the entities already validated before the abort stay written. With `warn`, the run completes, writes every entity, and counts one warning per nonconforming entity, reported once for the type. The [validation guide](https://vela-tools.github.io/cassiopeia/docs/guides/validation#validation-modes) describes the available outcomes.
 
 ## Naming the schema: precedence
 

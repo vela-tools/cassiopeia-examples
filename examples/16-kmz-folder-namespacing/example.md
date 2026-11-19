@@ -4,7 +4,7 @@ A KMZ of Yosemite National Park's points of interest becomes `ParkPointOfInteres
 
 ## Get the data
 
-The dataset is [Yosemite National Park - Points Of Interest](https://hub.arcgis.com/datasets/nps::yosemite-national-park-points-of-interest-open-data), published by the National Park Service. It holds 553 placemarks covering natural features and visitor infrastructure, and every record is marked `Unrestricted`. As a work of the US federal government it carries no copyright; the licence text on the item is a liability disclaimer rather than a restriction on reuse.
+The dataset is [Yosemite National Park - Points Of Interest](https://hub.arcgis.com/datasets/nps::yosemite-national-park-points-of-interest-open-data), published by the National Park Service. It holds 552 placemarks covering natural features and visitor infrastructure, and every record is marked `Unrestricted`. As a work of the US federal government it carries no copyright; the licence text on the item is a liability disclaimer rather than a restriction on reuse.
 
 The park service publishes it as KML. Download it and package it as the `.kmz` this example reads:
 
@@ -20,7 +20,7 @@ A KMZ is a zip archive whose payload is a KML file, so packaging one is exactly 
 
 ## The record shape
 
-Inside the archive, each point is a `<Placemark>` carrying its attributes as `SchemaData` and its position as a `<Point>`:
+Inside the archive, each point is a `<Placemark>` carrying its attributes as `SchemaData` and its position as a `<Point>`. Here is Vernal Fall, cut to the fields this page discusses:
 
 ```xml
 <Placemark>
@@ -29,9 +29,8 @@ Inside the archive, each point is a `<Placemark>` carrying its attributes as `Sc
         <SimpleData name="POINAME">Vernal Fall</SimpleData>
         <SimpleData name="POITYPE">Waterfall</SimpleData>
         <SimpleData name="UNITCODE">YOSE</SimpleData>
-        <SimpleData name="ISSEASONALLYCLOSED"></SimpleData>
-        <SimpleData name="LAT_DD_W84">37.7274313977158</SimpleData>
-        <SimpleData name="LON_DD_W84">-119.543787490733</SimpleData>
+        <SimpleData name="LAT_DD_W84">37.7274314</SimpleData>
+        <SimpleData name="LON_DD_W84">-119.54378749</SimpleData>
     </SchemaData></ExtendedData>
     <Point><coordinates>-119.543787490733,37.7274313977158</coordinates></Point>
 </Placemark>
@@ -55,7 +54,7 @@ That prefix is what makes a KML with several folders usable: each folder's recor
 
 ## Choose the entity identity
 
-The obvious identity is the name, and it does not work. Ten placemarks are called `Upper Pines Campground Restroom`, eight are `Tuolumne Meadows Campground Restroom`: 553 points carry only 492 distinct names. Using the name would merge each of those groups into a single entity, exactly as the [ID collision example](../02-json-id-collision/example.md) shows.
+The obvious identity is the name, and it does not work. Ten placemarks are called `Upper Pines Campground Restroom`, eight are `Tuolumne Meadows Campground Restroom`: 552 points carry only 491 distinct names. Using the name would merge each of those groups into a single entity, exactly as the [ID collision example](../02-json-id-collision/example.md) shows.
 
 `OBJECTID` is the park service's own identifier for a point, unique within the layer, so the mapping uses it and produces IDs such as `urn:ngsi-ld:ParkPointOfInterest:313`.
 
@@ -71,13 +70,13 @@ location: {
 }
 ```
 
-KML coordinates are WGS84 by definition, which is what NGSI-LD requires of a `GeoProperty` (ETSI GS CIM 009 v1.9.1, clause 4.7.1), so the geometry passes through as it stands. Rebuilding a point from two text columns would be more work and one more chance to swap latitude for longitude.
+KML coordinates are WGS84 by definition, which is what NGSI-LD requires of a `GeoProperty` (ETSI GS CIM 009 v1.9.1, clause 4.7.1), so the geometry passes through as it stands. Rebuilding a point from two text columns would be more work and one more chance to swap latitude for longitude. The columns are also rounded, to as few as five decimals, while the `<Point>` keeps the full precision.
 
 ## A vocabulary kept, a flag made boolean
 
 `POITYPE` is the park service's own vocabulary: `Waterfall`, `Trailhead`, `Campground`, `Historic Building`, `Bus Stop / Shuttle Stop`, and two dozen more. There is nothing to fold here, so the value is carried across as it stands. Folding a source vocabulary into fewer tokens, when a model demands it, is what the [conditionals example](../04-csv-conditionals/example.md) does.
 
-`ISSEASONALLYCLOSED` is different. It reads `Yes` on 101 points, `No` on 84, `Unknown` on two, and is empty on the rest. Only two of those four states mean anything:
+`ISSEASONALLYCLOSED` is different. It reads `Yes` on 101 points, `No` on 84, `Unknown` on two, and is missing from the rest. Only two of those four states mean anything:
 
 ```json5
 seasonallyClosed: {
@@ -142,7 +141,7 @@ cargo run -- run 16
 cargo run -- run 16 --runtime docker
 ```
 
-The run writes `out/ParkPointOfInterest.json`, one array of 553 entities.
+The run writes `out/ParkPointOfInterest.json`, one array of 552 entities. `ParkPointOfInterest` is a plain data model with no published schema, so every entity is written without a schema check and the run counts that once per entity as `schema-absent`.
 
 ## Read the result
 
@@ -207,4 +206,4 @@ The run writes `out/ParkPointOfInterest.json`, one array of 553 entities.
 ]
 ```
 
-Vernal Fall has no `seasonallyClosed` attribute because its source field is empty; the ski hut, which the park closes outside winter, carries `true`. Both keep the coordinates the placemark arrived with, and neither mentions the folder that named their prefix: namespacing shapes how a mapping reads a record, not what the entity ends up holding.
+Vernal Fall has no `seasonallyClosed` attribute because its placemark has no `ISSEASONALLYCLOSED` field; the ski hut, which the park closes outside winter, carries `true`. Both keep the coordinates the placemark arrived with, and neither mentions the folder that named their prefix: namespacing shapes how a mapping reads a record, not what the entity ends up holding.

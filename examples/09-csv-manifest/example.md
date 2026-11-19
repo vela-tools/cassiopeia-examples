@@ -71,6 +71,8 @@ codeIATA: {
 
 The `is string` check comes first because the CSV reader may parse a numeric-looking field as a number, while `matching` expects text. If the check fails, the source produces nothing and the attribute is omitted instead of written with an invalid value.
 
+An airline's two-character IATA code can be all digits, such as `20`, which the CSV reader reads as the number 20. The airline mapping therefore turns the value into text with `str` before matching it, so such a code is kept. The number prints back as the same digits, because a code with a leading zero, such as `04`, is never read as a number.
+
 ## Write the mappings
 
 Each source has its own mapping. [airport.json5](airport.json5) builds the name, two codes, location, and nested address:
@@ -143,7 +145,7 @@ Each source has its own mapping. [airport.json5](airport.json5) builds the name,
             transformation: "string",
         },
         codeIATA: {
-            source: "{% if this[3] is string and this[3] is matching(pat='^[A-Z0-9]{2}$') %}{{ this[3] }}{% endif %}",
+            source: "{% set code = this[3] | str %}{% if code is matching(pat='^[A-Z0-9]{2}$') %}{{ code }}{% endif %}",
             type: "Property",
             transformation: "string",
         },

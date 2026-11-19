@@ -8,7 +8,7 @@ It uses a **custom** data model because no published Smart Data Model represents
 
 - The `ListProperty` type and its `valueList` member.
 - Why preserving order matters, and why a bare value array does not make that promise to consumers.
-- How preprocessing can turn a one-row-per-hour feed into one record per day with an ordered array, as in examples [20](../21-json-dataset-id/example.md) and [21](../22-csv-broker-temporal/example.md).
+- How preprocessing can turn a one-row-per-hour feed into one record per day with an ordered array, as in examples [21](../21-json-dataset-id/example.md) and [22](../22-csv-broker-temporal/example.md).
 
 ## Get the data
 
@@ -170,7 +170,7 @@ cargo run -- run 24
 cargo run -- run 24 --runtime docker
 ```
 
-The model is a custom one, so `--context none` attaches no `@context` and there is no schema to download or validate against. The run writes `out/BicycleCounter.json`, one entity per day.
+The model is a custom one, so `--context none` attaches no `@context` and there is no schema to download or validate against. The run writes `out/BicycleCounter.json`, one entity per day. Every entity is therefore written without a schema check, and the run counts that once per entity as `schema-absent`.
 
 ## Read the result
 
@@ -231,7 +231,7 @@ One day comes out with its twenty-four counts in order under `valueList`:
 }
 ```
 
-The list is positional: `valueList[7]` is 312 at 07:00, `valueList[8]` is 456 at 08:00, and `valueList[16]` is 648 at 17:00. Those readings are meaningful because the order is preserved. A weekend day from the same run has a flatter pattern, with more traffic in the middle of the day, and the shared positions make the days comparable.
+The list is positional: `valueList[7]` is 312 at 07:00, `valueList[8]` is 456 at 08:00, and `valueList[16]` is 648 at 16:00. Those readings are meaningful because the order is preserved. A weekend day from the same run has a flatter pattern, with more traffic in the middle of the day, and the shared positions make the days comparable.
 
 ## When a ListProperty, and when not
 

@@ -229,7 +229,7 @@ cargo run -- run 31
 cargo run -- run 31 --runtime docker
 ```
 
-The custom model needs no context or schema, so `--context none`. The run writes `out/Region.json`, one entity per region.
+The custom model needs no context or schema, so `--context none`. The run writes `out/Region.json`, one entity per region. With no published schema, every entity is written without a schema check, and the run counts that once per entity as `schema-absent`.
 
 ## Read the result
 

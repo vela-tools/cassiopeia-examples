@@ -142,7 +142,7 @@ dateLastValueReported: {
 },
 ```
 
-The end of a Datastream's `phenomenonTime` is the time of its last Observation, so the latest end over a Thing's readings is when the station last reported. The end of an interval is the instant after its `/`. An instant holds no `/`, so `last` returns it whole. The filters fail on a missing field, so the template passes over a Datastream without a `phenomenonTime`. It also passes over a Thing without readings, because a loop over a missing field fails too. No Datastream of this server reaches the present. Most of its stations report in batches or have stopped, and an old `dateLastValueReported` shows that plainly.
+The end of a Datastream's `phenomenonTime` is the time of its last Observation, so the latest end over a Thing's readings is when the station last reported. This server also gives a `phenomenonTime` to Datastreams that serve no Observation at all, but a latest read gives no reading for a data stream without a newest Observation, so those never reach the template. The end of an interval is the instant after its `/`. An instant holds no `/`, so `last` returns it whole. The filters fail on a missing field, so the template passes over a Datastream without a `phenomenonTime`. It also passes over a Thing without readings, because a loop over a missing field fails too. No Datastream of this server reaches the present. Most of its stations report in batches or have stopped, and an old `dateLastValueReported` shows that plainly.
 
 ## The MultiDatastreams the run does not read
 
@@ -181,7 +181,7 @@ cargo run -- run 47
 cargo run -- run 47 --runtime docker
 ```
 
-The read takes about six seconds and writes `out/Device.jsonld`. When this was written, the file held 176 Devices, 106 of them from Things without readings.
+The read takes about six seconds and writes `out/Device.jsonld`. When this was written, the file held 176 Devices, 106 of them from Things without readings. Only seven of those Things have no data stream at all. The other 99 have data streams, but none of them holds an Observation, which on this server is the more common way for a station to have nothing to report.
 
 ## Read the result
 

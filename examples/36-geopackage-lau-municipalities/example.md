@@ -72,7 +72,7 @@ Ljubljana becomes `urn:ngsi-ld:LocalAdministrativeUnit:SI_061`.
 
 ## A figure the source does not have
 
-The file stores `0` for a unit it has no population for. Every unit of France, Spain, and Albania holds a `0`, along with 203 German ones, 43,859 units in all, and the page for the dataset says the files include population "where available". Written as a number, a `0` would say that nobody lives in the unit. The mapping reads a population only when it is positive:
+The file stores `0` for a unit it has no population for. Every unit of France, Spain, Serbia, Iceland, and Albania holds a `0`, along with 220 units in Cyprus, 203 in Germany, 44 in Switzerland, 16 in Greece, four in Czechia, and one in Slovakia, 43,859 units in all, and the page for the dataset says the files include population "where available". Written as a number, a `0` would say that nobody lives in the unit. The mapping reads a population only when it is positive:
 
 ```json5
 population: {
@@ -82,7 +82,7 @@ population: {
 },
 ```
 
-A guarded template that renders nothing gives no attribute, and the entity is still written. The same guard covers the density. The 203 German units may be a real zero, because a few unincorporated areas have no residents; the file does not say which, so the mapping leaves them off with the rest. The `integer` transformation then writes `297575.0` as `297575`.
+A guarded template that renders nothing gives no attribute, and the entity is still written. The same guard covers the density. Where only part of a country holds a `0`, as with the 203 German units, some may be a real zero, because a few unincorporated areas have no residents; the file does not say which, so the mapping leaves them off with the rest. The `integer` transformation then writes `297575.0` as `297575`.
 
 The area needs no guard and carries a `unitCode` of `KMK`, the UN/CEFACT Common Code for square kilometre (ETSI GS CIM 009 v1.9.1, clause 4.5.2.2).
 

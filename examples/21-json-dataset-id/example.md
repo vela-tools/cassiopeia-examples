@@ -102,7 +102,7 @@ cargo run -- run 21
 cargo run -- run 21 --runtime docker
 ```
 
-The command reads `forecast.json`, maps each day object to a `WeatherForecast` entity, and writes `out/WeatherForecast.json`. `WeatherForecast` is a custom model, so no schema download is needed; validation checks structure only.
+The command reads `forecast.json`, maps each day object to a `WeatherForecast` entity, and writes `out/WeatherForecast.json`. `WeatherForecast` is a custom model, so no schema download is needed; validation checks structure only. With no published schema, every entity is written without a schema check, and the run counts that once per entity as `schema-absent`.
 
 ## The result
 

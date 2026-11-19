@@ -134,7 +134,7 @@ cargo run -- run 45
 cargo run -- run 45 --runtime docker
 ```
 
-The read lists 584 Datastreams in six pages of 100 and takes a little over a minute. It writes one entity per gauge with a reading, 180 when this was written.
+The read lists the selected Datastreams, 581 when this was written, in six pages of 100 and takes a little over a minute. It writes one entity per gauge with a reading, 180 at the same time.
 
 ## Read the result
 

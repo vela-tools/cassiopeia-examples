@@ -38,7 +38,7 @@ permissions:
 
 jobs:
   # The runner is the same binary for every example, so it is compiled once here rather than in each
-  # of the thirty-one legs below. A leg then needs no Rust toolchain and no build at all.
+  # of the legs below. A leg then needs no Rust toolchain and no build at all.
   build:
     name: build
     runs-on: ubuntu-latest

@@ -201,7 +201,7 @@ cargo run -- run 10
 cargo run -- run 10 --runtime docker
 ```
 
-The run reads all four sources and writes one file per entity type: `out/Region.json` (6), `out/Subregion.json` (22), `out/Country.json` (250), and `out/State.json` (5,327).
+The run reads all four sources and writes one file per entity type: `out/Region.json` (6), `out/Subregion.json` (22), `out/Country.json` (250), and `out/State.json` (5,327). None of the four types has a published schema, so every entity is written without a schema check and the run counts that once per entity as `schema-absent`.
 
 ## Read the result
 

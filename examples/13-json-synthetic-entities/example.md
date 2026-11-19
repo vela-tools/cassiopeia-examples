@@ -56,7 +56,9 @@ parentMountain: {
 },
 ```
 
-Both sides use the mountain's primary name. The identity takes the first comma-separated item from `mountain_names`; `parent_mountain` already contains that name, so its guarded relationship produces the same cleaned URN. Lhotse therefore points to `urn:ngsi-ld:Mountain:MountEverest`, the ID minted for Everest. The highest summits use an em dash for no parent, and the guard omits their relationship instead of creating a placeholder.
+Both sides use the mountain's primary name. The identity takes the first comma-separated item from `mountain_names`, and wherever `parent_mountain` spells the parent the same way, its guarded relationship produces the same cleaned URN. Lhotse therefore points to `urn:ngsi-ld:Mountain:MountEverest`, the ID minted for Everest. The highest summits use an em dash for no parent, and the guard omits their relationship instead of creating a placeholder.
+
+That match holds for 109 of the 119 parents, and only because the dataset spells them consistently. The other ten point at IDs no entity carries. Four mountains name `Dhaulagiri` and two name `Annapurna`, while the parents themselves are listed as `Dhaulagiri I` and `Annapurna I`. Talung names `Kabru`, and only `Kabru North` is listed. The Crown names `Skil Brum ( K2 )`, which cleans to `SkilBrumK2` rather than the `SkilBrum` the mountain itself gets. Jengish Chokusu and Labuche Kang III name `Ismail Samani Peak` and `Labuche Himalaya`, which are not in the list at all. Cassiopeia writes each relationship as the source states it, since a relationship's target does not have to exist in the same output. Joining two fields by name is only as reliable as the spelling the two fields share.
 
 ## Synthetic entities
 
@@ -112,7 +114,7 @@ Because the country URN comes from its name, every mountain that names `Nepal` p
 }
 ```
 
-`Mountain` and `Country` are custom models with no published schemas. In `fail-when-schema` mode they are written without schema checks, just like the schemaless country in the [previous graph](../11-csv-relationship-graph/example.md).
+`Mountain` and `Country` are custom models with no published schemas. In `fail-when-schema` mode they are written without schema checks, just like the schemaless country in the [previous graph](../11-csv-relationship-graph/example.md), and the run counts each of them once as `schema-absent`.
 
 ## Run it
 
