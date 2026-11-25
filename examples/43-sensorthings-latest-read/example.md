@@ -239,7 +239,7 @@ docker run --rm \
     --volume "$PWD:/data" \
     --volume "$HOME/.cache/cassiopeia-examples/schemas:/var/lib/cassiopeia/schemas" \
     --workdir /data \
-    ghcr.io/vela-tools/cassiopeia:v1.3.0 \
+    ghcr.io/vela-tools/cassiopeia:v1.3.1 \
     map \
     --manifest manifest.json5
 ```

@@ -114,7 +114,7 @@ docker run --rm \
     --user "$(id -u):$(id -g)" \
     --volume "$PWD:/data" \
     --workdir /data \
-    ghcr.io/vela-tools/cassiopeia:v1.3.0 \
+    ghcr.io/vela-tools/cassiopeia:v1.3.1 \
     map \
     --input data/discovery-metadata.json \
     --mapping dataset.json5 \
